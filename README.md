@@ -1,13 +1,22 @@
 # mattermost-plugin-remind
 a plugin for mattermost that provides reminders from a slash command /remind
 
+### setup
+config.json changes
 
-### Notes
-
-To enable timezones per user you will need to set your display settings to do so
+Setup siteUrl (set to your url)
 ```
+...
+"SiteURL": "http://127.0.0.1",
+...
+```
+
+Enable timezones (each user set timezone)
+```
+...
    "DisplaySettings": {
         "CustomUrlSchemes": [],
         "ExperimentalTimezone": false
     },
+...
 ```
