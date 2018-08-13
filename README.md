@@ -16,7 +16,7 @@ Enable timezones (each user set timezone)
 ...
    "DisplaySettings": {
         "CustomUrlSchemes": [],
-        "ExperimentalTimezone": false
+        "ExperimentalTimezone": true
     },
 ...
 ```
