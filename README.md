@@ -20,3 +20,13 @@ Enable timezones (each user set timezone)
     },
 ...
 ```
+
+Enable plugin uploads
+```
+...
+"PluginsSetting": {
+  ...
+  "EnableUploads": true,
+  ...
+}
+```
