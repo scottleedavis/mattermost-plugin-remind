@@ -1,3 +1,3 @@
 package main
 
-const PluginId = "com.mattermost.sample-plugin"
+const PluginId = "io.github.mattermost-plugin-remind"
