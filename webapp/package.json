@@ -8,8 +8,8 @@
     "lint": "eslint --ignore-pattern node_modules --ignore-pattern dist --ext .js --ext .jsx . --quiet",
     "fix": "eslint --ignore-pattern node_modules --ignore-pattern dist --ext .js --ext .jsx . --quiet --fix"
   },
-  "author": "",
-  "license": "",
+  "author": "Scott Lee Davis <scottleedavis@gmail.com>",
+  "license": "Apache 2.0",
   "devDependencies": {
     "babel-core": "^6.26.3",
     "babel-eslint": "^8.2.6",
@@ -26,6 +26,7 @@
     "webpack-cli": "^3.0.8"
   },
   "dependencies": {
+    "mattermost-redux": "^1.2.0",
     "react": "16.4.1",
     "react-redux": "5.0.7",
     "redux": "4.0.0"
