@@ -34,6 +34,11 @@ Enable plugin uploads
 }
 ```
 
+```
+docker stop containerid
+docker start containerid
+```
+
 ### Building 
 ```
 make
