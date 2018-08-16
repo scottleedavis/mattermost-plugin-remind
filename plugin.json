@@ -1,6 +1,6 @@
 {
     "id": "io.github.mattermost-plugin-remind",
-    "name": "Mattermost Remind",
+    "name": "Remind",
     "description": "A plugin that schedules and emits reminders by a /remind command",
     "version": "0.0.1",
     "server": {
