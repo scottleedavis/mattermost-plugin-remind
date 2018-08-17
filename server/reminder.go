@@ -6,15 +6,19 @@ import (
 
 type Reminder struct {
 
-	UserId string
+	Username string
 
 	Target string
 
-	Username string
-
 	Message string
 
-	Occurrences []string
-
+	Occurrences []time.Time
+	
 	Completed time.Time
+}
+
+type ReminderRequest struct {
+	Username string
+
+	Payload string
 }

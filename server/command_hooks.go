@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"strings"
 	"time"
+	"encoding/json"
+	// "io/ioutil"
 
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/plugin"
@@ -50,18 +52,11 @@ func (p *Plugin) registerCommand(teamId string) error {
 }
 
 func (p *Plugin) runner() {
+
     go func() {
 		<-time.NewTimer(time.Second).C
-
-		bytes, err := p.API.KVGet("reminder")
-		if err != nil {
-			p.API.LogError("failed KVGet %s", err)
-		}
-
-		p.API.LogError( string(bytes[:]) )
-
+		// p.triggerReminders()
 		p.runner()
-
 	}()
 }
 
@@ -71,6 +66,99 @@ func (p *Plugin) run() {
 		p.running = true
 		p.runner()
 	}
+}
+
+// func (o *CommandResponse) ToJson() string {
+// 	b, _ := json.Marshal(o)
+// 	return string(b)
+// }
+func (p *Plugin) remindersToJson(reminders []Reminder) (string) {
+	b, _ := json.Marshal(reminders)
+	return string(b)
+}
+
+
+func (p *Plugin) remindersFromJson(data []byte) ([]Reminder, error) {
+	// b, err := ioutil.ReadAll(data)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	var reminders []Reminder
+	err := json.Unmarshal(data, &reminders)
+	if err != nil {
+		return nil, err
+	}
+
+	return reminders, nil
+}
+
+func (p *Plugin) triggerReminders() {
+
+	// bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", time.Now().Round(time.Second))))
+	bytes, err := p.API.KVGet("skawtus")
+	if err != nil {
+		p.API.LogError("failed KVGet %s", err)
+	} else {
+		p.API.LogError( "value: "+string(bytes[:]) )			
+	}
+
+
+}
+
+func (p *Plugin) getUserReminders(request ReminderRequest) ([]Reminder, error) {
+
+	user, u_err := p.API.GetUserByUsername(request.Username)
+	
+	if u_err != nil {
+		p.API.LogError("failed to query user %s", request.Username)
+		return []Reminder{}, u_err
+	}
+
+	bytes, b_err := p.API.KVGet(user.Username)
+	if b_err != nil {
+		p.API.LogError("failed KVGet %s", b_err)
+		return []Reminder{}, b_err
+	}
+
+	reminder := Reminder{user.Username, "me", "foo in 2 seconds", []time.Time{}, time.Time{}}
+	var reminders []Reminder
+	err := json.Unmarshal(bytes, &reminders)
+
+	if err != nil {
+		p.API.LogError("new reminder " + user.Username)
+	} else {
+		p.API.LogError("existing "+fmt.Sprintf("%v",reminders))
+	}
+
+	reminders = append(reminders, reminder)
+	ro,__ := json.Marshal(reminders)
+
+	if __ != nil {
+		p.API.LogError("failed to marshal reminders %s", user.Username)
+		return []Reminder{}, __
+	}
+
+	p.API.KVSet(user.Username,ro)
+
+	return reminders, nil
+
+}
+
+func (p *Plugin) scheduleReminder(request ReminderRequest) (string, error) {
+	// user, err := p.API.GetUserByUsername(request.Username)
+	
+	// if err != nil {
+	// 	p.API.LogError("failed to query user %s", request.Username)
+	// }
+
+	reminders, err := p.getUserReminders(request)
+	if err != nil {
+		p.API.LogError("failed to query user reminders "+request.Username)
+	}
+
+
+	return fmt.Sprintf("%v",reminders), nil
 }
 
 func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*model.CommandResponse, *model.AppError) {
@@ -83,7 +171,6 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		p.API.LogError("failed to query user %s", args.UserId)
 	}
 
-	p.Username = user.Username
 	p.run()
 
 	if strings.HasSuffix(args.Command, "help") {
@@ -110,7 +197,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	if strings.HasSuffix(args.Command, "debug") {
 		return &model.CommandResponse{
 			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-			Text: fmt.Sprintf("* %s\n * %s\n * %s\n * %s\n * (%s)\n * %s\n", 
+			Text: fmt.Sprintf("* %s\n * %s\n * %s\n * %s\n * %s\n * %s\n", 
 				args.Command, 
 				args.TeamId,
 				args.SiteURL,
@@ -131,30 +218,23 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		}, nil
 	}
 
-	if commandSplit[1] == "me" {
+	if commandSplit[1] == "me" ||
+		strings.HasPrefix(commandSplit[1][:1], "@") ||
+		strings.HasPrefix(commandSplit[1][:1], "~") {
 
-		reminder := Reminder{UserId: "fooo", Target: "bar", Username: "skawtus", Message: "foooo", Occurrences: nil, Completed: time.Now()}
-		p.API.KVSet("reminder",[]byte(fmt.Sprintf("%v", reminder)))
+		request := ReminderRequest{user.Username, payload}
+		response, err := p.scheduleReminder(request)
 
-		return &model.CommandResponse{
-			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-			Text: fmt.Sprintf("todo"),
-		}, nil
-	}
-
-	if strings.HasPrefix(commandSplit[1][:1], "@"){
-
-		return &model.CommandResponse{
-			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-			Text:  fmt.Sprintf("todo"),
-		}, nil
-	}
-
-	if strings.HasPrefix(commandSplit[1][:1], "~") {
+		if err != nil {
+			return &model.CommandResponse{
+				ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
+				Text: fmt.Sprintf(ExceptionText),
+			}, nil
+		}
 
 		return &model.CommandResponse{
 			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-			Text:  fmt.Sprintf("todo"),
+			Text: fmt.Sprintf("%s",response),
 		}, nil
 	}
 
