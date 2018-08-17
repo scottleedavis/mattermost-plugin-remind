@@ -5,10 +5,14 @@ import (
 	"strings"
 	"time"
 	"encoding/json"
-	// "io/ioutil"
+	// "math/rand"
+    // "os/exec"
 
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/plugin"
+	"github.com/google/uuid"
+	// "github.com/nu7hatch/gouuid"
+
 )
 
 const Version = "0.0.1"
@@ -68,30 +72,26 @@ func (p *Plugin) run() {
 	}
 }
 
-// func (o *CommandResponse) ToJson() string {
-// 	b, _ := json.Marshal(o)
+// func (p *Plugin) remindersToJson(reminders []Reminder) (string) {
+// 	b, _ := json.Marshal(reminders)
 // 	return string(b)
 // }
-func (p *Plugin) remindersToJson(reminders []Reminder) (string) {
-	b, _ := json.Marshal(reminders)
-	return string(b)
-}
 
 
-func (p *Plugin) remindersFromJson(data []byte) ([]Reminder, error) {
-	// b, err := ioutil.ReadAll(data)
-	// if err != nil {
-	// 	return nil, err
-	// }
+// func (p *Plugin) remindersFromJson(data []byte) ([]Reminder, error) {
+// 	// b, err := ioutil.ReadAll(data)
+// 	// if err != nil {
+// 	// 	return nil, err
+// 	// }
 
-	var reminders []Reminder
-	err := json.Unmarshal(data, &reminders)
-	if err != nil {
-		return nil, err
-	}
+// 	var reminders []Reminder
+// 	err := json.Unmarshal(data, &reminders)
+// 	if err != nil {
+// 		return nil, err
+// 	}
 
-	return reminders, nil
-}
+// 	return reminders, nil
+// }
 
 func (p *Plugin) triggerReminders() {
 
@@ -106,7 +106,7 @@ func (p *Plugin) triggerReminders() {
 
 }
 
-func (p *Plugin) getUserReminders(request ReminderRequest) ([]Reminder, error) {
+func (p *Plugin) upsertReminder(request ReminderRequest) ([]Reminder, error) {
 
 	user, u_err := p.API.GetUserByUsername(request.Username)
 	
@@ -121,7 +121,8 @@ func (p *Plugin) getUserReminders(request ReminderRequest) ([]Reminder, error) {
 		return []Reminder{}, b_err
 	}
 
-	reminder := Reminder{user.Username, "me", "foo in 2 seconds", []time.Time{}, time.Time{}}
+	// reminder := request.Reminder
+	// reminder := Reminder{user.Username, "me", "foo in 2 seconds", []time.Time{}, time.Time{}}
 	var reminders []Reminder
 	err := json.Unmarshal(bytes, &reminders)
 
@@ -131,7 +132,7 @@ func (p *Plugin) getUserReminders(request ReminderRequest) ([]Reminder, error) {
 		p.API.LogError("existing "+fmt.Sprintf("%v",reminders))
 	}
 
-	reminders = append(reminders, reminder)
+	reminders = append(reminders, request.Reminder)
 	ro,__ := json.Marshal(reminders)
 
 	if __ != nil {
@@ -145,14 +146,39 @@ func (p *Plugin) getUserReminders(request ReminderRequest) ([]Reminder, error) {
 
 }
 
-func (p *Plugin) scheduleReminder(request ReminderRequest) (string, error) {
-	// user, err := p.API.GetUserByUsername(request.Username)
-	
-	// if err != nil {
-	// 	p.API.LogError("failed to query user %s", request.Username)
-	// }
+// func (p *Plugin) createOccurrences(request ReminderRequest) ([]ReminderOccurrence) {
 
-	reminders, err := p.getUserReminders(request)
+// }
+
+func (p *Plugin) scheduleReminder(request ReminderRequest) (string, error) {
+
+    // out, err := exec.Command("uuidgen").Output()
+    // if err != nil {
+    // 	p.API.LogError("here"+fmt.Sprintf("%v", err))
+    //     return "to do", err
+    // }
+
+	// request.Reminder.Id = fmt.Sprintf("%s", out) //fmt.Sprintf("%x",rand.Intn(100))
+
+	// p.API.LogError("reminder id "+fmt.Sprintf("%v",request.Reminder.Id))
+
+	guid, gerr := uuid.NewRandom()
+	if gerr != nil {
+		p.API.LogError("Failed to generate guid")
+	}
+
+	request.Reminder.Id = guid.String()
+
+	request.Reminder.Username = request.Username
+
+	request.Reminder.Target = "me"
+
+	request.Reminder.Message = "super foo bar"
+
+	// request.Reminder.Occurrences := p.createOccurrences(request)
+
+
+	reminders, err := p.upsertReminder(request)
 	if err != nil {
 		p.API.LogError("failed to query user reminders "+request.Username)
 	}
@@ -222,7 +248,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		strings.HasPrefix(commandSplit[1][:1], "@") ||
 		strings.HasPrefix(commandSplit[1][:1], "~") {
 
-		request := ReminderRequest{user.Username, payload}
+		request := ReminderRequest{user.Username, payload, Reminder{}}
 		response, err := p.scheduleReminder(request)
 
 		if err != nil {
