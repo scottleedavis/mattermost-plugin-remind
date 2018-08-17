@@ -44,22 +44,33 @@ func (p *Plugin) registerCommand(teamId string) error {
 		)
 	}
 	
+	p.run()
+
 	return nil
 }
 
-func (p *Plugin) runSchedule() {
-	
-	p.API.LogError("schedulerRunning: "+ fmt.Sprintf("%t",p.schedulerRunning)) 
-	
-	if !p.schedulerRunning {
-		p.schedulerRunning = true
-	    go func() {
-			p.API.LogError("scheduler go")
-			<-time.NewTimer(time.Second).C
+func (p *Plugin) runner() {
+    go func() {
+		p.API.LogError("scheduler go")
+		<-time.NewTimer(time.Second).C
 
-			// TODO pull in occurrences at current time
+		bytes, err := p.API.KVGet("fa so la ti do re me")
+		if err != nil {
+			p.API.LogError("failed KVGet %s", err)
+		}
 
-	    }()
+		// TODO pull in occurrences at current time
+		p.API.LogError( string(bytes[:]) )
+
+		p.runner()
+
+	}()
+}
+func (p *Plugin) run() {
+	
+	if !p.running {
+		p.running = true
+		p.runner()
 	}
 }
 
@@ -74,6 +85,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	}
 
 	p.Username = user.Username
+	p.run()
 
 	if strings.HasSuffix(args.Command, "help") {
 		return &model.CommandResponse{
@@ -123,7 +135,8 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 
 	if commandSplit[1] == "me" {
 
-		p.runSchedule()
+		p.API.KVSet("fa so la ti do re me",[]byte("foo"))
+
 		return &model.CommandResponse{
 			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
 			Text: fmt.Sprintf("todo"),
@@ -132,7 +145,6 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 
 	if strings.HasPrefix(commandSplit[1][:1], "@"){
 
-		p.runSchedule()
 		return &model.CommandResponse{
 			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
 			Text:  fmt.Sprintf("todo"),
@@ -141,7 +153,6 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 
 	if strings.HasPrefix(commandSplit[1][:1], "~") {
 
-		p.runSchedule()
 		return &model.CommandResponse{
 			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
 			Text:  fmt.Sprintf("todo"),

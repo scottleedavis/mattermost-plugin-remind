@@ -22,5 +22,5 @@ type Plugin struct {
 	// demoChannelIds maps team ids to the channels created for each using the channel name above.
 	// demoChannelIds map[string]string
 
-	schedulerRunning bool
+	running bool
 }
