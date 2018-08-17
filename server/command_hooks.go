@@ -51,21 +51,20 @@ func (p *Plugin) registerCommand(teamId string) error {
 
 func (p *Plugin) runner() {
     go func() {
-		p.API.LogError("scheduler go")
 		<-time.NewTimer(time.Second).C
 
-		bytes, err := p.API.KVGet("fa so la ti do re me")
+		bytes, err := p.API.KVGet("reminder")
 		if err != nil {
 			p.API.LogError("failed KVGet %s", err)
 		}
 
-		// TODO pull in occurrences at current time
 		p.API.LogError( string(bytes[:]) )
 
 		p.runner()
 
 	}()
 }
+
 func (p *Plugin) run() {
 	
 	if !p.running {
@@ -111,11 +110,10 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	if strings.HasSuffix(args.Command, "debug") {
 		return &model.CommandResponse{
 			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-			Text: fmt.Sprintf("* %s\n * %s\n * %s\n * %s\n * %s\n * (%s)\n * %s\n", 
+			Text: fmt.Sprintf("* %s\n * %s\n * %s\n * %s\n * (%s)\n * %s\n", 
 				args.Command, 
 				args.TeamId,
 				args.SiteURL,
-				args.Session,
 				user.Username, 
 				user.Id,  
 				user.Timezone["automaticTimezone"]),
@@ -135,7 +133,8 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 
 	if commandSplit[1] == "me" {
 
-		p.API.KVSet("fa so la ti do re me",[]byte("foo"))
+		reminder := Reminder{UserId: "fooo", Target: "bar", Username: "skawtus", Message: "foooo", Occurrences: nil, Completed: time.Now()}
+		p.API.KVSet("reminder",[]byte(fmt.Sprintf("%v", reminder)))
 
 		return &model.CommandResponse{
 			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,

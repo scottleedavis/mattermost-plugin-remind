@@ -1,7 +1,7 @@
 import {getConfig} from 'mattermost-redux/selectors/entities/general';
 
 import PluginId from './plugin_id';
-import {USERNAME, STATUS_CHANGE, OPEN_ROOT_MODAL, CLOSE_ROOT_MODAL} from './action_types';
+import {USERNAME, OPEN_ROOT_MODAL, CLOSE_ROOT_MODAL} from './action_types';
 
 export const openRootModal = () => (dispatch) => {
     dispatch({
