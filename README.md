@@ -2,7 +2,7 @@
 
 a plugin for mattermost that provides reminders from a slash command /remind
 
-Inspired by the java integration [mattermost-remind](http://github.com/scottleedavis/mattermost-remind)
+_Inspired by the java integration [mattermost-remind](http://github.com/scottleedavis/mattermost-remind)_
 
 ### usage
 
