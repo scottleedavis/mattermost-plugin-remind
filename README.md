@@ -4,6 +4,26 @@ a plugin for mattermost that provides reminders from a slash command /remind
 
 Inspired by the java integration [mattermost-remind](http://github.com/scottleedavis/mattermost-remind)
 
+### usage
+
+See the full list of [Usage Examples](https://github.com/scottleedavis/mattermost-remind/wiki/Usage) in the [wiki](https://github.com/scottleedavis/mattermost-remind/wiki) 
+* `/remind help`
+* `/remind list`
+* `/remind version`
+* `/remind [who] [what] [when]`
+  * `/remind [who] [what] in [# (seconds|minutes|hours|days|weeks|months|years)]`
+  * `/remind [who] [what] at [(noon|midnight|one..twelve|00:00am/pm|0000)] (every) [day|date]`
+  * `/remind [who] [what] (on) [(Monday-Sunday|Month&Day|MM/DD/YYYY|MM/DD)] (at) [time]`
+  * `/remind [who] [what] every (other) [Monday-Sunday|Month&Day|MM/DD] (at) [time]`
+* `/remind [who] [when] [what]`
+
+
+#### requirements
+* [Mattermost](https://mattermost.com/)
+* [Go](https://golang.org/)
+* [Dep](https://github.com/golang/dep)
+* [HTTPPie](https://httpie.org/)
+
 ### setup
 Mattermost config.json changes
 
