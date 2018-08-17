@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"strings"
-	// "time"
+	"time"
 
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/plugin"
@@ -47,17 +47,19 @@ func (p *Plugin) registerCommand(teamId string) error {
 	return nil
 }
 
-func (p *Plugin) runOnce() {
-
-	p.API.LogError("runOnce") 
-
-}
-
 func (p *Plugin) runSchedule() {
+	
 	p.API.LogError("schedulerRunning: "+ fmt.Sprintf("%t",p.schedulerRunning)) 
+	
 	if !p.schedulerRunning {
 		p.schedulerRunning = true
-		p.runOnce()
+	    go func() {
+			p.API.LogError("scheduler go")
+			<-time.NewTimer(time.Second).C
+
+			// TODO pull in occurrences at current time
+
+	    }()
 	}
 }
 
