@@ -27,74 +27,8 @@ const HelpText = ":wave: Need some help with `/remind`?\n" +
             "Or, use `/remind list` to see the list of all your reminders.\n" +
             "Have a bug to report or a feature request?  [Submit your issue here](https://gitreports.com/issue/scottleedavis/mattermost-plugin-remind).";
 
-
-func runSchedule() {
-	runOnce()
-}
-
-func runOnce() {
-
-	fmt.Println("runOnce")	
-
-	// maxThreads := 100
-
-	// if echoSem == nil {
-	// 	// We want one additional thread allowed so we never reach channel lockup
-	// 	echoSem = make(chan bool, maxThreads+1)
-	// }
-	// echoSem <- true
-	// go(func() {
-	// 	defer func() { <-echoSem }()
-	// 	// post := &model.Post{}
-	// 	// post.ChannelId = args.ChannelId
-	// 	// post.RootId = args.RootId
-	// 	// post.ParentId = args.ParentId
-	// 	// post.Message = message
-	// 	// post.UserId = args.UserId
-
-	// 	// time.Sleep(time.Duration(delay) * time.Second)
-	// 	time.Sleep(1 * time.Second)
-
-	// 	// if _, err := a.CreatePostMissingChannel(post, true); err != nil {
-	// 	// 	mlog.Error(fmt.Sprintf("Unable to create /echo post, err=%v", err))
-	// 	// }
-	//     fmt.Printf("Current Unix Time: %v\n", time.Now().Unix())
-	//     runSchedule()
-
-	// })
-
-// 	   // Timers represent a single event in the future. You
-//     // tell the timer how long you want to wait, and it
-//     // provides a channel that will be notified at that
-//     // time. This timer will wait 2 seconds.
-// 	fmt.Println("Timer 1 starting")	
-//     // timer1 := time.NewTimer(2 * time.Second)
-
-//     // The `<-timer1.C` blocks on the timer's channel `C`
-//     // until it sends a value indicating that the timer
-//     // expired.
-//     // go func() {
-//     //     <-timer1.C
-//     // 	fmt.Println("Timer 1 expired")	
-//     // }()
-// timer1.Stop()
-
-    // If you just wanted to wait, you could have used
-    // `time.Sleep`. One reason a timer may be useful is
-    // that you can cancel the timer before it expires.
-    // Here's an example of that.
-    // timer2 := time.NewTimer(time.Second)
-    // go func() {
-    //     <-timer2.C
-    //     fmt.Println("Timer 2 expired")
-    // }()
-    // stop2 := timer2.Stop()
-    // if stop2 {
-    //     fmt.Println("Timer 2 stopped")
-    // }
-}
-
 func (p *Plugin) registerCommand(teamId string) error {
+
 	if err := p.API.RegisterCommand(&model.Command{
 		TeamId:           teamId,
 		Trigger:          CommandTrigger,
@@ -110,22 +44,22 @@ func (p *Plugin) registerCommand(teamId string) error {
 		)
 	}
 	
-	// p.API.LogError("registerCommand %s \n", teamId)
-
-	// runSchedule()
-
 	return nil
 }
 
-func (p *Plugin) emitStatusChange() {
-	// p.API.PublishWebSocketEvent("status_change", map[string]interface{}{
-	// 	"enabled": true,
-	// }, &model.WebsocketBroadcast{})
-	fmt.Println("hahahahahahha")
-	p.API.LogError("emitStatusChange")
-	// runSchedule()
+func (p *Plugin) runOnce() {
+
+	p.API.LogError("runOnce") 
+
 }
 
+func (p *Plugin) runSchedule() {
+	p.API.LogError("schedulerRunning: "+ fmt.Sprintf("%t",p.schedulerRunning)) 
+	if !p.schedulerRunning {
+		p.schedulerRunning = true
+		p.runOnce()
+	}
+}
 
 func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*model.CommandResponse, *model.AppError) {
 
@@ -136,6 +70,8 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	if err != nil {
 		p.API.LogError("failed to query user %s", args.UserId)
 	}
+
+	p.Username = user.Username
 
 	if strings.HasSuffix(args.Command, "help") {
 		return &model.CommandResponse{
@@ -185,7 +121,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 
 	if commandSplit[1] == "me" {
 
-		p.emitStatusChange()
+		p.runSchedule()
 		return &model.CommandResponse{
 			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
 			Text: fmt.Sprintf("todo"),
@@ -194,7 +130,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 
 	if strings.HasPrefix(commandSplit[1][:1], "@"){
 
-		p.emitStatusChange()
+		p.runSchedule()
 		return &model.CommandResponse{
 			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
 			Text:  fmt.Sprintf("todo"),
@@ -203,7 +139,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 
 	if strings.HasPrefix(commandSplit[1][:1], "~") {
 
-		p.emitStatusChange()
+		p.runSchedule()
 		return &model.CommandResponse{
 			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
 			Text:  fmt.Sprintf("todo"),
