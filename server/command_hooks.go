@@ -3,31 +3,10 @@ package main
 import (
 	"fmt"
 	"strings"
-	"time"
-	// "encoding/json"
 
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/plugin"
-	"github.com/google/uuid"
 )
-
-const Version = "0.0.1"
-
-const CommandTrigger = "remind"
-
-const ExceptionText = "Sorry, I didn’t quite get that. I’m easily confused. " +
-            "Perhaps try the words in a different order? This usually works: " +
-            "`/remind [@someone or ~channel] [what] [when]`.\n";
-
-const HelpText = ":wave: Need some help with `/remind`?\n" +
-            "Use `/remind` to set a reminder for yourself, someone else, or for a channel. Some examples include:\n" +
-            "* `/remind me to drink water at 3pm every day`\n" +
-            "* `/remind me on June 1st to wish Linda happy birthday`\n" +
-            "* `/remind ~team-alpha to update the project status every Monday at 9am`\n" +
-            "* `/remind @jessica about the interview in 3 hours`\n" +
-            "* `/remind @peter tomorrow \"Please review the office seating plan\"`\n" +
-            "Or, use `/remind list` to see the list of all your reminders.\n" +
-            "Have a bug to report or a feature request?  [Submit your issue here](https://gitreports.com/issue/scottleedavis/mattermost-plugin-remind).";
 
 func (p *Plugin) registerCommand(teamId string) error {
 
@@ -46,98 +25,32 @@ func (p *Plugin) registerCommand(teamId string) error {
 		)
 	}
 	
-	// p.CreateUser()
 	p.run()
 
 	return nil
 }
 
-// func (p *Plugin) CreateUser {
-// 	// p.API.CreateUser// CreateUser(user *model.User) (*model.User, *model.AppError)
-// 	user, u_err := p.API.GetUserByUsername(request.Username)
-	
-// 	if u_err != nil {
-// 		p.API.LogError("failed to query user %s", request.Username)
-// 		return
-// 	}
+func (p *Plugin) unregisterCommand(teamId string) error {
 
-// 	p.API.LogError(fmt.Sprintf("%v", ))
-// }
+	p.API.UnregisterCommand(teamId, CommandTrigger);
 
-func (p *Plugin) runner() {
-
-    go func() {
-		<-time.NewTimer(time.Second).C
-		p.triggerReminders()
-		p.runner()
-	}()
+	return nil
 }
-
-func (p *Plugin) run() {
-	
-	if !p.running {
-		p.running = true
-		p.runner()
-	}
-}
-
 
 func (p *Plugin) parseRequest(request ReminderRequest) (string, string, string, error) {
 	return "me", "in 2 seconds", "foo bar", nil
 }
 
 
-func (p *Plugin) scheduleReminder(request ReminderRequest) (string, error) {
-
-	var when string
-	var target string
-	var message string
-	var useTo bool
-	useTo = false
-	var useToString string
-	if useTo {
-		useToString = " to"
-	} else {
-		useToString = ""
-	}
-
-	guid, gerr := uuid.NewRandom()
-	if gerr != nil {
-		p.API.LogError("Failed to generate guid")
-	}
-
-	target, when, message, perr := p.parseRequest(request)
-	if perr != nil {
-		return ExceptionText, nil
-	}
-
-	request.Reminder.Id = guid.String()
-	request.Reminder.Username = request.Username
-	request.Reminder.Target = target
-	request.Reminder.Message = message
-	request.Reminder.When = when
-	request.Reminder.Occurrences = p.createOccurrences(request)
-
-	p.API.KVDelete(request.Username)
-
-	p.upsertReminder(request)
-
-	response := ":thumbsup: I will remind " + target + useToString + " \"" + request.Reminder.Message + "\" " + when;
-   
-	return response, nil
-}
-
 func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*model.CommandResponse, *model.AppError) {
 
-	p.API.LogError("ExecuteCommand")
+	p.API.LogDebug("ExecuteCommand")
 
 	user, err := p.API.GetUser(args.UserId)
 	
 	if err != nil {
 		p.API.LogError("failed to query user %s", args.UserId)
 	}
-
-	p.run()
 
 	if strings.HasSuffix(args.Command, "help") {
 		return &model.CommandResponse{
