@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"time"
 	"encoding/json"
+
+	"github.com/mattermost/mattermost-server/model"
 )
 
 type Reminder struct {
@@ -72,51 +74,53 @@ func (p *Plugin) triggerReminders() {
 
 	if err != nil {
 		p.API.LogError("failed KVGet %s", err)
+	} else if string(bytes[:]) == "" {
 	} else {
-		if string(bytes[:]) != "" {
 
-			// p.API.LogError( "value: "+string(bytes[:]) )			
-			var reminderOccurrences []ReminderOccurrence
+		var reminderOccurrences []ReminderOccurrence
 
-			ro_err := json.Unmarshal(bytes, &reminderOccurrences)
-			if ro_err == nil {
-				p.API.LogError("existing "+fmt.Sprintf("%v",reminderOccurrences))
+		ro_err := json.Unmarshal(bytes, &reminderOccurrences)
+		if ro_err != nil {
+			p.API.LogError("Failed to unmarshal reminder occurrences "+ fmt.Sprintf("%v",ro_err))
+			return
+		}
 
+		p.API.LogError("existing "+fmt.Sprintf("%v",reminderOccurrences))
 
+		// TODO loop through array of occurrences, and trigger DM between remind user & user
+		for _, ReminderOccurrence := range reminderOccurrences {
 
+			user, err := p.API.GetUserByUsername(ReminderOccurrence.Username)
+			
+			if err != nil {
+				p.API.LogError("failed to query user %s", user.Id)
+			} else {
+				channel, cerr := p.API.GetDirectChannel(p.remindUserId, user.Id)
 
-
-
-
-
-
-
-
-
-
-
-
-				// TODO loop through array of occurrences, and trigger DM between remind user & user
-
-
-
-
-//GetDirectChannel
-//GetDirectChannel(userId1, userId2 string) (*model.Channel, *model.AppError)
+				if cerr != nil {
+					p.API.LogError("fail to get channel ", fmt.Sprintf("%v", cerr))
+				} else {
+					p.API.LogError("got channel "+ fmt.Sprintf("%v", channel))
 
 
+						if _, err = p.API.CreatePost(&model.Post{
+							UserId:    p.remindUserId,
+							ChannelId: channel.Id,
+							Message:   fmt.Sprintf(":wave: hello @%s", user.Username),
+						}); err != nil {
+							p.API.LogError(
+								"failed to post DM message",
+								"user_id", user.Id,
+								"error", err.Error(),
+							)
+						}
 
 
-
-
-
-
-
-
+				}
 			}
 
 		}
-	}
 
+	}
 
 }
