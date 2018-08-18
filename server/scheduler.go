@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"time"
-	// "strings"
+	"strings"
+	"errors"
 
 	"github.com/google/uuid"
 )
@@ -33,7 +35,48 @@ func (p *Plugin) stop() {
 
 
 func (p *Plugin) parseRequest(request ReminderRequest) (string, string, string, error) {
-	return "me", "in 2 seconds", "this is an end to end test.", nil
+
+	commandSplit := strings.Split(request.Payload," ")
+
+	p.API.LogError("parseRequest "+fmt.Sprintf("%v", request))
+	p.API.LogError(request.Payload)
+
+
+	if strings.HasPrefix(request.Payload, "me") ||
+		strings.HasPrefix(request.Payload, "~") ||
+		strings.HasPrefix(request.Payload, "@") {
+	
+		p.API.LogError("found target")
+
+		var message string
+		var when string
+		var firstIndex int
+		var lastIndex int
+
+		firstIndex = strings.Index(request.Payload, "\"")
+		lastIndex = strings.LastIndex(request.Payload, "\"")
+
+		if firstIndex > -1 && lastIndex > -1 && firstIndex != lastIndex {
+			message := request.Payload[firstIndex:lastIndex]
+
+			p.API.LogError("quotes when "+fmt.Sprintf("%v",firstIndex)+" "+fmt.Sprintf("%v",lastIndex) )
+
+			when = strings.Replace(request.Payload, message,"",-1)
+			when = strings.Replace(when, commandSplit[1],"",-1)
+			return commandSplit[1], when, message, nil
+		} 
+
+		p.API.LogError("no quotes when "+fmt.Sprintf("%v",firstIndex)+" "+fmt.Sprintf("%v",lastIndex) )
+
+		message = "foo"
+
+
+
+		return commandSplit[0], "in 2 seconds", message, nil
+	} 
+	err := errors.New("Unrecognized Target")
+
+	return "", "", "", err
 }
 
 func (p *Plugin) scheduleReminder(request ReminderRequest) (string, error) {

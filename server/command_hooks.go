@@ -81,20 +81,11 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		}, nil
 	}
 
-	payload := strings.Trim(strings.Replace(args.Command, "/"+CommandTrigger, "", -1),"")
-	commandSplit := strings.Split(payload," ")
+	payload := strings.Trim(strings.Replace(args.Command, "/"+CommandTrigger, "", -1)," ")
 
-	if len(commandSplit) == 0 {	
-
-		return &model.CommandResponse{
-			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-			Text: fmt.Sprintf(ExceptionText),
-		}, nil
-	}
-
-	if commandSplit[1] == "me" ||
-		strings.HasPrefix(commandSplit[1][:1], "@") ||
-		strings.HasPrefix(commandSplit[1][:1], "~") {
+	if strings.HasPrefix(payload, "me") ||
+		strings.HasPrefix(payload, "@") ||
+		strings.HasPrefix(payload, "~") {
 
 		request := ReminderRequest{args.TeamId, user.Username, payload, Reminder{}}
 		response, err := p.scheduleReminder(request)

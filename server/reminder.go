@@ -120,14 +120,15 @@ func (p *Plugin) triggerReminders() {
 			var reminder Reminder
 			reminder = p.findReminder(reminders, ReminderOccurrence)
 
-			p.API.LogDebug(fmt.Sprintf("%v",reminder))
+			p.API.LogError(fmt.Sprintf("%v",reminder))
 
 			if strings.HasPrefix(reminder.Target, "@") || strings.HasPrefix(reminder.Target, "me") {
 
+				p.API.LogError(fmt.Sprintf("%v", p.remindUserId)+" "+fmt.Sprintf("%v", user.Id))
 				channel, cerr := p.API.GetDirectChannel(p.remindUserId, user.Id)
 
 				if cerr != nil {
-					p.API.LogError("fail to get channel ", fmt.Sprintf("%v", cerr))
+					p.API.LogError("fail to get direct channel ", fmt.Sprintf("%v", cerr))
 				} else {
 					p.API.LogError("got direct channel "+ fmt.Sprintf("%v", channel))
 
