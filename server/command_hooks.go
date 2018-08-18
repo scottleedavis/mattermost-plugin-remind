@@ -5,14 +5,10 @@ import (
 	"strings"
 	"time"
 	"encoding/json"
-	// "math/rand"
-    // "os/exec"
 
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/plugin"
 	"github.com/google/uuid"
-	// "github.com/nu7hatch/gouuid"
-
 )
 
 const Version = "0.0.1"
@@ -72,27 +68,6 @@ func (p *Plugin) run() {
 	}
 }
 
-// func (p *Plugin) remindersToJson(reminders []Reminder) (string) {
-// 	b, _ := json.Marshal(reminders)
-// 	return string(b)
-// }
-
-
-// func (p *Plugin) remindersFromJson(data []byte) ([]Reminder, error) {
-// 	// b, err := ioutil.ReadAll(data)
-// 	// if err != nil {
-// 	// 	return nil, err
-// 	// }
-
-// 	var reminders []Reminder
-// 	err := json.Unmarshal(data, &reminders)
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	return reminders, nil
-// }
-
 func (p *Plugin) triggerReminders() {
 
 	// bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", time.Now().Round(time.Second))))
@@ -121,8 +96,6 @@ func (p *Plugin) upsertReminder(request ReminderRequest) ([]Reminder, error) {
 		return []Reminder{}, b_err
 	}
 
-	// reminder := request.Reminder
-	// reminder := Reminder{user.Username, "me", "foo in 2 seconds", []time.Time{}, time.Time{}}
 	var reminders []Reminder
 	err := json.Unmarshal(bytes, &reminders)
 
@@ -146,45 +119,54 @@ func (p *Plugin) upsertReminder(request ReminderRequest) ([]Reminder, error) {
 
 }
 
-// func (p *Plugin) createOccurrences(request ReminderRequest) ([]ReminderOccurrence) {
+func (p *Plugin) parseRequest(request ReminderRequest) (string, string, string, error) {
+	return "me", "in 2 seconds", "foo bar", nil
+}
 
-// }
+func (p *Plugin) createOccurrences(request ReminderRequest) ([]ReminderOccurrence) {
+
+	// switch the when patterns
+
+	// handle seconds as proof of concept
+
+	return []ReminderOccurrence{}
+}
 
 func (p *Plugin) scheduleReminder(request ReminderRequest) (string, error) {
 
-    // out, err := exec.Command("uuidgen").Output()
-    // if err != nil {
-    // 	p.API.LogError("here"+fmt.Sprintf("%v", err))
-    //     return "to do", err
-    // }
-
-	// request.Reminder.Id = fmt.Sprintf("%s", out) //fmt.Sprintf("%x",rand.Intn(100))
-
-	// p.API.LogError("reminder id "+fmt.Sprintf("%v",request.Reminder.Id))
+	var when string
+	var target string
+	var message string
+	var useTo bool
+	useTo = false
+	var useToString string
+	if useTo {
+		useToString = " to"
+	} else {
+		useToString = ""
+	}
 
 	guid, gerr := uuid.NewRandom()
 	if gerr != nil {
 		p.API.LogError("Failed to generate guid")
 	}
 
-	request.Reminder.Id = guid.String()
-
-	request.Reminder.Username = request.Username
-
-	request.Reminder.Target = "me"
-
-	request.Reminder.Message = "super foo bar"
-
-	// request.Reminder.Occurrences := p.createOccurrences(request)
-
-
-	reminders, err := p.upsertReminder(request)
-	if err != nil {
-		p.API.LogError("failed to query user reminders "+request.Username)
+	target, when, message, perr := p.parseRequest(request)
+	if perr != nil {
+		return ExceptionText, nil
 	}
 
+	request.Reminder.Id = guid.String()
+	request.Reminder.Username = request.Username
+	request.Reminder.Target = target
+	request.Reminder.Message = message
+	request.Reminder.Occurrences = p.createOccurrences(request)
 
-	return fmt.Sprintf("%v",reminders), nil
+	p.upsertReminder(request)
+
+	response := ":thumbsup: I will remind " + target + useToString + " \"" + request.Reminder.Message + "\" " + when;
+   
+	return response, nil
 }
 
 func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*model.CommandResponse, *model.AppError) {

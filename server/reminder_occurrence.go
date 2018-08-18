@@ -6,7 +6,7 @@ import (
 
 type ReminderOccurrence struct {
 
-	ReminderOccurrenceId string
+	Id string
 
 	ReminderId string
 

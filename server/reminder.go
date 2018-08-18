@@ -14,7 +14,7 @@ type Reminder struct {
 
 	Message string
 
-	Occurrences []time.Time
+	Occurrences []ReminderOccurrence
 
 	Completed time.Time
 }
