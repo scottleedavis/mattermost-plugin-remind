@@ -58,32 +58,21 @@ func (p *Plugin) parseRequest(request ReminderRequest) (string, string, string, 
 
 		if firstIndex > -1 && lastIndex > -1 && firstIndex != lastIndex {
 
-
-
-
-
-			///////
-			// TODO.  this isn't working as designed.  fix
-			///////
-
-
-
-
-
-
 			message := request.Payload[firstIndex:lastIndex]
 			when = strings.Replace(request.Payload, message,"",-1)
 			when = strings.Replace(when, commandSplit[1],"",-1)
 			p.API.LogError("quotes when "+fmt.Sprintf("%v",firstIndex)+" "+fmt.Sprintf("%v",lastIndex) + " "+ when )
 
-			return commandSplit[1], when, message, nil
+			return commandSplit[0], when, message, nil
 		} 
 
 		p.API.LogError("no quotes when "+fmt.Sprintf("%v",firstIndex)+" "+fmt.Sprintf("%v",lastIndex) )
 
 		message = "foo"
-		// TODO determine when
 
+		////////
+		// TODO determine when
+		/////////
 
 		return commandSplit[0], "in 2 seconds", message, nil
 	} 
