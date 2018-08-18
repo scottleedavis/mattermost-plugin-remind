@@ -55,7 +55,7 @@ func (p *Plugin) runner() {
 
     go func() {
 		<-time.NewTimer(time.Second).C
-		// p.triggerReminders()
+		p.triggerReminders()
 		p.runner()
 	}()
 }
@@ -70,12 +70,14 @@ func (p *Plugin) run() {
 
 func (p *Plugin) triggerReminders() {
 
-	// bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", time.Now().Round(time.Second))))
-	bytes, err := p.API.KVGet("skawtus")
+	bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", time.Now().Round(time.Second))))
+	// bytes, err := p.API.KVGet("skawtus")
 	if err != nil {
 		p.API.LogError("failed KVGet %s", err)
 	} else {
-		p.API.LogError( "value: "+string(bytes[:]) )			
+		if string(bytes[:]) != "" {
+			p.API.LogError( "value: "+string(bytes[:]) )			
+		}
 	}
 
 
@@ -123,13 +125,57 @@ func (p *Plugin) parseRequest(request ReminderRequest) (string, string, string, 
 	return "me", "in 2 seconds", "foo bar", nil
 }
 
+func (p *Plugin) upsertOccurrence(reminderOccurrence ReminderOccurrence) {
+
+	bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", reminderOccurrence.Occurrence)))
+	if err != nil {
+		p.API.LogError("failed KVGet %s", err)
+		return
+	}
+
+	var reminderOccurrences []ReminderOccurrence
+
+	ro_err := json.Unmarshal(bytes, &reminderOccurrences)
+	if ro_err != nil {
+		p.API.LogError("new occurruence " + string(fmt.Sprintf("%v", reminderOccurrence.Occurrence)))
+	} else {
+		p.API.LogError("existing "+fmt.Sprintf("%v",reminderOccurrences))
+	}
+
+	reminderOccurrences = append(reminderOccurrences, reminderOccurrence)
+	ro,__ := json.Marshal(reminderOccurrences)
+
+	if __ != nil {
+		p.API.LogError("failed to marshal reminderOccurrences %s", reminderOccurrence.Id)
+		return
+	}
+
+	p.API.KVSet(string(fmt.Sprintf("%v", reminderOccurrence.Occurrence)),ro)
+
+}
+
 func (p *Plugin) createOccurrences(request ReminderRequest) ([]ReminderOccurrence) {
+
+	var ReminderOccurrences []ReminderOccurrence
 
 	// switch the when patterns
 
 	// handle seconds as proof of concept
 
-	return []ReminderOccurrence{}
+
+	guid, gerr := uuid.NewRandom()
+	if gerr != nil {
+		p.API.LogError("Failed to generate guid")
+		return []ReminderOccurrence{}
+	}
+
+	occurrence := time.Now().Round(time.Second).Add(time.Second * time.Duration(5))
+	reminderOccurrence := ReminderOccurrence{guid.String(),request.Reminder.Id, occurrence, time.Time{}, ""}
+	ReminderOccurrences = append(ReminderOccurrences, reminderOccurrence)
+
+	p.upsertOccurrence(reminderOccurrence)
+
+	return ReminderOccurrences
 }
 
 func (p *Plugin) scheduleReminder(request ReminderRequest) (string, error) {
@@ -160,7 +206,10 @@ func (p *Plugin) scheduleReminder(request ReminderRequest) (string, error) {
 	request.Reminder.Username = request.Username
 	request.Reminder.Target = target
 	request.Reminder.Message = message
+	request.Reminder.When = when
 	request.Reminder.Occurrences = p.createOccurrences(request)
+
+	// p.API.KVDelete(request.Username)
 
 	p.upsertReminder(request)
 
