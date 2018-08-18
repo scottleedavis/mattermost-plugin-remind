@@ -37,11 +37,6 @@ func (p *Plugin) unregisterCommand(teamId string) error {
 	return nil
 }
 
-func (p *Plugin) parseRequest(request ReminderRequest) (string, string, string, error) {
-	return "me", "in 2 seconds", "foo bar", nil
-}
-
-
 func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*model.CommandResponse, *model.AppError) {
 
 	p.API.LogDebug("ExecuteCommand")
@@ -101,7 +96,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		strings.HasPrefix(commandSplit[1][:1], "@") ||
 		strings.HasPrefix(commandSplit[1][:1], "~") {
 
-		request := ReminderRequest{user.Username, payload, Reminder{}}
+		request := ReminderRequest{args.TeamId, user.Username, payload, Reminder{}}
 		response, err := p.scheduleReminder(request)
 
 		if err != nil {

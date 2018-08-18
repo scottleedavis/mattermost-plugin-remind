@@ -3,12 +3,15 @@ package main
 import (
 	"fmt"
 	"time"
+	"strings"
 	"encoding/json"
 
 	"github.com/mattermost/mattermost-server/model"
 )
 
 type Reminder struct {
+
+	TeamId string
 
     Id string
 
@@ -26,6 +29,9 @@ type Reminder struct {
 }
 
 type ReminderRequest struct {
+
+	TeamId string
+
 	Username string
 
 	Payload string
@@ -94,28 +100,78 @@ func (p *Plugin) triggerReminders() {
 			
 			if err != nil {
 				p.API.LogError("failed to query user %s", user.Id)
-			} else {
+				continue
+			} 
+
+
+			bytes, b_err := p.API.KVGet(user.Username)
+			if b_err != nil {
+				p.API.LogError("failed KVGet %s", b_err)
+				return
+			}
+
+			var reminders []Reminder
+			uerr := json.Unmarshal(bytes, &reminders)
+
+			if uerr != nil {
+				continue
+			} 
+
+			var reminder Reminder
+			reminder = p.findReminder(reminders, ReminderOccurrence)
+
+			p.API.LogDebug(fmt.Sprintf("%v",reminder))
+
+			if strings.HasPrefix(reminder.Target, "@") || strings.HasPrefix(reminder.Target, "me") {
+
 				channel, cerr := p.API.GetDirectChannel(p.remindUserId, user.Id)
 
 				if cerr != nil {
 					p.API.LogError("fail to get channel ", fmt.Sprintf("%v", cerr))
 				} else {
-					p.API.LogError("got channel "+ fmt.Sprintf("%v", channel))
+					p.API.LogError("got direct channel "+ fmt.Sprintf("%v", channel))
 
+					var finalTarget string
+					finalTarget = reminder.Target
+					if finalTarget == "me" {
+						 finalTarget = "You"
+					} else {
+						 finalTarget = "@"+user.Username
+					}
 
-						if _, err = p.API.CreatePost(&model.Post{
-							UserId:    p.remindUserId,
-							ChannelId: channel.Id,
-							Message:   fmt.Sprintf(":wave: hello @%s", user.Username),
-						}); err != nil {
-							p.API.LogError(
-								"failed to post DM message",
-								"user_id", user.Id,
-								"error", err.Error(),
-							)
-						}
+					if _, err = p.API.CreatePost(&model.Post{
+						UserId:    p.remindUserId,
+						ChannelId: channel.Id,
+						Message:   fmt.Sprintf(finalTarget+" asked me to remind you \""+ reminder.Message +"\"."),
+					}); err != nil {
+						p.API.LogError(
+							"failed to post DM message",
+							"user_id", user.Id,
+							"error", err.Error(),
+						)
+					}
+				}
 
+			} else { //~ channel
 
+				channel, cerr := p.API.GetChannelByName(reminder.TeamId, strings.Replace(reminder.Target, "~", "", -1), false)
+
+				if cerr != nil {
+					p.API.LogError("fail to get channel "+fmt.Sprintf("%v", cerr))
+				} else {
+					p.API.LogDebug("got channel "+ fmt.Sprintf("%v", channel))
+
+					if _, err = p.API.CreatePost(&model.Post{
+						UserId:    p.remindUserId,
+						ChannelId: channel.Id,
+						Message:   fmt.Sprintf("@"+user.Username+" asked me to remind you \""+ reminder.Message +"\"."),
+					}); err != nil {
+						p.API.LogError(
+							"failed to post DM message",
+							"user_id", user.Id,
+							"error", err.Error(),
+						)
+					}
 				}
 			}
 
@@ -123,4 +179,14 @@ func (p *Plugin) triggerReminders() {
 
 	}
 
+}
+
+func (p *Plugin) findReminder(reminders []Reminder, reminderOccurrence ReminderOccurrence) (Reminder) {
+	for _, reminder := range reminders {
+		if reminder.Id == reminderOccurrence.ReminderId {
+			p.API.LogError("FOUND!")
+			return reminder
+		}
+	}
+	return Reminder{}
 }
