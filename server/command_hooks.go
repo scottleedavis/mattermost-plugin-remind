@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"time"
-	"encoding/json"
+	// "encoding/json"
 
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/plugin"
@@ -46,10 +46,23 @@ func (p *Plugin) registerCommand(teamId string) error {
 		)
 	}
 	
+	// p.CreateUser()
 	p.run()
 
 	return nil
 }
+
+// func (p *Plugin) CreateUser {
+// 	// p.API.CreateUser// CreateUser(user *model.User) (*model.User, *model.AppError)
+// 	user, u_err := p.API.GetUserByUsername(request.Username)
+	
+// 	if u_err != nil {
+// 		p.API.LogError("failed to query user %s", request.Username)
+// 		return
+// 	}
+
+// 	p.API.LogError(fmt.Sprintf("%v", ))
+// }
 
 func (p *Plugin) runner() {
 
@@ -68,151 +81,11 @@ func (p *Plugin) run() {
 	}
 }
 
-func (p *Plugin) triggerReminders() {
-
-	bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", time.Now().Round(time.Second))))
-
-	if err != nil {
-		p.API.LogError("failed KVGet %s", err)
-	} else {
-		if string(bytes[:]) != "" {
-
-			// p.API.LogError( "value: "+string(bytes[:]) )			
-			var reminderOccurrences []ReminderOccurrence
-
-			ro_err := json.Unmarshal(bytes, &reminderOccurrences)
-			if ro_err == nil {
-				p.API.LogError("existing "+fmt.Sprintf("%v",reminderOccurrences))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-				// TODO loop through array of occurrences, and trigger DM between remind user & user
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-			}
-
-		}
-	}
-
-
-}
 
 func (p *Plugin) parseRequest(request ReminderRequest) (string, string, string, error) {
 	return "me", "in 2 seconds", "foo bar", nil
 }
 
-func (p *Plugin) upsertOccurrence(reminderOccurrence ReminderOccurrence) {
-
-	bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", reminderOccurrence.Occurrence)))
-	if err != nil {
-		p.API.LogError("failed KVGet %s", err)
-		return
-	}
-
-	var reminderOccurrences []ReminderOccurrence
-
-	ro_err := json.Unmarshal(bytes, &reminderOccurrences)
-	if ro_err != nil {
-		p.API.LogError("new occurruence " + string(fmt.Sprintf("%v", reminderOccurrence.Occurrence)))
-	} else {
-		p.API.LogError("existing "+fmt.Sprintf("%v",reminderOccurrences))
-	}
-
-	reminderOccurrences = append(reminderOccurrences, reminderOccurrence)
-	ro,__ := json.Marshal(reminderOccurrences)
-
-	if __ != nil {
-		p.API.LogError("failed to marshal reminderOccurrences %s", reminderOccurrence.Id)
-		return
-	}
-
-	p.API.KVSet(string(fmt.Sprintf("%v", reminderOccurrence.Occurrence)),ro)
-
-}
-
-func (p *Plugin) createOccurrences(request ReminderRequest) ([]ReminderOccurrence) {
-
-	var ReminderOccurrences []ReminderOccurrence
-
-	// switch the when patterns
-
-	// handle seconds as proof of concept
-
-
-	guid, gerr := uuid.NewRandom()
-	if gerr != nil {
-		p.API.LogError("Failed to generate guid")
-		return []ReminderOccurrence{}
-	}
-
-	occurrence := time.Now().Round(time.Second).Add(time.Second * time.Duration(5))
-	reminderOccurrence := ReminderOccurrence{guid.String(),request.Username, request.Reminder.Id, occurrence, time.Time{}, ""}
-	ReminderOccurrences = append(ReminderOccurrences, reminderOccurrence)
-
-	p.upsertOccurrence(reminderOccurrence)
-
-	return ReminderOccurrences
-}
-
-func (p *Plugin) upsertReminder(request ReminderRequest) {
-
-	user, u_err := p.API.GetUserByUsername(request.Username)
-	
-	if u_err != nil {
-		p.API.LogError("failed to query user %s", request.Username)
-		return
-	}
-
-	bytes, b_err := p.API.KVGet(user.Username)
-	if b_err != nil {
-		p.API.LogError("failed KVGet %s", b_err)
-		return
-	}
-
-	var reminders []Reminder
-	err := json.Unmarshal(bytes, &reminders)
-
-	if err != nil {
-		p.API.LogError("new reminder " + user.Username)
-	} else {
-		p.API.LogError("existing "+fmt.Sprintf("%v",reminders))
-	}
-
-	reminders = append(reminders, request.Reminder)
-	ro,__ := json.Marshal(reminders)
-
-	if __ != nil {
-		p.API.LogError("failed to marshal reminders %s", user.Username)
-		return
-	}
-
-	p.API.KVSet(user.Username,ro)
-}
 
 func (p *Plugin) scheduleReminder(request ReminderRequest) (string, error) {
 
