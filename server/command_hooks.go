@@ -28,7 +28,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	if strings.HasSuffix(args.Command, "list") {
 		return &model.CommandResponse{
 			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-			Text:         fmt.Sprintf("todo"),
+			Text:         p.ListReminders(user.Username),
 		}, nil
 	}
 
@@ -39,23 +39,24 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		}, nil
 	}
 
-	if strings.HasSuffix(args.Command, "debug") {
-		return &model.CommandResponse{
-			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-			Text: fmt.Sprintf("* %s\n * %s\n * %s\n * %s\n * %s\n * %s\n",
-				args.Command,
-				args.TeamId,
-				args.SiteURL,
-				user.Username,
-				user.Id,
-				user.Timezone["automaticTimezone"]),
-		}, nil
-	}
+	//if strings.HasSuffix(args.Command, "debug") {
+	//	return &model.CommandResponse{
+	//		ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
+	//		Text: fmt.Sprintf("* %s\n * %s\n * %s\n * %s\n * %s\n * %s\n",
+	//			args.Command,
+	//			args.TeamId,
+	//			args.SiteURL,
+	//			user.Username,
+	//			user.Id,
+	//			user.Timezone["automaticTimezone"]),
+	//	}, nil
+	//}
 
 	if strings.HasSuffix(args.Command, "clear") {
+		p.API.KVDelete(user.Username)
 		return &model.CommandResponse{
 			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-			Text:         fmt.Sprintf("<tbd>"),
+			Text:         fmt.Sprintf("Ok.  Deleted."),
 		}, nil
 	}
 
@@ -65,7 +66,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		strings.HasPrefix(payload, "@") ||
 		strings.HasPrefix(payload, "~") {
 
-		p.API.LogDebug("has valid target")
+		p.API.LogDebug("has target")
 
 		request := ReminderRequest{args.TeamId, user.Username, payload, Reminder{}}
 		response, err := p.ScheduleReminder(request)

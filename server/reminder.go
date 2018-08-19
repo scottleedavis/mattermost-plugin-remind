@@ -37,6 +37,33 @@ type ReminderRequest struct {
 	Reminder Reminder
 }
 
+func (p *Plugin) GetReminders(username string) ([]Reminder) {
+
+	user, uErr := p.API.GetUserByUsername(username)
+
+	if uErr != nil {
+		p.API.LogError("failed to query user %s", username)
+		return []Reminder{}
+	}
+
+	bytes, bErr := p.API.KVGet(user.Username)
+	if bErr != nil {
+		p.API.LogError("failed KVGet %s", bErr)
+		return []Reminder{}
+	}
+
+	var reminders []Reminder
+	err := json.Unmarshal(bytes, &reminders)
+
+	if err != nil {
+		p.API.LogError("new reminder " + user.Username)
+	} else {
+		p.API.LogDebug("existing " + fmt.Sprintf("%v", reminders))
+	}
+
+	return reminders
+}
+
 func (p *Plugin) UpsertReminder(request ReminderRequest) {
 
 	user, uErr := p.API.GetUserByUsername(request.Username)
@@ -56,7 +83,7 @@ func (p *Plugin) UpsertReminder(request ReminderRequest) {
 	err := json.Unmarshal(bytes, &reminders)
 
 	if err != nil {
-		p.API.LogError("new reminder " + user.Username)
+		p.API.LogDebug("new reminder " + user.Username)
 	} else {
 		p.API.LogDebug("existing " + fmt.Sprintf("%v", reminders))
 	}

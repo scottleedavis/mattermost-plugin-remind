@@ -42,7 +42,7 @@ func (p *Plugin) ScheduleReminder(request ReminderRequest) (string, error) {
 	request.Reminder.When = when
 	request.Reminder.Occurrences, _ = p.CreateOccurrences(request)
 
-	p.API.LogDebug(fmt.Sprintf("%v", request.Reminder.Occurrences))
+	p.API.LogError(fmt.Sprintf("%v", request.Reminder.Occurrences))
 
 	////// TODO REMOVE THIS LATER
 	//p.API.KVDelete(request.Username)
