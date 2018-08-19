@@ -26,7 +26,9 @@ type ReminderOccurrence struct {
 
 func (p *Plugin) CreateOccurrences(request ReminderRequest) (reminderOccurrences []ReminderOccurrence, err error) {
 
+p.API.LogError("AAAAAA: "+request.Reminder.When);
 	if strings.HasPrefix(request.Reminder.When, "in") {
+p.API.LogError("BBBBBBB")
 		occurrences, inErr := p.in(request.Reminder.When)
 		if inErr != nil {
 			return []ReminderOccurrence{}, inErr
@@ -39,7 +41,7 @@ func (p *Plugin) CreateOccurrences(request ReminderRequest) (reminderOccurrences
 		}
 
 		for _, o := range occurrences {
-
+p.API.LogError("occurrence")
 			reminderOccurrence := ReminderOccurrence{guid.String(), request.Username, request.Reminder.Id, o, time.Time{}, ""}
 			reminderOccurrences = append(reminderOccurrences, reminderOccurrence)
 			p.upsertOccurrence(reminderOccurrence)
@@ -47,6 +49,8 @@ func (p *Plugin) CreateOccurrences(request ReminderRequest) (reminderOccurrences
 		}
 
 	}
+
+	// TODO handle the other when prefix's
 
 	return []ReminderOccurrence{}, errors.New("unable to create occurrences")
 }
@@ -80,11 +84,13 @@ func (p *Plugin) upsertOccurrence(reminderOccurrence ReminderOccurrence) {
 
 }
 
-func (p *Plugin) in(when string) (times []time.Time, err error) {
+func (p *Plugin) in(when string) ([]time.Time, error) {
 
 	whenSplit := strings.Split(when, " ")
 	value := whenSplit[0]
 	units := whenSplit[len(whenSplit)-1]
+
+	p.API.LogError("whenSplit: "+fmt.Sprintf("%v",whenSplit))
 
 	switch units {
 	case "seconds":
@@ -93,10 +99,13 @@ func (p *Plugin) in(when string) (times []time.Time, err error) {
 	case "s":
 		i, _ := strconv.Atoi(value)
 		occurrence := time.Now().Round(time.Second).Add(time.Second * time.Duration(int(i)))
-		times = append(times, occurrence)
+		times := append([]time.Time{}, occurrence)
+
+		p.API.LogError(when + fmt.Sprintf("%v", times))
+
 		return times, nil
 
-		//TODO handle the other units
+	//TODO handle the other units
 
 	default:
 		return nil, errors.New("could not format 'in'")

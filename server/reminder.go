@@ -39,16 +39,16 @@ type ReminderRequest struct {
 
 func (p *Plugin) UpsertReminder(request ReminderRequest) {
 
-	user, u_err := p.API.GetUserByUsername(request.Username)
+	user, uErr := p.API.GetUserByUsername(request.Username)
 
-	if u_err != nil {
+	if uErr != nil {
 		p.API.LogError("failed to query user %s", request.Username)
 		return
 	}
 
-	bytes, b_err := p.API.KVGet(user.Username)
-	if b_err != nil {
-		p.API.LogError("failed KVGet %s", b_err)
+	bytes, bErr := p.API.KVGet(user.Username)
+	if bErr != nil {
+		p.API.LogError("failed KVGet %s", bErr)
 		return
 	}
 
@@ -62,9 +62,9 @@ func (p *Plugin) UpsertReminder(request ReminderRequest) {
 	}
 
 	reminders = append(reminders, request.Reminder)
-	ro, __ := json.Marshal(reminders)
+	ro, rErr := json.Marshal(reminders)
 
-	if __ != nil {
+	if rErr != nil {
 		p.API.LogError("failed to marshal reminders %s", user.Username)
 		return
 	}
@@ -75,11 +75,14 @@ func (p *Plugin) UpsertReminder(request ReminderRequest) {
 func (p *Plugin) TriggerReminders() {
 
 	bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", time.Now().Round(time.Second))))
+	p.API.LogError("*")
 
 	if err != nil {
 		p.API.LogError("failed KVGet %s", err)
 	} else if string(bytes[:]) == "" {
 	} else {
+
+		p.API.LogError(string(bytes[:]))
 
 		var reminderOccurrences []ReminderOccurrence
 

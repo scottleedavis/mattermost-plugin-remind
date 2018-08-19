@@ -64,7 +64,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	if strings.HasPrefix(payload, "me") ||
 		strings.HasPrefix(payload, "@") ||
 		strings.HasPrefix(payload, "~") {
-
+p.API.LogError("HAS VALID TARGET")
 		request := ReminderRequest{args.TeamId, user.Username, payload, Reminder{}}
 		response, err := p.ScheduleReminder(request)
 

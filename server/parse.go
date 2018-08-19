@@ -45,9 +45,8 @@ func (p *Plugin) ParseRequest(request ReminderRequest) (string, string, string, 
 
 		return commandSplit[0], when, message, nil
 	}
-	err := errors.New("unrecognized Target")
 
-	return "", "", "", err
+	return "", "", "", errors.New("unrecognized Target")
 }
 
 func (p *Plugin) findWhen(payload string) (string, error) {

@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/google/uuid"
 	"time"
+	"fmt"
 )
 
 func (p *Plugin) Run() {
@@ -15,9 +16,10 @@ func (p *Plugin) Run() {
 
 func (p *Plugin) ScheduleReminder(request ReminderRequest) (string, error) {
 
-	//var when string
-	//var target string
-	//var message string
+p.API.LogError("ScheduleReminder")
+	var when string
+	var target string
+	var message string
 	var useTo bool
 	useTo = false
 	var useToString string
@@ -34,6 +36,7 @@ func (p *Plugin) ScheduleReminder(request ReminderRequest) (string, error) {
 
 	target, when, message, pErr := p.ParseRequest(request)
 	if pErr != nil {
+		p.API.LogError("parse request failed: "+fmt.Sprintf("%v", pErr))
 		return ExceptionText, nil
 	}
 
@@ -45,6 +48,7 @@ func (p *Plugin) ScheduleReminder(request ReminderRequest) (string, error) {
 	request.Reminder.When = when
 	request.Reminder.Occurrences, _ = p.CreateOccurrences(request)
 
+	p.API.LogError(fmt.Sprintf("%v",request.Reminder.Occurrences))
 	//// TODO REMOVE THIS LATER
 	p.API.KVDelete(request.Username)
 	//////////////
