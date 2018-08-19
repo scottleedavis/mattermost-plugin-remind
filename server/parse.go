@@ -63,7 +63,7 @@ func (p *Plugin) findWhen(payload string) (string, error) {
 		return "in "+inSplit[len(inSplit)-1], nil
 	}
 
-	//TODO the additional when states
+	//TODO the additional when patterns
 
 	return "", errors.New("unable to find when")
 }

@@ -11,7 +11,6 @@ import (
 func (p *Plugin) ListReminders(user *model.User) (string) {
 
 	reminders := p.GetReminders(user.Username)
-	//fmt.Println("Same, in UTC:", t.UTC().Format(time.UnixDate))
 
 	var output string
 	output = ""
