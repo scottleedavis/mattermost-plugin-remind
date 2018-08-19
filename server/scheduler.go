@@ -15,9 +15,9 @@ func (p *Plugin) Run() {
 
 func (p *Plugin) ScheduleReminder(request ReminderRequest) (string, error) {
 
-	var when string
-	var target string
-	var message string
+	//var when string
+	//var target string
+	//var message string
 	var useTo bool
 	useTo = false
 	var useToString string
@@ -43,13 +43,17 @@ func (p *Plugin) ScheduleReminder(request ReminderRequest) (string, error) {
 	request.Reminder.Target = target
 	request.Reminder.Message = message
 	request.Reminder.When = when
-	request.Reminder.Occurrences = p.CreateOccurrences(request)
+	request.Reminder.Occurrences, _ = p.CreateOccurrences(request)
 
 	//// TODO REMOVE THIS LATER
-	//p.API.KVDelete(request.Username)
+	p.API.KVDelete(request.Username)
 	//////////////
 
 	p.UpsertReminder(request)
+
+	if target == "me" {
+		target = "you"
+	}
 
 	response := ":thumbsup: I will remind " + target + useToString + " \"" + request.Reminder.Message + "\" " + when;
 	return response, nil

@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"time"
 	"encoding/json"
+	"strings"
+	"errors"
+	"strconv"
 	"github.com/google/uuid"
 )
 
@@ -21,27 +24,31 @@ type ReminderOccurrence struct {
 	Repeat string
 }
 
-func (p *Plugin) CreateOccurrences(request ReminderRequest) ([]ReminderOccurrence) {
+func (p *Plugin) CreateOccurrences(request ReminderRequest) (reminderOccurrences []ReminderOccurrence, err error) {
 
-	var ReminderOccurrences []ReminderOccurrence
+	if strings.HasPrefix(request.Reminder.When, "in") {
+		occurrences, inErr := p.in(request.Reminder.When)
+		if inErr != nil {
+			return []ReminderOccurrence{}, inErr
+		}
 
-	// switch the when patterns
+		guid, gErr := uuid.NewRandom()
+		if gErr != nil {
+			p.API.LogError("failed to generate guid")
+			return []ReminderOccurrence{}, gErr
+		}
 
-	// handle seconds as proof of concept
+		for _, o := range occurrences {
 
-	guid, gerr := uuid.NewRandom()
-	if gerr != nil {
-		p.API.LogError("Failed to generate guid")
-		return []ReminderOccurrence{}
+			reminderOccurrence := ReminderOccurrence{guid.String(), request.Username, request.Reminder.Id, o, time.Time{}, ""}
+			reminderOccurrences = append(reminderOccurrences, reminderOccurrence)
+			p.upsertOccurrence(reminderOccurrence)
+
+		}
+
 	}
 
-	occurrence := time.Now().Round(time.Second).Add(time.Second * time.Duration(5))
-	reminderOccurrence := ReminderOccurrence{guid.String(), request.Username, request.Reminder.Id, occurrence, time.Time{}, ""}
-	ReminderOccurrences = append(ReminderOccurrences, reminderOccurrence)
-
-	p.upsertOccurrence(reminderOccurrence)
-
-	return ReminderOccurrences
+	return []ReminderOccurrence{}, errors.New("unable to create occurrences")
 }
 
 func (p *Plugin) upsertOccurrence(reminderOccurrence ReminderOccurrence) {
@@ -70,5 +77,30 @@ func (p *Plugin) upsertOccurrence(reminderOccurrence ReminderOccurrence) {
 	}
 
 	p.API.KVSet(string(fmt.Sprintf("%v", reminderOccurrence.Occurrence)), ro)
+
+}
+
+func (p *Plugin) in(when string) (times []time.Time, err error) {
+
+	whenSplit := strings.Split(when, " ")
+	value := whenSplit[0]
+	units := whenSplit[len(whenSplit)-1]
+
+	switch units {
+	case "seconds":
+	case "second":
+	case "sec":
+	case "s":
+		i, _ := strconv.Atoi(value)
+		occurrence := time.Now().Round(time.Second).Add(time.Second * time.Duration(int(i)))
+		times = append(times, occurrence)
+
+		//TODO handle the other units
+
+	default:
+		return nil, errors.New("could not format 'in'")
+	}
+
+	return nil, errors.New("could not format 'in'")
 
 }
