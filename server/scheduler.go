@@ -24,6 +24,7 @@ p.API.LogError("ScheduleReminder")
 	guid, gErr := uuid.NewRandom()
 	if gErr != nil {
 		p.API.LogError("Failed to generate guid")
+	        return ExceptionText, nil
 	}
 
 	target, when, message, pErr := p.ParseRequest(request)
