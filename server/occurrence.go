@@ -27,6 +27,13 @@ type Occurrence struct {
 func (p *Plugin) CreateOccurrences(request ReminderRequest) ([]Occurrence, error) {
 
 	p.API.LogDebug("CreateOccurrences");
+	user, err := p.API.GetUserByUsername(request.Username)
+
+	if err != nil {
+		p.API.LogError("failed to query user %s", request.Username)
+		return []Occurrence{}, err
+	}
+
 	if strings.HasPrefix(request.Reminder.When, "in") {
 
 		p.API.LogDebug(request.Reminder.When)
@@ -42,9 +49,11 @@ func (p *Plugin) CreateOccurrences(request ReminderRequest) ([]Occurrence, error
 			return []Occurrence{}, gErr
 		}
 
+		location, _ := time.LoadLocation(user.Timezone["automaticTimezone"])
+
 		for _, o := range occurrences {
 
-			reminderOccurrence := Occurrence{guid.String(), request.Username, request.Reminder.Id, o, time.Time{}, ""}
+			reminderOccurrence := Occurrence{guid.String(), request.Username, request.Reminder.Id, o.In(location), time.Time{}, ""}
 
 			p.API.LogDebug("occurrence " + fmt.Sprintf("%v", reminderOccurrence))
 

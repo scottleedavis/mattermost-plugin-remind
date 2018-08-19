@@ -13,7 +13,6 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	p.API.LogDebug("ExecuteCommand")
 
 	user, err := p.API.GetUser(args.UserId)
-
 	if err != nil {
 		p.API.LogError("failed to query user %s", args.UserId)
 	}
@@ -28,7 +27,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	if strings.HasSuffix(args.Command, "list") {
 		return &model.CommandResponse{
 			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-			Text:         p.ListReminders(user.Username),
+			Text:         p.ListReminders(user),
 		}, nil
 	}
 
