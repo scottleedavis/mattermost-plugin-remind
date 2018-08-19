@@ -152,10 +152,11 @@ func (p *Plugin) TriggerReminders() {
 
 			} else { //~ channel
 
-				channel, cerr := p.API.GetChannelByName(reminder.TeamId, strings.Replace(reminder.Target, "~", "", -1), false)
+				//channel, cErr := p.API.GetChannelByName(reminder.TeamId, strings.Replace(reminder.Target, "~", "", -1), false)
+				channel, cErr := p.API.GetChannelByName(reminder.TeamId, strings.Replace(reminder.Target, "~", "", -1))
 
-				if cerr != nil {
-					p.API.LogError("fail to get channel " + fmt.Sprintf("%v", cerr))
+				if cErr != nil {
+					p.API.LogError("fail to get channel " + fmt.Sprintf("%v", cErr))
 				} else {
 					p.API.LogDebug("got channel " + fmt.Sprintf("%v", channel))
 
