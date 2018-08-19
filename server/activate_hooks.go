@@ -58,7 +58,7 @@ func (p *Plugin) OnDeactivate() error {
 		}
 	}
 
-	p.stop()
+	p.Stop()
 
 	return nil
 }
