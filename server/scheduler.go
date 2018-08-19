@@ -6,14 +6,6 @@ import (
 	"fmt"
 )
 
-func (p *Plugin) Run() {
-
-	if !p.running {
-		p.running = true
-		p.runner()
-	}
-}
-
 func (p *Plugin) ScheduleReminder(request ReminderRequest) (string, error) {
 
 p.API.LogError("ScheduleReminder")
@@ -32,6 +24,7 @@ p.API.LogError("ScheduleReminder")
 	guid, gErr := uuid.NewRandom()
 	if gErr != nil {
 		p.API.LogError("Failed to generate guid")
+	        return ExceptionText, nil
 	}
 
 	target, when, message, pErr := p.ParseRequest(request)
@@ -63,7 +56,15 @@ p.API.LogError("ScheduleReminder")
 	return response, nil
 }
 
-func (p *Plugin) stop() {
+func (p *Plugin) Run() {
+
+	if !p.running {
+		p.running = true
+		p.runner()
+	}
+}
+
+func (p *Plugin) Stop() {
 	p.running = false
 }
 
