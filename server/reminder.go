@@ -94,7 +94,6 @@ func (p *Plugin) TriggerReminders() {
 
 		p.API.LogError("existing " + fmt.Sprintf("%v", reminderOccurrences))
 
-		// TODO loop through array of occurrences, and trigger DM between remind user & user
 		for _, ReminderOccurrence := range reminderOccurrences {
 
 			user, err := p.API.GetUserByUsername(ReminderOccurrence.Username)
