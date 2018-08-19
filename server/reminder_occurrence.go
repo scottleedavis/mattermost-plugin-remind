@@ -94,6 +94,7 @@ func (p *Plugin) in(when string) (times []time.Time, err error) {
 		i, _ := strconv.Atoi(value)
 		occurrence := time.Now().Round(time.Second).Add(time.Second * time.Duration(int(i)))
 		times = append(times, occurrence)
+		return times, nil
 
 		//TODO handle the other units
 
