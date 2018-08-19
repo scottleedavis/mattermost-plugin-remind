@@ -6,18 +6,6 @@ import (
 	"fmt"
 )
 
-func (p *Plugin) Run() {
-
-	if !p.running {
-		p.running = true
-		p.runner()
-	}
-}
-
-func (p *Plugin) Stop() {
-	p.running = false
-}
-
 func (p *Plugin) ScheduleReminder(request ReminderRequest) (string, error) {
 
 p.API.LogError("ScheduleReminder")
@@ -65,6 +53,19 @@ p.API.LogError("ScheduleReminder")
 
 	response := ":thumbsup: I will remind " + target + useToString + " \"" + request.Reminder.Message + "\" " + when;
 	return response, nil
+}
+
+
+func (p *Plugin) Run() {
+
+	if !p.running {
+		p.running = true
+		p.runner()
+	}
+}
+
+func (p *Plugin) Stop() {
+	p.running = false
 }
 
 func (p *Plugin) runner() {
