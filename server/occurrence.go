@@ -8,6 +8,8 @@ import (
 	"errors"
 	"strconv"
 	"github.com/google/uuid"
+
+	"github.com/mattermost/mattermost-server/model"
 )
 
 type Occurrence struct {
@@ -38,7 +40,7 @@ func (p *Plugin) CreateOccurrences(request ReminderRequest) ([]Occurrence, error
 
 		p.API.LogDebug(request.Reminder.When)
 
-		occurrences, inErr := p.in(request.Reminder.When)
+		occurrences, inErr := p.in(request.Reminder.When, user)
 		if inErr != nil {
 			return []Occurrence{}, inErr
 		}
@@ -49,11 +51,9 @@ func (p *Plugin) CreateOccurrences(request ReminderRequest) ([]Occurrence, error
 			return []Occurrence{}, gErr
 		}
 
-		location, _ := time.LoadLocation(user.Timezone["automaticTimezone"])
-
 		for _, o := range occurrences {
 
-			reminderOccurrence := Occurrence{guid.String(), request.Username, request.Reminder.Id, o.In(location), time.Time{}, ""}
+			reminderOccurrence := Occurrence{guid.String(), request.Username, request.Reminder.Id, o.UTC(), time.Time{}, ""}
 
 			p.API.LogDebug("occurrence " + fmt.Sprintf("%v", reminderOccurrence))
 
@@ -99,7 +99,7 @@ func (p *Plugin) upsertOccurrence(reminderOccurrence Occurrence) {
 
 }
 
-func (p *Plugin) in(when string) (times []time.Time, err error) {
+func (p *Plugin) in(when string, user *model.User) (times []time.Time, err error) {
 
 	whenSplit := strings.Split(when, " ")
 	value := whenSplit[1]
@@ -109,13 +109,18 @@ func (p *Plugin) in(when string) (times []time.Time, err error) {
 	p.API.LogDebug("value: " + fmt.Sprintf("%v", value))
 	p.API.LogDebug("units: " + fmt.Sprintf("%v", units))
 
+	location, _ := time.LoadLocation(user.Timezone["automaticTimezone"])
+
 	switch units {
 	case "seconds", "second", "secs", "sec", "s":
 		i, _ := strconv.Atoi(value)
-		occurrence := time.Now().Round(time.Second).Add(time.Second * time.Duration(i))
+
+		occurrence := time.Now().In(location).Round(time.Second).Add(time.Second * time.Duration(i))
 		times = append(times, occurrence)
+
 		p.API.LogDebug("occurrence: " + fmt.Sprintf("%v", occurrence))
 		p.API.LogDebug("times: " + fmt.Sprintf("%v", times))
+		return times, nil
 
 		//TODO handle the other units
 
@@ -123,6 +128,5 @@ func (p *Plugin) in(when string) (times []time.Time, err error) {
 		return nil, errors.New("could not format 'in'")
 	}
 
-	return times, nil
-
+	return nil, errors.New("could not format 'in'")
 }

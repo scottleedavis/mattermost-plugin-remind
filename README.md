@@ -1,12 +1,13 @@
 # mattermost-plugin-remind
 
-# TODO WHEN YOU ARE BACK SCOTT
+### ToDOs
 * wiki
-* current features
+* mattermost hackathon link
+* current
 * * timezone aware
 * * reminders with messages can be set
 * * * `/remind (me/@user/~channel) "message" in X seconds` is only current pattern supported
-* TODO
+* planned
 * * feature parity with [mattermost-remind](http://github.com/scottleedavis/mattermost-remind)
 * * add unit testing
 * * complete UI from lock icon in header
