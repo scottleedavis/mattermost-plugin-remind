@@ -53,7 +53,7 @@ func (p *Plugin) findWhen(payload string) (string, error) {
 
 	inSplit := strings.Split(payload, " in ")
 	if len(inSplit) == 2 {
-		return inSplit[len(inSplit)-1], nil
+		return "in "+inSplit[len(inSplit)-1], nil
 	}
 
 	//TODO the additional when states

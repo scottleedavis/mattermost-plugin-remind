@@ -84,26 +84,23 @@ func (p *Plugin) upsertOccurrence(reminderOccurrence ReminderOccurrence) {
 
 }
 
-func (p *Plugin) in(when string) ([]time.Time, error) {
+func (p *Plugin) in(when string) (times []time.Time, err error) {
 
 	whenSplit := strings.Split(when, " ")
-	value := whenSplit[0]
+	value := whenSplit[1]
 	units := whenSplit[len(whenSplit)-1]
 
-	p.API.LogError("whenSplit: "+fmt.Sprintf("%v",whenSplit))
+	p.API.LogDebug("whenSplit: "+fmt.Sprintf("%v",whenSplit))
+	p.API.LogDebug("value: "+fmt.Sprintf("%v",value))
+	p.API.LogDebug("units: "+fmt.Sprintf("%v",units))
 
 	switch units {
-	case "seconds":
-	case "second":
-	case "sec":
-	case "s":
+	case "seconds", "second", "sec", "s":
 		i, _ := strconv.Atoi(value)
-		occurrence := time.Now().Round(time.Second).Add(time.Second * time.Duration(int(i)))
-		times := append([]time.Time{}, occurrence)
-
-		p.API.LogError(when + fmt.Sprintf("%v", times))
-
-		return times, nil
+		occurrence := time.Now().Round(time.Second).Add(time.Second * time.Duration(i))
+		times = append(times, occurrence)
+		p.API.LogDebug("occurrence: " + fmt.Sprintf("%v", occurrence))
+		p.API.LogDebug("times: " + fmt.Sprintf("%v", times))
 
 	//TODO handle the other units
 
@@ -111,6 +108,6 @@ func (p *Plugin) in(when string) ([]time.Time, error) {
 		return nil, errors.New("could not format 'in'")
 	}
 
-	return nil, errors.New("could not format 'in'")
+	return times, nil
 
 }

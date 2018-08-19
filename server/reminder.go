@@ -75,7 +75,7 @@ func (p *Plugin) UpsertReminder(request ReminderRequest) {
 func (p *Plugin) TriggerReminders() {
 
 	bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", time.Now().Round(time.Second))))
-	p.API.LogError("*")
+	p.API.LogDebug("*")
 
 	if err != nil {
 		p.API.LogError("failed KVGet %s", err)
