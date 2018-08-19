@@ -55,7 +55,6 @@ p.API.LogError("ScheduleReminder")
 	return response, nil
 }
 
-
 func (p *Plugin) Run() {
 
 	if !p.running {
