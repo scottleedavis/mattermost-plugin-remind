@@ -44,10 +44,6 @@ func (p *Plugin) ScheduleReminder(request ReminderRequest) (string, error) {
 
 	p.API.LogError(fmt.Sprintf("%v", request.Reminder.Occurrences))
 
-	////// TODO REMOVE THIS LATER
-	//p.API.KVDelete(request.Username)
-	////////////////
-
 	p.UpsertReminder(request)
 
 	if target == "me" {
