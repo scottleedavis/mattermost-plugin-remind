@@ -75,6 +75,7 @@ func (p *Plugin) UpsertReminder(request ReminderRequest) {
 func (p *Plugin) TriggerReminders() {
 
 	bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", time.Now().Round(time.Second))))
+
 	p.API.LogDebug("*")
 
 	if err != nil {
@@ -82,10 +83,9 @@ func (p *Plugin) TriggerReminders() {
 	} else if string(bytes[:]) == "" {
 	} else {
 
-		p.API.LogError(string(bytes[:]))
+		p.API.LogDebug(string(bytes[:]))
 
 		var reminderOccurrences []Occurrence
-
 		roErr := json.Unmarshal(bytes, &reminderOccurrences)
 		if roErr != nil {
 			p.API.LogError("Failed to unmarshal reminder occurrences " + fmt.Sprintf("%v", roErr))
@@ -122,13 +122,13 @@ func (p *Plugin) TriggerReminders() {
 
 			if strings.HasPrefix(reminder.Target, "@") || strings.HasPrefix(reminder.Target, "me") {
 
-				p.API.LogError(fmt.Sprintf("%v", p.remindUserId) + " " + fmt.Sprintf("%v", user.Id))
+				p.API.LogDebug("DM: "+fmt.Sprintf("%v", p.remindUserId) + "__" + fmt.Sprintf("%v", user.Id))
 				channel, cErr := p.API.GetDirectChannel(p.remindUserId, user.Id)
 
 				if cErr != nil {
 					p.API.LogError("fail to get direct channel ", fmt.Sprintf("%v", cErr))
 				} else {
-					p.API.LogError("got direct channel " + fmt.Sprintf("%v", channel))
+					p.API.LogDebug("got direct channel " + fmt.Sprintf("%v", channel))
 
 					var finalTarget string
 					finalTarget = reminder.Target

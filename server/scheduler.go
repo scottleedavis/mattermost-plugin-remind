@@ -25,12 +25,12 @@ func (p *Plugin) ScheduleReminder(request ReminderRequest) (string, error) {
 	guid, gErr := uuid.NewRandom()
 	if gErr != nil {
 		p.API.LogError("Failed to generate guid")
-	        return ExceptionText, nil
+		return ExceptionText, nil
 	}
 
 	target, when, message, pErr := p.ParseRequest(request)
 	if pErr != nil {
-		p.API.LogError("parse request failed: "+fmt.Sprintf("%v", pErr))
+		p.API.LogError("parse request failed: " + fmt.Sprintf("%v", pErr))
 		return ExceptionText, nil
 	}
 
@@ -42,13 +42,13 @@ func (p *Plugin) ScheduleReminder(request ReminderRequest) (string, error) {
 	request.Reminder.When = when
 	request.Reminder.Occurrences, _ = p.CreateOccurrences(request)
 
-	p.API.LogDebug(fmt.Sprintf("%v",request.Reminder.Occurrences))
+	p.API.LogDebug(fmt.Sprintf("%v", request.Reminder.Occurrences))
 
 	////// TODO REMOVE THIS LATER
-	p.API.KVDelete(request.Username)
+	//p.API.KVDelete(request.Username)
 	////////////////
 
-	//p.UpsertReminder(request)
+	p.UpsertReminder(request)
 
 	if target == "me" {
 		target = "you"

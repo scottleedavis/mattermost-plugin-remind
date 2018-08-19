@@ -24,10 +24,17 @@ func (p *Plugin) ParseRequest(request ReminderRequest) (string, string, string, 
 
 		if firstIndex > -1 && lastIndex > -1 && firstIndex != lastIndex { // has quotes
 
-			message := request.Payload[firstIndex-1:lastIndex]
+			message := request.Payload[firstIndex:lastIndex+1]
+
+			p.API.LogDebug(message)
+
 			when := strings.Replace(request.Payload, message, "", -1)
 			when = strings.Replace(when, commandSplit[0], "", -1)
-			p.API.LogError("quotes when " + fmt.Sprintf("%v", firstIndex) + " " + fmt.Sprintf("%v", lastIndex) + " " + when)
+			when = strings.Trim(when," ")
+
+			p.API.LogDebug("quotes when (" + fmt.Sprintf("%v", firstIndex) + " " + fmt.Sprintf("%v", lastIndex) + ") " + when)
+
+			message = strings.Replace(message,"\"","",-1)
 
 			return commandSplit[0], when, message, nil
 		}

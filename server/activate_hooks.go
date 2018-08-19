@@ -16,7 +16,7 @@ func (p *Plugin) OnActivate() error {
 		)
 	}
 
-	p.API.LogError("OnActivate")
+	p.API.LogDebug("OnActivate")
 
 	p.createUser()
 
@@ -44,7 +44,7 @@ func (p *Plugin) OnDeactivate() error {
 		)
 	}
 
-	p.API.LogError("OnDeactivate")
+	p.API.LogDebug("OnDeactivate")
 
 	// p.deleteUser()
 
@@ -65,15 +65,15 @@ func (p *Plugin) OnDeactivate() error {
 
 func (p *Plugin) createUser() (*model.User, error) {
 
-	p.API.LogError("create user")
+	p.API.LogDebug("createUser")
 
 	user, err := p.API.GetUserByUsername("remind")
 	if err != nil {
-		p.API.LogError("Failed to get user remind")
+		p.API.LogError("failed to get user remind")
 
 		guid, gerr := uuid.NewRandom()
 		if gerr != nil {
-			p.API.LogError("Failed to generate guid")
+			p.API.LogError("failed to generate guid")
 			return nil, gerr
 		}
 
@@ -81,7 +81,7 @@ func (p *Plugin) createUser() (*model.User, error) {
 
 		cuser, err := p.API.CreateUser(&user)
 		if err != nil {
-			p.API.LogError("Failed to create remind user " + fmt.Sprintf("%v", err))
+			p.API.LogError("failed to create remind user " + fmt.Sprintf("%v", err))
 			return cuser, err
 		}
 
@@ -90,7 +90,7 @@ func (p *Plugin) createUser() (*model.User, error) {
 		return cuser, nil
 	}
 
-	p.API.LogDebug("id " + user.Id)
+	p.API.LogDebug("user.Id " + user.Id)
 
 	p.remindUserId = user.Id
 

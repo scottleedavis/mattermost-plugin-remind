@@ -27,7 +27,6 @@ type Occurrence struct {
 func (p *Plugin) CreateOccurrences(request ReminderRequest) ([]Occurrence, error) {
 
 	p.API.LogDebug("CreateOccurrences");
-
 	if strings.HasPrefix(request.Reminder.When, "in") {
 
 		p.API.LogDebug(request.Reminder.When)
@@ -47,7 +46,7 @@ func (p *Plugin) CreateOccurrences(request ReminderRequest) ([]Occurrence, error
 
 			reminderOccurrence := Occurrence{guid.String(), request.Username, request.Reminder.Id, o, time.Time{}, ""}
 
-			p.API.LogDebug("occurrence "+fmt.Sprintf("%v", reminderOccurrence))
+			p.API.LogDebug("occurrence " + fmt.Sprintf("%v", reminderOccurrence))
 
 			request.Reminder.Occurrences = append(request.Reminder.Occurrences, reminderOccurrence)
 			p.upsertOccurrence(reminderOccurrence)
@@ -74,9 +73,9 @@ func (p *Plugin) upsertOccurrence(reminderOccurrence Occurrence) {
 	var reminderOccurrences []Occurrence
 	roErr := json.Unmarshal(bytes, &reminderOccurrences)
 	if roErr != nil {
-		p.API.LogError("new occurrence " + string(fmt.Sprintf("%v", reminderOccurrence.Occurrence)))
+		p.API.LogDebug("new occurrence " + string(fmt.Sprintf("%v", reminderOccurrence.Occurrence)))
 	} else {
-		p.API.LogError("existing " + fmt.Sprintf("%v", reminderOccurrences))
+		p.API.LogDebug("existing " + fmt.Sprintf("%v", reminderOccurrences))
 	}
 
 	reminderOccurrences = append(reminderOccurrences, reminderOccurrence)
@@ -97,19 +96,19 @@ func (p *Plugin) in(when string) (times []time.Time, err error) {
 	value := whenSplit[1]
 	units := whenSplit[len(whenSplit)-1]
 
-	p.API.LogDebug("whenSplit: "+fmt.Sprintf("%v",whenSplit))
-	p.API.LogDebug("value: "+fmt.Sprintf("%v",value))
-	p.API.LogDebug("units: "+fmt.Sprintf("%v",units))
+	p.API.LogDebug("whenSplit: " + fmt.Sprintf("%v", whenSplit))
+	p.API.LogDebug("value: " + fmt.Sprintf("%v", value))
+	p.API.LogDebug("units: " + fmt.Sprintf("%v", units))
 
 	switch units {
-	case "seconds", "second", "sec", "s":
+	case "seconds", "second", "secs", "sec", "s":
 		i, _ := strconv.Atoi(value)
 		occurrence := time.Now().Round(time.Second).Add(time.Second * time.Duration(i))
 		times = append(times, occurrence)
 		p.API.LogDebug("occurrence: " + fmt.Sprintf("%v", occurrence))
 		p.API.LogDebug("times: " + fmt.Sprintf("%v", times))
 
-	//TODO handle the other units
+		//TODO handle the other units
 
 	default:
 		return nil, errors.New("could not format 'in'")

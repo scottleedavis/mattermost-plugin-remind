@@ -97,7 +97,7 @@ func (p *Plugin) registerCommand(teamId string) error {
 		Trigger:          CommandTrigger,
 		AutoComplete:     true,
 		AutoCompleteHint: "[@someone or ~channel] [what] [when]",
-		AutoCompleteDesc: "Enables or disables the demo plugin hooks.",
+		AutoCompleteDesc: "",
 		DisplayName:      "Remind Plugin Command",
 		Description:      "Set a reminder",
 	}); err != nil {
