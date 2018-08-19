@@ -22,7 +22,7 @@ type Reminder struct {
 
 	When string
 
-	Occurrences []ReminderOccurrence
+	Occurrences []Occurrence
 
 	Completed time.Time
 }
@@ -58,7 +58,7 @@ func (p *Plugin) UpsertReminder(request ReminderRequest) {
 	if err != nil {
 		p.API.LogError("new reminder " + user.Username)
 	} else {
-		p.API.LogError("existing " + fmt.Sprintf("%v", reminders))
+		p.API.LogDebug("existing " + fmt.Sprintf("%v", reminders))
 	}
 
 	reminders = append(reminders, request.Reminder)
@@ -84,7 +84,7 @@ func (p *Plugin) TriggerReminders() {
 
 		p.API.LogError(string(bytes[:]))
 
-		var reminderOccurrences []ReminderOccurrence
+		var reminderOccurrences []Occurrence
 
 		roErr := json.Unmarshal(bytes, &reminderOccurrences)
 		if roErr != nil {
@@ -92,7 +92,7 @@ func (p *Plugin) TriggerReminders() {
 			return
 		}
 
-		p.API.LogError("existing " + fmt.Sprintf("%v", reminderOccurrences))
+		p.API.LogDebug(fmt.Sprintf("%v", reminderOccurrences))
 
 		for _, ReminderOccurrence := range reminderOccurrences {
 
@@ -116,10 +116,9 @@ func (p *Plugin) TriggerReminders() {
 				continue
 			}
 
-			//var reminder Reminder
 			reminder := p.findReminder(reminders, ReminderOccurrence)
 
-			p.API.LogError(fmt.Sprintf("%v", reminder))
+			p.API.LogDebug(fmt.Sprintf("%v", reminder))
 
 			if strings.HasPrefix(reminder.Target, "@") || strings.HasPrefix(reminder.Target, "me") {
 
@@ -182,10 +181,9 @@ func (p *Plugin) TriggerReminders() {
 
 }
 
-func (p *Plugin) findReminder(reminders []Reminder, reminderOccurrence ReminderOccurrence) (Reminder) {
+func (p *Plugin) findReminder(reminders []Reminder, reminderOccurrence Occurrence) (Reminder) {
 	for _, reminder := range reminders {
 		if reminder.Id == reminderOccurrence.ReminderId {
-			p.API.LogError("FOUND!")
 			return reminder
 		}
 	}

@@ -10,7 +10,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type ReminderOccurrence struct {
+type Occurrence struct {
 	Id string
 
 	Username string
@@ -24,38 +24,46 @@ type ReminderOccurrence struct {
 	Repeat string
 }
 
-func (p *Plugin) CreateOccurrences(request ReminderRequest) (reminderOccurrences []ReminderOccurrence, err error) {
+func (p *Plugin) CreateOccurrences(request ReminderRequest) ([]Occurrence, error) {
 
-p.API.LogError("AAAAAA: "+request.Reminder.When);
+	p.API.LogDebug("CreateOccurrences");
+
 	if strings.HasPrefix(request.Reminder.When, "in") {
-p.API.LogError("BBBBBBB")
+
+		p.API.LogDebug(request.Reminder.When)
+
 		occurrences, inErr := p.in(request.Reminder.When)
 		if inErr != nil {
-			return []ReminderOccurrence{}, inErr
+			return []Occurrence{}, inErr
 		}
 
 		guid, gErr := uuid.NewRandom()
 		if gErr != nil {
 			p.API.LogError("failed to generate guid")
-			return []ReminderOccurrence{}, gErr
+			return []Occurrence{}, gErr
 		}
 
 		for _, o := range occurrences {
-p.API.LogError("occurrence")
-			reminderOccurrence := ReminderOccurrence{guid.String(), request.Username, request.Reminder.Id, o, time.Time{}, ""}
-			reminderOccurrences = append(reminderOccurrences, reminderOccurrence)
+
+			reminderOccurrence := Occurrence{guid.String(), request.Username, request.Reminder.Id, o, time.Time{}, ""}
+
+			p.API.LogDebug("occurrence "+fmt.Sprintf("%v", reminderOccurrence))
+
+			request.Reminder.Occurrences = append(request.Reminder.Occurrences, reminderOccurrence)
 			p.upsertOccurrence(reminderOccurrence)
 
 		}
+
+		return request.Reminder.Occurrences, nil
 
 	}
 
 	// TODO handle the other when prefix's
 
-	return []ReminderOccurrence{}, errors.New("unable to create occurrences")
+	return []Occurrence{}, errors.New("unable to create occurrences")
 }
 
-func (p *Plugin) upsertOccurrence(reminderOccurrence ReminderOccurrence) {
+func (p *Plugin) upsertOccurrence(reminderOccurrence Occurrence) {
 
 	bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", reminderOccurrence.Occurrence)))
 	if err != nil {
@@ -63,8 +71,7 @@ func (p *Plugin) upsertOccurrence(reminderOccurrence ReminderOccurrence) {
 		return
 	}
 
-	var reminderOccurrences []ReminderOccurrence
-
+	var reminderOccurrences []Occurrence
 	roErr := json.Unmarshal(bytes, &reminderOccurrences)
 	if roErr != nil {
 		p.API.LogError("new occurrence " + string(fmt.Sprintf("%v", reminderOccurrence.Occurrence)))

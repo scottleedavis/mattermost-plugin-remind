@@ -8,7 +8,8 @@ import (
 
 func (p *Plugin) ScheduleReminder(request ReminderRequest) (string, error) {
 
-p.API.LogError("ScheduleReminder")
+	p.API.LogDebug("ScheduleReminder")
+
 	var when string
 	var target string
 	var message string
@@ -41,12 +42,13 @@ p.API.LogError("ScheduleReminder")
 	request.Reminder.When = when
 	request.Reminder.Occurrences, _ = p.CreateOccurrences(request)
 
-	p.API.LogError(fmt.Sprintf("%v",request.Reminder.Occurrences))
-	//// TODO REMOVE THIS LATER
-	p.API.KVDelete(request.Username)
-	//////////////
+	p.API.LogDebug(fmt.Sprintf("%v",request.Reminder.Occurrences))
 
-	p.UpsertReminder(request)
+	////// TODO REMOVE THIS LATER
+	p.API.KVDelete(request.Username)
+	////////////////
+
+	//p.UpsertReminder(request)
 
 	if target == "me" {
 		target = "you"
