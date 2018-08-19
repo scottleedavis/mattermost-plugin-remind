@@ -1,8 +1,17 @@
 # mattermost-plugin-remind
 
-a plugin for mattermost that provides reminders from a slash command /remind
+# TODO WHEN YOU ARE BACK SCOTT
+* wiki
+* current features
+* * timezone aware
+* * reminders with messages can be set
+* * * `/remind (me/@user/~channel) "message" in X seconds` is only current pattern supported
+* TODO
+* * feature parity with [mattermost-remind](http://github.com/scottleedavis/mattermost-remind)
+* * add unit testing
+* * complete UI from lock icon in header
+* * anything mattermost requests
 
-_Inspired by the java integration [mattermost-remind](http://github.com/scottleedavis/mattermost-remind)_
 
 ### usage
 
