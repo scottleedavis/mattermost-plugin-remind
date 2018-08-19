@@ -122,10 +122,10 @@ func (p *Plugin) TriggerReminders() {
 			if strings.HasPrefix(reminder.Target, "@") || strings.HasPrefix(reminder.Target, "me") {
 
 				p.API.LogError(fmt.Sprintf("%v", p.remindUserId) + " " + fmt.Sprintf("%v", user.Id))
-				channel, cerr := p.API.GetDirectChannel(p.remindUserId, user.Id)
+				channel, cErr := p.API.GetDirectChannel(p.remindUserId, user.Id)
 
-				if cerr != nil {
-					p.API.LogError("fail to get direct channel ", fmt.Sprintf("%v", cerr))
+				if cErr != nil {
+					p.API.LogError("fail to get direct channel ", fmt.Sprintf("%v", cErr))
 				} else {
 					p.API.LogError("got direct channel " + fmt.Sprintf("%v", channel))
 
