@@ -16,6 +16,14 @@
   version = "v1.1.0"
 
 [[projects]]
+  digest = "1:8f8811f9be822914c3a25c6a071e93beb4c805d7b026cbf298bc577bc1cc945b"
+  name = "github.com/google/uuid"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "064e2069ce9c359c118179501254f67d7d37ba24"
+  version = "0.2"
+
+[[projects]]
   branch = "master"
   digest = "1:bc36a17a513f15717b5fa3dcfd666f5ddb6fd3db06f5f2834ac2f5979d4f5070"
   name = "github.com/gorilla/websocket"
@@ -256,6 +264,10 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = ["github.com/mattermost/mattermost-server/plugin"]
+  input-imports = [
+    "github.com/google/uuid",
+    "github.com/mattermost/mattermost-server/model",
+    "github.com/mattermost/mattermost-server/plugin",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1

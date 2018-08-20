@@ -11,6 +11,7 @@
 ##### planned
 * feature parity with [mattermost-remind](http://github.com/scottleedavis/mattermost-remind)
 * unit testing
+* structure/packaging/style mimicking [mattermost-plugin-zoom](https://github.com/mattermost/mattermost-plugin-zoom)
 * complete webapp functionality
 * any additional requests
 
