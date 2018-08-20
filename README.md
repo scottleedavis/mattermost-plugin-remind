@@ -1,18 +1,18 @@
 # mattermost-plugin-remind
 
-### ToDOs
-* wiki
-* mattermost hackathon link
-* current
-* * timezone aware
-* * reminders with messages can be set
-* * * only one pattern currently supported 
-* * * * `/remind (me or @user or ~channel) "message" in X seconds` is 
-* planned
-* * feature parity with [mattermost-remind](http://github.com/scottleedavis/mattermost-remind)
-* * add unit testing
-* * complete UI from lock icon in header
-* * anything mattermost requests
+### Developed during [Mattermost Plugins Hackathon 2018](https://forum.mattermost.org/t/virtual-hackathon/5471)
+
+##### current status
+* timezone aware
+* reminders with messages can be set
+  * only one pattern currently supported 
+    * `/remind (me or @user or ~channel) "message" in X seconds`
+    
+##### planned
+* feature parity with [mattermost-remind](http://github.com/scottleedavis/mattermost-remind)
+* unit testing
+* complete webapp functionality
+* any additional requests
 
 
 ### usage
