@@ -1,4 +1,5 @@
-dist
+fdist
 *.iml
 .idea
+.idea/
 setenv
