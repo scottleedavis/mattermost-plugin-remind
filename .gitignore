@@ -3,3 +3,4 @@ fdist
 .idea
 .idea/
 setenv
+dist/

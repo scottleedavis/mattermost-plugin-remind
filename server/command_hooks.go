@@ -38,18 +38,18 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		}, nil
 	}
 
-	//if strings.HasSuffix(args.Command, "debug") {
-	//	return &model.CommandResponse{
-	//		ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-	//		Text: fmt.Sprintf("* %s\n * %s\n * %s\n * %s\n * %s\n * %s\n",
-	//			args.Command,
-	//			args.TeamId,
-	//			args.SiteURL,
-	//			user.Username,
-	//			user.Id,
-	//			user.Timezone["automaticTimezone"]),
-	//	}, nil
-	//}
+	if strings.HasSuffix(args.Command, "debug") {
+		return &model.CommandResponse{
+			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
+			Text: fmt.Sprintf("* %s\n * %s\n * %s\n * %s\n * %s\n * %s\n",
+				args.Command,
+				args.TeamId,
+				args.SiteURL,
+				user.Username,
+				user.Id,
+				user.Timezone["automaticTimezone"]),
+		}, nil
+	}
 
 	if strings.HasSuffix(args.Command, "clear") {
 		p.API.KVDelete(user.Username)
