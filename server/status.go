@@ -9,9 +9,9 @@ import (
 
 )
 
-func (p *Plugin) emitStatusChange(reminders  []Reminder) {
+func (p *Plugin) emitStatusChange() {
 	p.API.PublishWebSocketEvent("status_change", map[string]interface{}{
-		"reminders": reminders,
+		"enabled": p.running,
 	}, &model.WebsocketBroadcast{})
 }
 
@@ -39,7 +39,7 @@ func (p *Plugin) handleStatus(w http.ResponseWriter, r *http.Request) {
 	var response = struct {
 		Enabled bool `json:"enabled"`
 	}{
-		Enabled: !p.disabled,
+		Enabled: !p.running,
 	}
 
 	responseJSON, _ := json.Marshal(response)

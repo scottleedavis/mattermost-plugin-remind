@@ -53,6 +53,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 
 	if strings.HasSuffix(args.Command, "clear") {
 		p.API.KVDelete(user.Username)
+		p.emitStatusChange()
 		return &model.CommandResponse{
 			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
 			Text:         fmt.Sprintf("Ok.  Deleted."),
@@ -69,6 +70,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 
 		request := ReminderRequest{args.TeamId, user.Username, payload, Reminder{}}
 		response, err := p.ScheduleReminder(request)
+		p.emitStatusChange()
 
 		if err != nil {
 			return &model.CommandResponse{
