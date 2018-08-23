@@ -1,3 +1,6 @@
+_note: development on this project has ceased, and instead will become a core part of [mattermost-server](https://github.com/mattermost/mattermost-server]_
+
+
 # mattermost-plugin-remind
 
 ### Developed during [Mattermost Plugins Hackathon 2018](https://forum.mattermost.org/t/virtual-hackathon/5471)
