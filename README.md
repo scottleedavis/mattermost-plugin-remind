@@ -1,4 +1,4 @@
-_note: development on this project has ceased, and instead will become a core part of [mattermost-server](https://github.com/mattermost/mattermost-server)_
+## _Development on this project has ceased, it will be merged into the core mattermost server & webapp.   See [MM-10580](https://github.com/mattermost/mattermost-server/issues/9283)._
 
 
 # mattermost-plugin-remind
