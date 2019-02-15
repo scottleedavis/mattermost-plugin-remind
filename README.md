@@ -1,6 +1,3 @@
-## _Development on this project has ceased, it will be merged into the core mattermost server & webapp.   See [MM-10580](https://github.com/mattermost/mattermost-server/issues/9283)._
-
-
 # mattermost-plugin-remind
 
 ### Developed during [Mattermost Plugins Hackathon 2018](https://forum.mattermost.org/t/virtual-hackathon/5471)
