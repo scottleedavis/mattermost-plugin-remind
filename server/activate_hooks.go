@@ -51,6 +51,7 @@ func (p *Plugin) OnActivate() error {
 
 	p.emptyTime = time.Time{}.AddDate(1, 1, 1)
 	p.supportedLocales = []string{"en"}
+	p.Run()
 
 	return nil
 }
@@ -62,6 +63,7 @@ func (p *Plugin) OnDeactivate() error {
 		return errors.Wrap(err, "failed to query teams OnDeactivate")
 	}
 
+	p.Stop()
 	p.deleteBotUser()
 
 	for _, team := range teams {

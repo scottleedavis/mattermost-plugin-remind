@@ -8,7 +8,8 @@ import (
 	"github.com/mattermost/mattermost-server/model"
 )
 
-func (p *Plugin) ListReminders(user *model.User) string {
+// TODO
+func (p *Plugin) ListReminders(user *model.User, channelId string) string {
 
 	reminders := p.GetReminders(user.Username)
 
@@ -28,5 +29,5 @@ func (p *Plugin) ListReminders(user *model.User) string {
 		}
 	}
 
-	return output + "\n*Note*:  To interact with these reminders use `/remind list` in a direct message with the remind user"
+	return output + "test"
 }

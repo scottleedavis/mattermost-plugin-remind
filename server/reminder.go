@@ -208,6 +208,16 @@ func (p *Plugin) TriggerReminders() {
 
 }
 
+func (p *Plugin) DeleteReminders(user *model.User) string {
+	T, _ := p.translation(user)
+	dErr := p.API.KVDelete(user.Username)
+	if dErr != nil {
+		p.API.LogError("failed KVDelete %s", dErr)
+		return T("exception-response")
+	}
+	return T("clear-response")
+}
+
 func (p *Plugin) findReminder(reminders []Reminder, reminderOccurrence Occurrence) Reminder {
 	for _, reminder := range reminders {
 		if reminder.Id == reminderOccurrence.ReminderId {
