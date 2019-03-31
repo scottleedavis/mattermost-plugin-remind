@@ -21,12 +21,14 @@ type LicenseRecord struct {
 }
 
 type License struct {
-	Id        string    `json:"id"`
-	IssuedAt  int64     `json:"issued_at"`
-	StartsAt  int64     `json:"starts_at"`
-	ExpiresAt int64     `json:"expires_at"`
-	Customer  *Customer `json:"customer"`
-	Features  *Features `json:"features"`
+	Id           string    `json:"id"`
+	IssuedAt     int64     `json:"issued_at"`
+	StartsAt     int64     `json:"starts_at"`
+	ExpiresAt    int64     `json:"expires_at"`
+	Customer     *Customer `json:"customer"`
+	Features     *Features `json:"features"`
+	SkuName      string    `json:"sku_name"`
+	SkuShortName string    `json:"sku_short_name"`
 }
 
 type Customer struct {
@@ -55,8 +57,9 @@ type Features struct {
 	DataRetention             *bool `json:"data_retention"`
 	MessageExport             *bool `json:"message_export"`
 	CustomPermissionsSchemes  *bool `json:"custom_permissions_schemes"`
+	CustomTermsOfService      *bool `json:"custom_terms_of_service"`
 
-	// after we enabled more features for webrtc we'll need to control them with this
+	// after we enabled more features we'll need to control them with this
 	FutureFeatures *bool `json:"future_features"`
 }
 
@@ -151,6 +154,10 @@ func (f *Features) SetDefaults() {
 
 	if f.CustomPermissionsSchemes == nil {
 		f.CustomPermissionsSchemes = NewBool(*f.FutureFeatures)
+	}
+
+	if f.CustomTermsOfService == nil {
+		f.CustomTermsOfService = NewBool(*f.FutureFeatures)
 	}
 }
 

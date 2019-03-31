@@ -132,7 +132,7 @@ func (u *User) IsValid() *AppError {
 		return InvalidUserError("username", u.Id)
 	}
 
-	if len(u.Email) > USER_EMAIL_MAX_LENGTH || len(u.Email) == 0 {
+	if len(u.Email) > USER_EMAIL_MAX_LENGTH || len(u.Email) == 0 || !IsValidEmail(u.Email) {
 		return InvalidUserError("email", u.Id)
 	}
 
@@ -498,11 +498,7 @@ func (u *User) IsSAMLUser() bool {
 }
 
 func (u *User) GetPreferredTimezone() string {
-	if u.Timezone["useAutomaticTimezone"] == "true" {
-		return u.Timezone["automaticTimezone"]
-	}
-
-	return u.Timezone["manualTimezone"]
+	return GetPreferredTimezone(u.Timezone)
 }
 
 // UserFromJson will decode the input and return a User
@@ -637,4 +633,10 @@ func IsValidCommentsNotifyLevel(notifyLevel string) bool {
 	return notifyLevel == COMMENTS_NOTIFY_ANY ||
 		notifyLevel == COMMENTS_NOTIFY_ROOT ||
 		notifyLevel == COMMENTS_NOTIFY_NEVER
+}
+
+func IsValidEmailBatchingInterval(emailInterval string) bool {
+	return emailInterval == PREFERENCE_EMAIL_INTERVAL_IMMEDIATELY ||
+		emailInterval == PREFERENCE_EMAIL_INTERVAL_FIFTEEN ||
+		emailInterval == PREFERENCE_EMAIL_INTERVAL_HOUR
 }

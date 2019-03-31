@@ -2,70 +2,74 @@ package main
 
 import (
 	"fmt"
+	"github.com/mattermost/mattermost-server/mlog"
 
-	"github.com/mattermost/mattermost-server/model"
+	"github.com/blang/semver"
 	"github.com/google/uuid"
+	"github.com/mattermost/mattermost-server/model"
+	"github.com/pkg/errors"
 )
 
-func (p *Plugin) OnActivate() error {
-	teams, err := p.API.GetTeams()
+const minimumServerVersion = "5.4.0"
+
+func (p *Plugin) checkServerVersion() error {
+	serverVersion, err := semver.Parse(p.API.GetServerVersion())
 	if err != nil {
-		p.API.LogError(
-			"failed to query teams OnActivate",
-			"error", err.Error(),
-		)
+		return errors.Wrap(err, "failed to parse server version")
 	}
 
-	p.API.LogDebug("OnActivate")
+	r := semver.MustParseRange(">=" + minimumServerVersion)
+	if !r(serverVersion) {
+		return fmt.Errorf("this plugin requires Mattermost v%s or later", minimumServerVersion)
+	}
 
-	p.createUser()
+	return nil
+}
+
+func (p *Plugin) OnActivate() error {
+	if err := p.checkServerVersion(); err != nil {
+		return err
+	}
+
+	teams, err := p.API.GetTeams()
+	if err != nil {
+		return errors.Wrap(err, "failed to query teams OnActivate")
+	}
+
+	p.createBotUser()
 
 	for _, team := range teams {
-
 		if err := p.registerCommand(team.Id); err != nil {
-			p.API.LogError(
-				"failed to register command",
-				"error", err.Error(),
-			)
+			return errors.Wrap(err, "failed to register command")
 		}
 	}
 
-	p.Run()
+	if err := TranslationsPreInit(); err != nil {
+		mlog.Error(err.Error())
+	}
 
 	return nil
 }
 
 func (p *Plugin) OnDeactivate() error {
+
 	teams, err := p.API.GetTeams()
 	if err != nil {
-		p.API.LogError(
-			"failed to query teams OnDeactivate",
-			"error", err.Error(),
-		)
+		return errors.Wrap(err, "failed to query teams OnDeactivate")
 	}
 
-	p.API.LogDebug("OnDeactivate")
-
-	// p.deleteUser()
+	p.deleteBotUser()
 
 	for _, team := range teams {
-
-		if err := p.unregisterCommand(team.Id); err != nil {
-			p.API.LogError(
-				"failed to register command",
-				"error", err.Error(),
-			)
+		if err := p.API.UnregisterCommand(team.Id, CommandTrigger); err != nil {
+			return errors.Wrap(err, "failed to unregister command")
 		}
 	}
-
-	p.Stop()
 
 	return nil
 }
 
-func (p *Plugin) createUser() (*model.User, error) {
-
-	p.API.LogDebug("createUser")
+func (p *Plugin) createBotUser() (*model.User, error) {
 
 	user, err := p.API.GetUserByUsername("remind")
 	if err != nil {
@@ -77,7 +81,7 @@ func (p *Plugin) createUser() (*model.User, error) {
 			return nil, gerr
 		}
 
-		user := model.User{Email: "scottleedavis@gmail.com", Nickname: "Remind", Password: guid.String(), Username: "remind", Roles: model.SYSTEM_USER_ROLE_ID}
+		user := model.User{Email: "-@-.-", Nickname: "Remind", Password: guid.String(), Username: "remind", Roles: model.SYSTEM_USER_ROLE_ID}
 
 		cuser, err := p.API.CreateUser(&user)
 		if err != nil {
@@ -95,17 +99,17 @@ func (p *Plugin) createUser() (*model.User, error) {
 	p.remindUserId = user.Id
 
 	return user, nil
+
 }
 
-// func (p *Plugin) deleteUser() {
+func (p *Plugin) deleteBotUser() {
 
-//     p.API.LogError("delete user")
-// 	user, err := p.API.GetUserByUsername("remind")
-// 	if err != nil {
-// 		return
-// 	}
-// 	derr := p.API.DeleteUser(user.Id)
-// 	if derr != nil {
-// 		p.API.LogError("Failed to delete remind user "+fmt.Sprintf("%v", derr))
-// 	}
-// }
+	user, err := p.API.GetUserByUsername("remind")
+	if err != nil {
+		return
+	}
+	derr := p.API.DeleteUser(user.Id)
+	if derr != nil {
+		p.API.LogError("Failed to delete remind user " + fmt.Sprintf("%v", derr))
+	}
+}

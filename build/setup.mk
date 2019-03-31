@@ -8,9 +8,15 @@ endif
 $(shell cd build/manifest && $(GO) build -o ../bin/manifest)
 
 # Extract the plugin id from the manifest.
-PLUGIN_ID ?= $(shell build/bin/manifest plugin_id)
+PLUGIN_ID ?= $(shell build/bin/manifest id)
 ifeq ($(PLUGIN_ID),)
     $(error "Cannot parse id from $(MANIFEST_FILE)")
+endif
+
+# Extract the plugin version from the manifest.
+PLUGIN_VERSION ?= $(shell build/bin/manifest version)
+ifeq ($(PLUGIN_VERSION),)
+    $(error "Cannot parse version from $(MANIFEST_FILE)")
 endif
 
 # Determine if a server is defined in the manifest.

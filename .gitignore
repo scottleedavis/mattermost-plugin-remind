@@ -1,6 +1,4 @@
-fdist
+dist
 *.iml
+deploy.sh
 .idea
-.idea/
-setenv
-dist/
