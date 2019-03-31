@@ -2,6 +2,7 @@ package main
 
 import (
 	"sync"
+	"time"
 
 	"github.com/mattermost/mattermost-server/plugin"
 )
@@ -19,4 +20,8 @@ type Plugin struct {
 	remindUserId string
 
 	running bool
+
+	emptyTime time.Time
+
+	supportedLocales []string
 }

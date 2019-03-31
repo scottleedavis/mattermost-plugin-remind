@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/mattermost/mattermost-server/mlog"
+	"time"
 
 	"github.com/blang/semver"
 	"github.com/google/uuid"
+	"github.com/mattermost/mattermost-server/mlog"
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/pkg/errors"
 )
@@ -47,6 +48,9 @@ func (p *Plugin) OnActivate() error {
 	if err := TranslationsPreInit(); err != nil {
 		mlog.Error(err.Error())
 	}
+
+	p.emptyTime = time.Time{}.AddDate(1, 1, 1)
+	p.supportedLocales = []string{"en"}
 
 	return nil
 }

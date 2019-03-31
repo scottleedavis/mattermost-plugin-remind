@@ -26,13 +26,13 @@ func (p *Plugin) ScheduleReminder(request ReminderRequest) (string, error) {
 	guid, gErr := uuid.NewRandom()
 	if gErr != nil {
 		p.API.LogError("Failed to generate guid")
-		return T("exception"), nil
+		return T("exception-response"), nil
 	}
 
 	target, when, message, pErr := p.ParseRequest(request)
 	if pErr != nil {
 		p.API.LogError("parse request failed: " + fmt.Sprintf("%v", pErr))
-		return T("exception"), nil
+		return T("exception-response"), nil
 	}
 
 	request.Reminder.TeamId = request.TeamId
