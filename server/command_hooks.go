@@ -34,11 +34,17 @@ func (p *Plugin) unregisterCommand(teamId string) error {
 
 func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*model.CommandResponse, *model.AppError) {
 
-	u, _ := p.API.GetUser(args.UserId)
+	u, err := p.API.GetUser(args.UserId)
+
+	if err != nil {
+		p.API.LogError(err.Error())
+	}
 	T := GetUserTranslations(u.Locale)
+
+	p.API.LogError(T("exception"))
 
 	return &model.CommandResponse{
 		ResponseType: model.COMMAND_RESPONSE_TYPE_IN_CHANNEL,
-		Text:         fmt.Sprintf(T("test-response")),
+		Text:         fmt.Sprintf(T("exception")),
 	}, nil
 }

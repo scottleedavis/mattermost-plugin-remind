@@ -1,6 +1,6 @@
 [
   {
-    "id": "test-response",
-    "translation": "A Test i18n response."
+    "id": "exception",
+    "translation": "Sorry, I didn’t quite get that. I’m easily confused. Perhaps try the words in a different order? This usually works: `/remind [@someone or ~channel] [what] [when]`.\n"
   }
 ]
