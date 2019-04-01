@@ -25,39 +25,23 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
 		return T("exception.response"), nil
 	}
 
-	// var when string
-	// var target string
-	// var message string
-	// var useTo bool
-	// useTo = false
-	// var useToString string
-	// if useTo {
-	// 	useToString = " to"
-	// } else {
-	// 	useToString = ""
-	// }
+	useTo := strings.HasPrefix(request.Reminder.Message, T("to"))
+	var useToString string
+	if useTo {
+		useToString = " " + T("to")
+	} else {
+		useToString = ""
+	}
 
-	// guid, gErr := uuid.NewRandom()
-	// if gErr != nil {
-	// 	p.API.LogError("Failed to generate guid")
-	// 	return T("exception-response"), nil
-	// }
+	request.Reminder.Id = model.NewId()
+	request.Reminder.TeamId = request.TeamId
+	request.Reminder.Username = request.Username
+	request.Reminder.Completed = p.emptyTime.Format(time.RFC3339)
 
-	// target, when, message, pErr := p.ParseRequest(request)
-	// if pErr != nil {
-	// 	p.API.LogError("parse request failed: " + fmt.Sprintf("%v", pErr))
-	// 	return T("exception-response"), nil
-	// }
-
-	// request.Reminder.TeamId = request.TeamId
-	// request.Reminder.Id = guid.String()
-	// request.Reminder.Username = request.Username
-	// request.Reminder.Target = target
-	// request.Reminder.Message = message
-	// request.Reminder.When = when
-	// request.Reminder.Occurrences, _ = p.CreateOccurrences(request)
-
-	// p.API.LogDebug(fmt.Sprintf("%v", request.Reminder.Occurrences))
+	if cErr := p.CreateOccurrences(request); cErr != nil {
+		p.API.LogError(cErr.Error())
+		return T(model.REMIND_EXCEPTION_TEXT), nil
+	}
 
 	// p.UpsertReminder(request)
 
@@ -70,32 +54,14 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
 
 	// TODO ////////////////////////////////////////////////////////////////////////////////////
 
-	// useTo := strings.HasPrefix(request.Reminder.Message, T("app.reminder.chrono.to"))
-	// var useToString string
-	// if useTo {
-	// 	useToString = " " + T("app.reminder.chrono.to")
-	// } else {
-	// 	useToString = ""
-	// }
-
-	// request.Reminder.Id = model.NewId()
-	// request.Reminder.TeamId = request.TeamId
-	// request.Reminder.Username = request.Username
-	// request.Reminder.Completed = p.emptyTime.Format(time.RFC3339)
-
-	// if cErr := p.createOccurrences(request); cErr != nil {
-	// 	mlog.Error(cErr.Error())
-	// 	return T(model.REMIND_EXCEPTION_TEXT), nil
-	// }
-
 	// schan := a.Srv.Store.Remind().SaveReminder(&request.Reminder)
 	// if result := <-schan; result.Err != nil {
 	// 	mlog.Error(result.Err.Message)
 	// 	return T(model.REMIND_EXCEPTION_TEXT), nil
 	// }
 
-	// if request.Reminder.Target == T("app.reminder.me") {
-	// 	request.Reminder.Target = T("app.reminder.you")
+	// if request.Reminder.Target == T("me") {
+	// 	request.Reminder.Target = T("you")
 	// }
 
 	// var responseParameters = map[string]interface{}{
@@ -104,7 +70,7 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
 	// 	"Message": request.Reminder.Message,
 	// 	"When":    a.formatWhen(request.UserId, request.Reminder.When, request.Occurrences[0].Occurrence, false),
 	// }
-	// response := T("app.reminder.response", responseParameters)
+	// response := T("response", responseParameters)
 
 	// return response, nil
 

@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
-	"strconv"
 	"strings"
 	"time"
 
@@ -26,106 +24,149 @@ type Occurrence struct {
 	Repeat string
 }
 
-func (p *Plugin) CreateOccurrences(request ReminderRequest) ([]Occurrence, error) {
+func (p *Plugin) CreateOccurrences(request *ReminderRequest) error {
 
-	p.API.LogDebug("CreateOccurrences")
-	user, err := p.API.GetUserByUsername(request.Username)
+	user, _ := p.API.GetUserByUsername(request.Username)
+	_, locale := p.translation(user)
 
-	if err != nil {
-		p.API.LogError("failed to query user %s", request.Username)
-		return []Occurrence{}, err
+	switch locale {
+	case "en":
+		return p.createOccurrencesEN(request)
+	default:
+		return p.createOccurrencesEN(request)
 	}
 
-	if strings.HasPrefix(request.Reminder.When, "in") {
-
-		p.API.LogDebug(request.Reminder.When)
-
-		occurrences, inErr := p.in(request.Reminder.When, user)
-		if inErr != nil {
-			return []Occurrence{}, inErr
-		}
-
-		guid, gErr := uuid.NewRandom()
-		if gErr != nil {
-			p.API.LogError("failed to generate guid")
-			return []Occurrence{}, gErr
-		}
-
-		for _, o := range occurrences {
-
-			reminderOccurrence := Occurrence{guid.String(), request.Username, request.Reminder.Id, o.UTC(), time.Time{}, ""}
-
-			p.API.LogDebug("occurrence " + fmt.Sprintf("%v", reminderOccurrence))
-
-			request.Reminder.Occurrences = append(request.Reminder.Occurrences, reminderOccurrence)
-			p.upsertOccurrence(reminderOccurrence)
-
-		}
-
-		return request.Reminder.Occurrences, nil
-
-	}
-
-	// TODO handle the other when prefix's
-
-	return []Occurrence{}, errors.New("unable to create occurrences")
 }
 
-func (p *Plugin) upsertOccurrence(reminderOccurrence Occurrence) {
+func (p *Plugin) createOccurrencesEN(request *ReminderRequest) error {
 
-	bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", reminderOccurrence.Occurrence)))
+	user, _ := p.API.GetUserByUsername(request.Username)
+	T, _ := p.translation(user)
+
+	if strings.HasPrefix(request.Reminder.When, T("in")) {
+		if occurrences, inErr := p.in(request.Reminder.When, user); inErr != nil {
+			return inErr
+		} else {
+			return p.addOccurrences(request, occurrences)
+		}
+	}
+
+	if strings.HasPrefix(request.Reminder.When, T("at")) {
+		if occurrences, inErr := p.at(request.Reminder.When, user); inErr != nil {
+			return inErr
+		} else {
+			return p.addOccurrences(request, occurrences)
+		}
+	}
+
+	if strings.HasPrefix(request.Reminder.When, T("on")) {
+		if occurrences, inErr := p.on(request.Reminder.When, user); inErr != nil {
+			return inErr
+		} else {
+			return p.addOccurrences(request, occurrences)
+		}
+	}
+
+	if strings.HasPrefix(request.Reminder.When, T("every")) {
+		if occurrences, inErr := p.every(request.Reminder.When, user); inErr != nil {
+			return inErr
+		} else {
+			return p.addOccurrences(request, occurrences)
+		}
+	}
+
+	if occurrences, freeErr := p.freeForm(request.Reminder.When, user); freeErr != nil {
+		return freeErr
+	} else {
+		return p.addOccurrences(request, occurrences)
+	}
+
+}
+
+func (p *Plugin) addOccurrences(request *ReminderRequest, occurrences []time.Time) error {
+
+	user, _ := p.API.GetUserByUsername(request.Username)
+	T, _ := p.translation(user)
+
+	for _, o := range occurrences {
+
+		repeat := ""
+
+		if p.isRepeating(request) {
+			repeat = request.Reminder.When
+			if strings.HasPrefix(request.Reminder.Target, "@") &&
+				request.Reminder.Target != T("app.reminder.me") {
+
+				rUser, _ := p.API.GetUserByUsername(request.Username)
+
+				if tUser, tErr := p.API.GetUserByUsername(request.Reminder.Target[1:]); tErr != nil {
+					return tErr
+				} else {
+					if rUser.Id != tUser.Id {
+						return errors.New("repeating reminders for another user not permitted")
+					}
+				}
+
+			}
+		}
+
+		occurrence := &Occurrence{
+			Id:         model.NewId(),
+			Username:   request.Username,
+			ReminderId: request.Reminder.Id,
+			Repeat:     repeat,
+			Occurrence: o,
+			Snoozed:    p.emptyTime,
+		}
+
+		request.Request.Occurrences = p.upsertOccurrence(occurrence)
+	}
+
+	return nil
+}
+
+func (p *Plugin) isRepeating(request *ReminderRequest) bool {
+
+	user, _ := p.API.GetUserByUsername(request.Username)
+	T, _ := p.translation(user)
+
+	return strings.Contains(request.Reminder.When, T("every")) ||
+		strings.Contains(request.Reminder.When, T("sundays")) ||
+		strings.Contains(request.Reminder.When, T("mondays")) ||
+		strings.Contains(request.Reminder.When, T("tuesdays")) ||
+		strings.Contains(request.Reminder.When, T("wednesdays")) ||
+		strings.Contains(request.Reminder.When, T("thursdays")) ||
+		strings.Contains(request.Reminder.When, T("fridays")) ||
+		strings.Contains(request.Reminder.When, T("saturdays"))
+
+}
+
+func (p *Plugin) upsertOccurrence(occurrence *Occurrence) []Occurrence {
+
+	bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", occurrence.Occurrence)))
 	if err != nil {
 		p.API.LogError("failed KVGet %s", err)
-		return
+		return nil
 	}
 
-	var reminderOccurrences []Occurrence
-	roErr := json.Unmarshal(bytes, &reminderOccurrences)
+	var occurrences []Occurrence
+	roErr := json.Unmarshal(bytes, &occurrences)
 	if roErr != nil {
-		p.API.LogDebug("new occurrence " + string(fmt.Sprintf("%v", reminderOccurrence.Occurrence)))
+		p.API.LogDebug("new occurrence " + string(fmt.Sprintf("%v", occurrence.Occurrence)))
 	} else {
-		p.API.LogDebug("existing " + fmt.Sprintf("%v", reminderOccurrences))
+		p.API.LogDebug("existing " + fmt.Sprintf("%v", occurrences))
 	}
 
-	reminderOccurrences = append(reminderOccurrences, reminderOccurrence)
-	ro, __ := json.Marshal(reminderOccurrences)
+	occurrences = append(occurrences, occurrence)
+	ro, __ := json.Marshal(occurrences)
 
 	if __ != nil {
-		p.API.LogError("failed to marshal reminderOccurrences %s", reminderOccurrence.Id)
+		p.API.LogError("failed to marshal reminderOccurrences %s", occurrence.Id)
 		return
 	}
 
-	p.API.KVSet(string(fmt.Sprintf("%v", reminderOccurrence.Occurrence)), ro)
+	p.API.KVSet(string(fmt.Sprintf("%v", occurrence.Occurrence)), ro)
 
-}
-
-func (p *Plugin) in(when string, user *model.User) (times []time.Time, err error) {
-
-	whenSplit := strings.Split(when, " ")
-	value := whenSplit[1]
-	units := whenSplit[len(whenSplit)-1]
-
-	p.API.LogDebug("whenSplit: " + fmt.Sprintf("%v", whenSplit))
-	p.API.LogDebug("value: " + fmt.Sprintf("%v", value))
-	p.API.LogDebug("units: " + fmt.Sprintf("%v", units))
-
-	location, _ := time.LoadLocation(user.Timezone["automaticTimezone"])
-
-	switch units {
-	case "seconds", "second", "secs", "sec", "s":
-		i, _ := strconv.Atoi(value)
-
-		occurrence := time.Now().In(location).Round(time.Second).Add(time.Second * time.Duration(i))
-		times = append(times, occurrence)
-
-		p.API.LogDebug("occurrence: " + fmt.Sprintf("%v", occurrence))
-		p.API.LogDebug("times: " + fmt.Sprintf("%v", times))
-		return times, nil
-
-		//TODO handle the other units
-
-	default:
-		return nil, errors.New("could not format 'in'")
-	}
+	return occurrences
 
 }
