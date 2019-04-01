@@ -3,11 +3,15 @@ package main
 import (
 	"errors"
 	"fmt"
+	"regexp"
+	"strconv"
 	"strings"
+	"time"
+
+	"github.com/mattermost/mattermost-server/model"
 )
 
 func (p *Plugin) ParseRequest(request *ReminderRequest) error {
-
 
 	user, _ := p.API.GetUserByUsername(request.Username)
 	T, _ := p.translation(user)
@@ -38,7 +42,7 @@ func (p *Plugin) ParseRequest(request *ReminderRequest) error {
 			return nil
 		}
 
-		if wErr := a.findWhen(request); wErr != nil {
+		if wErr := p.findWhen(request); wErr != nil {
 			return wErr
 		}
 
@@ -62,9 +66,9 @@ func (p *Plugin) findWhen(request *ReminderRequest) error {
 
 	switch locale {
 	case "en":
-		return a.findWhenEN(request)
+		return p.findWhenEN(request)
 	default:
-		return a.findWhenEN(request)
+		return p.findWhenEN(request)
 	}
 
 }
@@ -178,7 +182,7 @@ func (p *Plugin) findWhenEN(request *ReminderRequest) error {
 	}
 
 	lastWord := textSplit[len(textSplit)-2] + " " + textSplit[len(textSplit)-1]
-	_, dErr := a.normalizeDate(lastWord, user)
+	_, dErr := p.normalizeDate(lastWord, user)
 	if dErr == nil {
 		request.Reminder.When = lastWord
 		return nil
@@ -202,7 +206,7 @@ func (p *Plugin) findWhenEN(request *ReminderRequest) error {
 			break
 		}
 
-		_, dErr = a.normalizeDate(lastWord, user)
+		_, dErr = p.normalizeDate(lastWord, user)
 		if dErr == nil {
 			request.Reminder.When = lastWord
 			return nil
@@ -248,303 +252,514 @@ func (p *Plugin) findWhenEN(request *ReminderRequest) error {
 
 func (p *Plugin) normalizeDate(text string, user *model.User) (string, error) {
 
-	// cfg := a.Config()
-	// location := a.location(user)
-	// T, _ := a.translation(user)
+	location := p.location(user)
+	T, _ := p.translation(user)
 
-	// date := strings.ToLower(text)
-	// if strings.EqualFold(T("app.reminder.chrono.day"), date) {
-	// 	return date, nil
-	// } else if strings.EqualFold(T("app.reminder.chrono.today"), date) {
-	// 	return date, nil
-	// } else if strings.EqualFold(T("app.reminder.chrono.everyday"), date) {
-	// 	return date, nil
-	// } else if strings.EqualFold(T("app.reminder.chrono.tomorrow"), date) {
-	// 	return date, nil
-	// }
+	date := strings.ToLower(text)
+	if strings.EqualFold(T("day"), date) {
+		return date, nil
+	} else if strings.EqualFold(T("today"), date) {
+		return date, nil
+	} else if strings.EqualFold(T("everyday"), date) {
+		return date, nil
+	} else if strings.EqualFold(T("tomorrow"), date) {
+		return date, nil
+	}
 
-	// switch date {
-	// case T("app.reminder.chrono.mon"),
-	// 	T("app.reminder.chrono.monday"):
-	// 	return T("app.reminder.chrono.monday"), nil
-	// case T("app.reminder.chrono.tues"),
-	// 	T("app.reminder.chrono.tuesday"):
-	// 	return T("app.reminder.chrono.tuesday"), nil
-	// case T("app.reminder.chrono.wed"),
-	// 	T("app.reminder.chrono.wednes"),
-	// 	T("app.reminder.chrono.wednesday"):
-	// 	return T("app.reminder.chrono.wednesday"), nil
-	// case T("app.reminder.chrono.thur"),
-	// 	T("app.reminder.chrono.thursday"):
-	// 	return T("app.reminder.chrono.thursday"), nil
-	// case T("app.reminder.chrono.fri"),
-	// 	T("app.reminder.chrono.friday"):
-	// 	return T("app.reminder.chrono.friday"), nil
-	// case T("app.reminder.chrono.sat"),
-	// 	T("app.reminder.chrono.satur"),
-	// 	T("app.reminder.chrono.saturday"):
-	// 	return T("app.reminder.chrono.saturday"), nil
-	// case T("app.reminder.chrono.sun"),
-	// 	T("app.reminder.chrono.sunday"):
-	// 	return T("app.reminder.chrono.sunday"), nil
-	// case T("app.reminder.chrono.mondays"),
-	// 	T("app.reminder.chrono.tuesdays"),
-	// 	T("app.reminder.chrono.wednesdays"),
-	// 	T("app.reminder.chrono.thursdays"),
-	// 	T("app.reminder.chrono.fridays"),
-	// 	T("app.reminder.chrono.saturdays"),
-	// 	T("app.reminder.chrono.sundays"):
-	// 	return date, nil
-	// }
+	switch date {
+	case T("mon"),
+		T("monday"):
+		return T("monday"), nil
+	case T("tues"),
+		T("tuesday"):
+		return T("tuesday"), nil
+	case T("wed"),
+		T("wednes"),
+		T("wednesday"):
+		return T("wednesday"), nil
+	case T("thur"),
+		T("thursday"):
+		return T("thursday"), nil
+	case T("fri"),
+		T("friday"):
+		return T("friday"), nil
+	case T("sat"),
+		T("satur"),
+		T("saturday"):
+		return T("saturday"), nil
+	case T("sun"),
+		T("sunday"):
+		return T("sunday"), nil
+	case T("mondays"),
+		T("tuesdays"),
+		T("wednesdays"),
+		T("thursdays"),
+		T("fridays"),
+		T("saturdays"),
+		T("sundays"):
+		return date, nil
+	}
 
-	// if strings.Contains(date, T("app.reminder.chrono.jan")) ||
-	// 	strings.Contains(date, T("app.reminder.chrono.january")) ||
-	// 	strings.Contains(date, T("app.reminder.chrono.feb")) ||
-	// 	strings.Contains(date, T("app.reminder.chrono.february")) ||
-	// 	strings.Contains(date, T("app.reminder.chrono.mar")) ||
-	// 	strings.Contains(date, T("app.reminder.chrono.march")) ||
-	// 	strings.Contains(date, T("app.reminder.chrono.apr")) ||
-	// 	strings.Contains(date, T("app.reminder.chrono.april")) ||
-	// 	strings.Contains(date, T("app.reminder.chrono.may")) ||
-	// 	strings.Contains(date, T("app.reminder.chrono.june")) ||
-	// 	strings.Contains(date, T("app.reminder.chrono.july")) ||
-	// 	strings.Contains(date, T("app.reminder.chrono.aug")) ||
-	// 	strings.Contains(date, T("app.reminder.chrono.august")) ||
-	// 	strings.Contains(date, T("app.reminder.chrono.sept")) ||
-	// 	strings.Contains(date, T("app.reminder.chrono.september")) ||
-	// 	strings.Contains(date, T("app.reminder.chrono.oct")) ||
-	// 	strings.Contains(date, T("app.reminder.chrono.october")) ||
-	// 	strings.Contains(date, T("app.reminder.chrono.nov")) ||
-	// 	strings.Contains(date, T("app.reminder.chrono.november")) ||
-	// 	strings.Contains(date, T("app.reminder.chrono.dec")) ||
-	// 	strings.Contains(date, T("app.reminder.chrono.december")) {
+	if strings.Contains(date, T("jan")) ||
+		strings.Contains(date, T("january")) ||
+		strings.Contains(date, T("feb")) ||
+		strings.Contains(date, T("february")) ||
+		strings.Contains(date, T("mar")) ||
+		strings.Contains(date, T("march")) ||
+		strings.Contains(date, T("apr")) ||
+		strings.Contains(date, T("april")) ||
+		strings.Contains(date, T("may")) ||
+		strings.Contains(date, T("june")) ||
+		strings.Contains(date, T("july")) ||
+		strings.Contains(date, T("aug")) ||
+		strings.Contains(date, T("august")) ||
+		strings.Contains(date, T("sept")) ||
+		strings.Contains(date, T("september")) ||
+		strings.Contains(date, T("oct")) ||
+		strings.Contains(date, T("october")) ||
+		strings.Contains(date, T("nov")) ||
+		strings.Contains(date, T("november")) ||
+		strings.Contains(date, T("dec")) ||
+		strings.Contains(date, T("december")) {
 
-	// 	date = strings.Replace(date, ",", "", -1)
-	// 	parts := strings.Split(date, " ")
+		date = strings.Replace(date, ",", "", -1)
+		parts := strings.Split(date, " ")
 
-	// 	switch len(parts) {
-	// 	case 1:
-	// 		break
-	// 	case 2:
-	// 		if len(parts[1]) > 2 {
-	// 			parts[1] = a.daySuffix(user, parts[1])
-	// 		}
-	// 		if _, err := strconv.Atoi(parts[1]); err != nil {
-	// 			if wn, wErr := a.wordToNumber(parts[1], user); wErr == nil {
-	// 				parts[1] = strconv.Itoa(wn)
-	// 			}
-	// 		}
+		switch len(parts) {
+		case 1:
+			break
+		case 2:
+			if len(parts[1]) > 2 {
+				parts[1] = p.daySuffix(user, parts[1])
+			}
+			if _, err := strconv.Atoi(parts[1]); err != nil {
+				if wn, wErr := p.wordToNumber(parts[1], user); wErr == nil {
+					parts[1] = strconv.Itoa(wn)
+				}
+			}
 
-	// 		parts = append(parts, fmt.Sprintf("%v", time.Now().Year()))
+			parts = append(parts, fmt.Sprintf("%v", time.Now().Year()))
 
-	// 		break
-	// 	case 3:
-	// 		if len(parts[1]) > 2 {
-	// 			parts[1] = a.daySuffix(user, parts[1])
-	// 		}
+			break
+		case 3:
+			if len(parts[1]) > 2 {
+				parts[1] = p.daySuffix(user, parts[1])
+			}
 
-	// 		if _, err := strconv.Atoi(parts[1]); err != nil {
-	// 			if wn, wErr := a.wordToNumber(parts[1], user); wErr == nil {
-	// 				parts[1] = strconv.Itoa(wn)
-	// 			} else {
-	// 				mlog.Error(wErr.Error())
-	// 			}
+			if _, err := strconv.Atoi(parts[1]); err != nil {
+				if wn, wErr := p.wordToNumber(parts[1], user); wErr == nil {
+					parts[1] = strconv.Itoa(wn)
+				} else {
+					p.API.LogError(wErr.Error())
+				}
 
-	// 			if _, pErr := strconv.Atoi(parts[2]); pErr != nil {
-	// 				return "", pErr
-	// 			}
-	// 		}
+				if _, pErr := strconv.Atoi(parts[2]); pErr != nil {
+					return "", pErr
+				}
+			}
 
-	// 		break
-	// 	default:
-	// 		return "", errors.New("unrecognized date format")
-	// 	}
+			break
+		default:
+			return "", errors.New("unrecognized date format")
+		}
 
-	// 	switch parts[0] {
-	// 	case T("app.reminder.chrono.jan"),
-	// 		T("app.reminder.chrono.january"):
-	// 		parts[0] = "01"
-	// 		break
-	// 	case T("app.reminder.chrono.feb"),
-	// 		T("app.reminder.chrono.february"):
-	// 		parts[0] = "02"
-	// 		break
-	// 	case T("app.reminder.chrono.mar"),
-	// 		T("app.reminder.chrono.march"):
-	// 		parts[0] = "03"
-	// 		break
-	// 	case T("app.reminder.chrono.apr"),
-	// 		T("app.reminder.chrono.april"):
-	// 		parts[0] = "04"
-	// 		break
-	// 	case T("app.reminder.chrono.may"):
-	// 		parts[0] = "05"
-	// 		break
-	// 	case T("app.reminder.chrono.june"):
-	// 		parts[0] = "06"
-	// 		break
-	// 	case T("app.reminder.chrono.july"):
-	// 		parts[0] = "07"
-	// 		break
-	// 	case T("app.reminder.chrono.aug"),
-	// 		T("app.reminder.chrono.august"):
-	// 		parts[0] = "08"
-	// 		break
-	// 	case T("app.reminder.chrono.sept"),
-	// 		T("app.reminder.chrono.september"):
-	// 		parts[0] = "09"
-	// 		break
-	// 	case T("app.reminder.chrono.oct"),
-	// 		T("app.reminder.chrono.october"):
-	// 		parts[0] = "10"
-	// 		break
-	// 	case T("app.reminder.chrono.nov"),
-	// 		T("app.reminder.chrono.november"):
-	// 		parts[0] = "11"
-	// 		break
-	// 	case T("app.reminder.chrono.dec"),
-	// 		T("app.reminder.chrono.december"):
-	// 		parts[0] = "12"
-	// 		break
-	// 	default:
-	// 		return "", errors.New("month not found")
-	// 	}
+		switch parts[0] {
+		case T("jan"),
+			T("january"):
+			parts[0] = "01"
+			break
+		case T("feb"),
+			T("february"):
+			parts[0] = "02"
+			break
+		case T("mar"),
+			T("march"):
+			parts[0] = "03"
+			break
+		case T("apr"),
+			T("april"):
+			parts[0] = "04"
+			break
+		case T("may"):
+			parts[0] = "05"
+			break
+		case T("june"):
+			parts[0] = "06"
+			break
+		case T("july"):
+			parts[0] = "07"
+			break
+		case T("aug"),
+			T("august"):
+			parts[0] = "08"
+			break
+		case T("sept"),
+			T("september"):
+			parts[0] = "09"
+			break
+		case T("oct"),
+			T("october"):
+			parts[0] = "10"
+			break
+		case T("nov"),
+			T("november"):
+			parts[0] = "11"
+			break
+		case T("dec"),
+			T("december"):
+			parts[0] = "12"
+			break
+		default:
+			return "", errors.New("month not found")
+		}
 
-	// 	if len(parts[1]) < 2 {
-	// 		parts[1] = "0" + parts[1]
-	// 	}
-	// 	return parts[2] + "-" + parts[0] + "-" + parts[1] + "T00:00:00Z", nil
+		if len(parts[1]) < 2 {
+			parts[1] = "0" + parts[1]
+		}
+		return parts[2] + "-" + parts[0] + "-" + parts[1] + "T00:00:00Z", nil
 
-	// } else if match, _ := regexp.MatchString("^(([0-9]{2}|[0-9]{1})(-|/)([0-9]{2}|[0-9]{1})((-|/)([0-9]{4}|[0-9]{2}))?)", date); match {
+	} else if match, _ := regexp.MatchString("^(([0-9]{2}|[0-9]{1})(-|/)([0-9]{2}|[0-9]{1})((-|/)([0-9]{4}|[0-9]{2}))?)", date); match {
 
-	// 	date := a.regSplit(date, "-|/")
+		date := p.regSplit(date, "-|/")
 
-	// 	switch len(date) {
-	// 	case 2:
-	// 		year := time.Now().Year()
-	// 		month, mErr := strconv.Atoi(date[0])
-	// 		if mErr != nil {
-	// 			return "", mErr
-	// 		}
-	// 		day, dErr := strconv.Atoi(date[1])
-	// 		if dErr != nil {
-	// 			return "", dErr
-	// 		}
+		switch len(date) {
+		case 2:
+			year := time.Now().Year()
+			month, mErr := strconv.Atoi(date[0])
+			if mErr != nil {
+				return "", mErr
+			}
+			day, dErr := strconv.Atoi(date[1])
+			if dErr != nil {
+				return "", dErr
+			}
 
-	// 		if *cfg.DisplaySettings.ExperimentalTimezone {
-	// 			return time.Date(year, time.Month(month), day, 0, 0, 0, 0, location).Format(time.RFC3339), nil
-	// 		}
+			return time.Date(year, time.Month(month), day, 0, 0, 0, 0, location).Format(time.RFC3339), nil
 
-	// 		return time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.Local).Format(time.RFC3339), nil
+		case 3:
+			if len(date[2]) == 2 {
+				date[2] = "20" + date[2]
+			}
+			year, yErr := strconv.Atoi(date[2])
+			if yErr != nil {
+				return "", yErr
+			}
+			month, mErr := strconv.Atoi(date[0])
+			if mErr != nil {
+				return "", mErr
+			}
+			day, dErr := strconv.Atoi(date[1])
+			if dErr != nil {
+				return "", dErr
+			}
 
-	// 	case 3:
-	// 		if len(date[2]) == 2 {
-	// 			date[2] = "20" + date[2]
-	// 		}
-	// 		year, yErr := strconv.Atoi(date[2])
-	// 		if yErr != nil {
-	// 			return "", yErr
-	// 		}
-	// 		month, mErr := strconv.Atoi(date[0])
-	// 		if mErr != nil {
-	// 			return "", mErr
-	// 		}
-	// 		day, dErr := strconv.Atoi(date[1])
-	// 		if dErr != nil {
-	// 			return "", dErr
-	// 		}
+			return time.Date(year, time.Month(month), day, 0, 0, 0, 0, location).Format(time.RFC3339), nil
 
-	// 		if *cfg.DisplaySettings.ExperimentalTimezone {
-	// 			return time.Date(year, time.Month(month), day, 0, 0, 0, 0, location).Format(time.RFC3339), nil
-	// 		}
+		default:
+			return "", errors.New("unrecognized date")
+		}
 
-	// 		return time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.Local).Format(time.RFC3339), nil
+	} else if match, _ := regexp.MatchString("^(([0-9]{2}|[0-9]{1})(.)([0-9]{2}|[0-9]{1})((.)([0-9]{4}|[0-9]{2}))?)", date); match {
 
-	// 	default:
-	// 		return "", errors.New("unrecognized date")
-	// 	}
+		date := p.regSplit(date, "\\.")
 
-	// } else if match, _ := regexp.MatchString("^(([0-9]{2}|[0-9]{1})(.)([0-9]{2}|[0-9]{1})((.)([0-9]{4}|[0-9]{2}))?)", date); match {
+		switch len(date) {
+		case 2:
+			year := time.Now().Year()
+			month, mErr := strconv.Atoi(date[1])
+			if mErr != nil {
+				return "", mErr
+			}
+			day, dErr := strconv.Atoi(date[0])
+			if dErr != nil {
+				return "", dErr
+			}
 
-	// 	date := a.regSplit(date, "\\.")
+			return time.Date(year, time.Month(month), day, 0, 0, 0, 0, location).Format(time.RFC3339), nil
 
-	// 	switch len(date) {
-	// 	case 2:
-	// 		year := time.Now().Year()
-	// 		month, mErr := strconv.Atoi(date[1])
-	// 		if mErr != nil {
-	// 			return "", mErr
-	// 		}
-	// 		day, dErr := strconv.Atoi(date[0])
-	// 		if dErr != nil {
-	// 			return "", dErr
-	// 		}
+		case 3:
+			if len(date[2]) == 2 {
+				date[2] = "20" + date[2]
+			}
+			year, yErr := strconv.Atoi(date[2])
+			if yErr != nil {
+				return "", yErr
+			}
+			month, mErr := strconv.Atoi(date[1])
+			if mErr != nil {
+				return "", mErr
+			}
+			day, dErr := strconv.Atoi(date[0])
+			if dErr != nil {
+				return "", dErr
+			}
 
-	// 		if *cfg.DisplaySettings.ExperimentalTimezone {
-	// 			return time.Date(year, time.Month(month), day, 0, 0, 0, 0, location).Format(time.RFC3339), nil
-	// 		}
+			return time.Date(year, time.Month(month), day, 0, 0, 0, 0, location).Format(time.RFC3339), nil
 
-	// 		return time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.Local).Format(time.RFC3339), nil
+		default:
+			return "", errors.New("unrecognized date")
+		}
 
-	// 	case 3:
-	// 		if len(date[2]) == 2 {
-	// 			date[2] = "20" + date[2]
-	// 		}
-	// 		year, yErr := strconv.Atoi(date[2])
-	// 		if yErr != nil {
-	// 			return "", yErr
-	// 		}
-	// 		month, mErr := strconv.Atoi(date[1])
-	// 		if mErr != nil {
-	// 			return "", mErr
-	// 		}
-	// 		day, dErr := strconv.Atoi(date[0])
-	// 		if dErr != nil {
-	// 			return "", dErr
-	// 		}
+	} else { //single number day
 
-	// 		if *cfg.DisplaySettings.ExperimentalTimezone {
-	// 			return time.Date(year, time.Month(month), day, 0, 0, 0, 0, location).Format(time.RFC3339), nil
-	// 		}
+		var dayInt int
+		day := p.daySuffix(user, date)
 
-	// 		return time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.Local).Format(time.RFC3339), nil
+		if d, nErr := strconv.Atoi(day); nErr != nil {
+			if wordNum, wErr := p.wordToNumber(date, user); wErr != nil {
+				return "", wErr
+			} else {
+				day = strconv.Itoa(wordNum)
+				dayInt = wordNum
+			}
+		} else {
+			dayInt = d
+		}
 
-	// 	default:
-	// 		return "", errors.New("unrecognized date")
-	// 	}
+		month := time.Now().Month()
+		year := time.Now().Year()
+		t := time.Date(year, month, dayInt, 0, 0, 0, 0, location)
 
-	// } else { //single number day
+		if t.Before(time.Now()) {
+			t = t.AddDate(0, 1, 0)
+		}
 
-	// 	var dayInt int
-	// 	day := a.daySuffix(user, date)
+		return t.Format(time.RFC3339), nil
 
-	// 	if d, nErr := strconv.Atoi(day); nErr != nil {
-	// 		if wordNum, wErr := a.wordToNumber(date, user); wErr != nil {
-	// 			return "", wErr
-	// 		} else {
-	// 			day = strconv.Itoa(wordNum)
-	// 			dayInt = wordNum
-	// 		}
-	// 	} else {
-	// 		dayInt = d
-	// 	}
+	}
 
-	// 	month := time.Now().Month()
-	// 	year := time.Now().Year()
+}
 
-	// 	var t time.Time
-	// 	if *cfg.DisplaySettings.ExperimentalTimezone {
-	// 		t = time.Date(year, month, dayInt, 0, 0, 0, 0, location)
-	// 	} else {
-	// 		t = time.Date(year, month, dayInt, 0, 0, 0, 0, time.Local)
-	// 	}
+func (p *Plugin) daySuffixFromInt(user *model.User, day int) string {
 
-	// 	if t.Before(time.Now()) {
-	// 		t = t.AddDate(0, 1, 0)
-	// 	}
+	T, _ := p.translation(user)
 
-	// 	return t.Format(time.RFC3339), nil
+	daySuffixes := []string{
+		T("0th"),
+		T("1st"),
+		T("2nd"),
+		T("3rd"),
+		T("4th"),
+		T("5th"),
+		T("6th"),
+		T("7th"),
+		T("8th"),
+		T("9th"),
+		T("10th"),
+		T("11th"),
+		T("12th"),
+		T("13th"),
+		T("14th"),
+		T("15th"),
+		T("16th"),
+		T("17th"),
+		T("18th"),
+		T("19th"),
+		T("20th"),
+		T("21st"),
+		T("22nd"),
+		T("23rd"),
+		T("24th"),
+		T("25th"),
+		T("26th"),
+		T("27th"),
+		T("28th"),
+		T("29th"),
+		T("30th"),
+		T("31st"),
+	}
+	return daySuffixes[day]
 
-	// }
+}
 
+func (p *Plugin) daySuffix(user *model.User, day string) string {
+
+	T, _ := p.translation(user)
+
+	daySuffixes := []string{
+		T("0th"),
+		T("1st"),
+		T("2nd"),
+		T("3rd"),
+		T("4th"),
+		T("5th"),
+		T("6th"),
+		T("7th"),
+		T("8th"),
+		T("9th"),
+		T("10th"),
+		T("11th"),
+		T("12th"),
+		T("13th"),
+		T("14th"),
+		T("15th"),
+		T("16th"),
+		T("17th"),
+		T("18th"),
+		T("19th"),
+		T("20th"),
+		T("21st"),
+		T("22nd"),
+		T("23rd"),
+		T("24th"),
+		T("25th"),
+		T("26th"),
+		T("27th"),
+		T("28th"),
+		T("29th"),
+		T("30th"),
+		T("31st"),
+	}
+	for _, suffix := range daySuffixes {
+		if suffix == day {
+			day = day[:len(day)-2]
+			break
+		}
+	}
+	return day
+}
+
+func (p *Plugin) weekDayNumber(day string, user *model.User) int {
+
+	T, _ := p.translation(user)
+
+	switch day {
+	case T("sunday"):
+		return 0
+	case T("monday"):
+		return 1
+	case T("tuesday"):
+		return 2
+	case T("wednesday"):
+		return 3
+	case T("thursday"):
+		return 4
+	case T("friday"):
+		return 5
+	case T("saturday"):
+		return 6
+	default:
+		return -1
+	}
+}
+
+func (p *Plugin) regSplit(text string, delimeter string) []string {
+
+	reg := regexp.MustCompile(delimeter)
+	indexes := reg.FindAllStringIndex(text, -1)
+	laststart := 0
+	result := make([]string, len(indexes)+1)
+	for i, element := range indexes {
+		result[i] = text[laststart:element[0]]
+		laststart = element[1]
+	}
+	result[len(indexes)] = text[laststart:]
+	return result
+}
+
+func (p *Plugin) wordToNumber(word string, user *model.User) (int, error) {
+
+	T, _ := p.translation(user)
+
+	var sum int
+	var temp int
+	var previous int
+
+	numbers := make(map[string]int)
+	onumbers := make(map[string]int)
+	tnumbers := make(map[string]int)
+
+	numbers[T("zero")] = 0
+	numbers[T("one")] = 1
+	numbers[T("two")] = 2
+	numbers[T("three")] = 3
+	numbers[T("four")] = 4
+	numbers[T("five")] = 5
+	numbers[T("six")] = 6
+	numbers[T("seven")] = 7
+	numbers[T("eight")] = 8
+	numbers[T("nine")] = 9
+	numbers[T("ten")] = 10
+	numbers[T("eleven")] = 11
+	numbers[T("twelve")] = 12
+	numbers[T("thirteen")] = 13
+	numbers[T("fourteen")] = 14
+	numbers[T("fifteen")] = 15
+	numbers[T("sixteen")] = 16
+	numbers[T("seventeen")] = 17
+	numbers[T("eighteen")] = 18
+	numbers[T("nineteen")] = 19
+
+	tnumbers[T("twenty")] = 20
+	tnumbers[T("thirty")] = 30
+	tnumbers[T("forty")] = 40
+	tnumbers[T("fifty")] = 50
+	tnumbers[T("sixty")] = 60
+	tnumbers[T("seventy")] = 70
+	tnumbers[T("eighty")] = 80
+	tnumbers[T("ninety")] = 90
+
+	onumbers[T("hundred")] = 100
+	onumbers[T("thousand")] = 1000
+	onumbers[T("million")] = 1000000
+	onumbers[T("billion")] = 1000000000
+
+	numbers[T("first")] = 1
+	numbers[T("second")] = 2
+	numbers[T("third")] = 3
+	numbers[T("fourth")] = 4
+	numbers[T("fifth")] = 5
+	numbers[T("sixth")] = 6
+	numbers[T("seventh")] = 7
+	numbers[T("eighth")] = 8
+	numbers[T("nineth")] = 9
+	numbers[T("tenth")] = 10
+	numbers[T("eleventh")] = 11
+	numbers[T("twelveth")] = 12
+	numbers[T("thirteenth")] = 13
+	numbers[T("fourteenth")] = 14
+	numbers[T("fifteenth")] = 15
+	numbers[T("sixteenth")] = 16
+	numbers[T("seventeenth")] = 17
+	numbers[T("eighteenth")] = 18
+	numbers[T("nineteenth")] = 19
+
+	tnumbers[T("twenteth")] = 20
+	tnumbers[T("twentyfirst")] = 21
+	tnumbers[T("twentysecond")] = 22
+	tnumbers[T("twentythird")] = 23
+	tnumbers[T("twentyfourth")] = 24
+	tnumbers[T("twentyfifth")] = 25
+	tnumbers[T("twentysixth")] = 26
+	tnumbers[T("twentyseventh")] = 27
+	tnumbers[T("twentyeight")] = 28
+	tnumbers[T("twentynineth")] = 29
+	tnumbers[T("thirteth")] = 30
+	tnumbers[T("thirtyfirst")] = 31
+
+	splitted := strings.Split(strings.ToLower(word), " ")
+
+	for _, split := range splitted {
+		if numbers[split] != 0 {
+			temp = numbers[split]
+			sum = sum + temp
+			previous = previous + temp
+		} else if onumbers[split] != 0 {
+			if sum != 0 {
+				sum = sum - previous
+			}
+			sum = sum + previous*onumbers[split]
+			temp = 0
+			previous = 0
+		} else if tnumbers[split] != 0 {
+			temp = tnumbers[split]
+			sum = sum + temp
+		}
+	}
+
+	if sum == 0 {
+		return 0, errors.New("couldn't format number")
+	}
+
+	return sum, nil
 }

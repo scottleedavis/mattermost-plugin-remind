@@ -24,6 +24,14 @@
   	"translation": "me"
   },
   {
+  	"id": "to",
+  	"translation": "to"
+  },
+  {
+    "id": "and",
+    "translation": "and"
+  },
+  {
   	"id": "in",
   	"translation": "in"
   },
@@ -52,32 +60,72 @@
   	"translation": "tomorrow"
   },
   {
-  	"id": "monday",
-  	"translation": "monday"
+    "id": "mon",
+    "translation": "mon"
   },
   {
-  	"id": "tuesday",
-  	"translation": "tuesday"
+    "id": "monday",
+    "translation": "monday"
   },
   {
-  	"id": "wednesday",
-  	"translation": "wednesday"
+    "id": "tues",
+    "translation": "tues"
   },
   {
-  	"id": "thursday",
-  	"translation": "thursday"
+    "id": "tuesday",
+    "translation": "tuesday"
   },
   {
-  	"id": "friday",
-  	"translation": "friday"
+    "id": "wed",
+    "translation": "wed"
   },
   {
-  	"id": "saturday",
-  	"translation": "saturday"
+    "id": "wednes",
+    "translation": "wednes"
   },
   {
-  	"id": "sunday",
-  	"translation": "sunday"
+    "id": "wednesday",
+    "translation": "wednesday"
+  },
+  {
+    "id": "thur",
+    "translation": "thur"
+  },
+  {
+    "id": "thurs",
+    "translation": "thurs"
+  },
+  {
+    "id": "thursday",
+    "translation": "thursday"
+  },
+  {
+    "id": "fri",
+    "translation": "fri"
+  },
+  {
+    "id": "friday",
+    "translation": "friday"
+  },
+  {
+    "id": "sat",
+    "translation": "sat"
+  },
+  {
+    "id": "satur",
+    "translation": "satur"
+  },
+  {
+    "id": "saturday",
+    "translation": "saturday"
+  },
+  {
+    "id": "sun",
+    "translation": "sun"
+  },
+  {
+    "id": "sunday",
+    "translation": "sunday"
   },
   {
   	"id": "mondays",
@@ -106,5 +154,689 @@
   {
   	"id": "sundays",
   	"translation": "sundays"
+  },
+    {
+    "id": "s",
+    "translation": "s"
+  },
+  {
+    "id": "sec",
+    "translation": "sec"
+  },
+  {
+    "id": "secs",
+    "translation": "secs"
+  },
+  {
+    "id": "second",
+    "translation": "second"
+  },
+  {
+    "id": "seconds",
+    "translation": "seconds"
+  },
+  {
+    "id": "minutes",
+    "translation": "minutes"
+  },
+  {
+    "id": "minute",
+    "translation": "minute"
+  },
+  {
+    "id": "min",
+    "translation": "min"
+  },
+  {
+    "id": "hours",
+    "translation": "hours"
+  },
+  {
+    "id": "hours",
+    "translation": "hours"
+  },
+  {
+    "id": "hrs",
+    "translation": "hrs"
+  },
+  {
+    "id": "hr",
+    "translation": "hr"
+  },
+  {
+    "id": "days",
+    "translation": "days"
+  },
+  {
+    "id": "day",
+    "translation": "day"
+  },
+  {
+    "id": "d",
+    "translation": "d"
+  },
+  {
+    "id": "weeks",
+    "translation": "weeks"
+  },
+  {
+    "id": "week",
+    "translation": "week"
+  },
+  {
+    "id": "wks",
+    "translation": "wks"
+  },
+  {
+    "id": "wk",
+    "translation": "wk"
+  },
+  {
+    "id": "months",
+    "translation": "months"
+  },
+  {
+    "id": "month",
+    "translation": "month"
+  },
+  {
+    "id": "m",
+    "translation": "m"
+  },
+  {
+    "id": "years",
+    "translation": "years"
+  },
+  {
+    "id": "year",
+    "translation": "year"
+  },
+  {
+    "id": "yr",
+    "translation": "yr"
+  },
+  {
+    "id": "y",
+    "translation": "y"
+  },
+   {
+    "id": "jan",
+    "translation": "jan"
+  },
+  {
+    "id": "january",
+    "translation": "january"
+  },
+  {
+    "id": "feb",
+    "translation": "feb"
+  },
+  {
+    "id": "february",
+    "translation": "february"
+  },
+  {
+    "id": "mar",
+    "translation": "mar"
+  },
+  {
+    "id": "march",
+    "translation": "march"
+  },
+  {
+    "id": "apr",
+    "translation": "apr"
+  },
+  {
+    "id": "april",
+    "translation": "april"
+  },
+  {
+    "id": "may",
+    "translation": "may"
+  },
+  {
+    "id": "june",
+    "translation": "june"
+  },
+  {
+    "id": "july",
+    "translation": "july"
+  },
+  {
+    "id": "aug",
+    "translation": "aug"
+  },
+  {
+    "id": "august",
+    "translation": "august"
+  },
+  {
+    "id": "sept",
+    "translation": "sept"
+  },
+  {
+    "id": "september",
+    "translation": "september"
+  },
+  {
+    "id": "oct",
+    "translation": "oct"
+  },
+  {
+    "id": "october",
+    "translation": "october"
+  },
+  {
+    "id": "nov",
+    "translation": "nov"
+  },
+  {
+    "id": "november",
+    "translation": "november"
+  },
+  {
+    "id": "dec",
+    "translation": "dec"
+  },
+  {
+    "id": "december",
+    "translation": "december"
+  },
+  {
+    "id": "other",
+    "translation": "other"
+  },
+  {
+    "id": "pm",
+    "translation": "pm"
+  },
+  {
+    "id": "am",
+    "translation": "am"
+  },
+  {
+    "id": "noon",
+    "translation": "noon"
+  },
+  {
+    "id": "midnight",
+    "translation": "midnight"
+  },
+  {
+    "id": "zero",
+    "translation": "zero"
+  },
+  {
+    "id": "one",
+    "translation": "one"
+  },
+  {
+    "id": "two",
+    "translation": "two"
+  },
+  {
+    "id": "three",
+    "translation": "three"
+  },
+  {
+    "id": "four",
+    "translation": "four"
+  },
+  {
+    "id": "five",
+    "translation": "five"
+  },
+  {
+    "id": "six",
+    "translation": "six"
+  },
+  {
+    "id": "seven",
+    "translation": "seven"
+  },
+  {
+    "id": "eight",
+    "translation": "eight"
+  },
+  {
+    "id": "nine",
+    "translation": "nine"
+  },
+  {
+    "id": "ten",
+    "translation": "ten"
+  },
+  {
+    "id": "eleven",
+    "translation": "eleven"
+  },
+  {
+    "id": "twelve",
+    "translation": "twelve"
+  },
+  {
+    "id": "thirteen",
+    "translation": "thirteen"
+  },
+  {
+    "id": "fourteen",
+    "translation": "fourteen"
+  },
+  {
+    "id": "fifteen",
+    "translation": "fifteen"
+  },
+  {
+    "id": "sixteen",
+    "translation": "sixteen"
+  },
+  {
+    "id": "seventeen",
+    "translation": "seventeen"
+  },
+  {
+    "id": "eighteen",
+    "translation": "eighteen"
+  },
+  {
+    "id": "nineteen",
+    "translation": "nineteen"
+  },
+  {
+    "id": "twenty",
+    "translation": "twenty"
+  },
+  {
+    "id": "thirty",
+    "translation": "thirty"
+  },
+  {
+    "id": "fourty",
+    "translation": "fourty"
+  },
+  {
+    "id": "fifty",
+    "translation": "fifty"
+  },
+  {
+    "id": "sixty",
+    "translation": "sixty"
+  },
+  {
+    "id": "seventy",
+    "translation": "seventy"
+  },
+  {
+    "id": "eighty",
+    "translation": "eighty"
+  },
+  {
+    "id": "ninety",
+    "translation": "ninety"
+  },
+  {
+    "id": "hundred",
+    "translation": "hundred"
+  },
+  {
+    "id": "thousand",
+    "translation": "thousand"
+  },
+  {
+    "id": "million",
+    "translation": "million"
+  },
+  {
+    "id": "billion",
+    "translation": "billion"
+  },
+  {
+    "id": "0",
+    "translation": "0"
+  },
+  {
+    "id": "1",
+    "translation": "1"
+  },
+  {
+    "id": "2",
+    "translation": "2"
+  },
+  {
+    "id": "3",
+    "translation": "3"
+  },
+  {
+    "id": "4",
+    "translation": "4"
+  },
+  {
+    "id": "5",
+    "translation": "5"
+  },
+  {
+    "id": "6",
+    "translation": "6"
+  },
+  {
+    "id": "7",
+    "translation": "7"
+  },
+  {
+    "id": "8",
+    "translation": "8"
+  },
+  {
+    "id": "9",
+    "translation": "9"
+  },
+  {
+    "id": "10",
+    "translation": "10"
+  },
+  {
+    "id": "11",
+    "translation": "11"
+  },
+  {
+    "id": "12",
+    "translation": "12"
+  },
+  {
+    "id": "13",
+    "translation": "13"
+  },
+  {
+    "id": "14",
+    "translation": "14"
+  },
+  {
+    "id": "15",
+    "translation": "15"
+  },
+  {
+    "id": "16",
+    "translation": "16"
+  },
+  {
+    "id": "17",
+    "translation": "17"
+  },
+  {
+    "id": "18",
+    "translation": "18"
+  },
+  {
+    "id": "19",
+    "translation": "19"
+  },
+  {
+    "id": "20",
+    "translation": "20"
+  },
+  {
+    "id": "21",
+    "translation": "21"
+  },
+  {
+    "id": "22",
+    "translation": "22"
+  },
+  {
+    "id": "23",
+    "translation": "23"
+  },
+  {
+    "id": "0th",
+    "translation": "0th"
+  },
+  {
+    "id": "1st",
+    "translation": "1st"
+  },
+  {
+    "id": "2nd",
+    "translation": "2nd"
+  },
+  {
+    "id": "3rd",
+    "translation": "3rd"
+  },
+  {
+    "id": "4th",
+    "translation": "4th"
+  },
+  {
+    "id": "5th",
+    "translation": "5th"
+  },
+  {
+    "id": "6th",
+    "translation": "6th"
+  },
+  {
+    "id": "7th",
+    "translation": "7th"
+  },
+  {
+    "id": "8th",
+    "translation": "8th"
+  },
+  {
+    "id": "9th",
+    "translation": "9th"
+  },
+  {
+    "id": "10th",
+    "translation": "10th"
+  },
+  {
+    "id": "11th",
+    "translation": "11th"
+  },
+  {
+    "id": "12th",
+    "translation": "12th"
+  },
+  {
+    "id": "13th",
+    "translation": "13th"
+  },
+  {
+    "id": "14th",
+    "translation": "14th"
+  },
+  {
+    "id": "15th",
+    "translation": "15th"
+  },
+  {
+    "id": "16th",
+    "translation": "16th"
+  },
+  {
+    "id": "17th",
+    "translation": "17th"
+  },
+  {
+    "id": "18th",
+    "translation": "18th"
+  },
+  {
+    "id": "19th",
+    "translation": "19th"
+  },
+  {
+    "id": "20th",
+    "translation": "20th"
+  },
+  {
+    "id": "21st",
+    "translation": "21st"
+  },
+  {
+    "id": "22nd",
+    "translation": "22nd"
+  },
+  {
+    "id": "23rd",
+    "translation": "23rd"
+  },
+  {
+    "id": "24th",
+    "translation": "24th"
+  },
+  {
+    "id": "25th",
+    "translation": "25th"
+  },
+  {
+    "id": "26th",
+    "translation": "26th"
+  },
+  {
+    "id": "27th",
+    "translation": "27th"
+  },
+  {
+    "id": "28th",
+    "translation": "28th"
+  },
+  {
+    "id": "29th",
+    "translation": "29th"
+  },
+  {
+    "id": "30th",
+    "translation": "30th"
+  },
+  {
+    "id": "31th",
+    "translation": "31th"
+  },
+  {
+    "id": "first",
+    "translation": "first"
+  },
+  {
+    "id": "second",
+    "translation": "second"
+  },
+  {
+    "id": "third",
+    "translation": "third"
+  },
+  {
+    "id": "fourth",
+    "translation": "fourth"
+  },
+  {
+    "id": "fifth",
+    "translation": "fifth"
+  },
+  {
+    "id": "sixth",
+    "translation": "sixth"
+  },
+  {
+    "id": "seventh",
+    "translation": "seventh"
+  },
+  {
+    "id": "eighth",
+    "translation": "eighth"
+  },
+  {
+    "id": "nineth",
+    "translation": "nineth"
+  },
+  {
+    "id": "tenth",
+    "translation": "tenth"
+  },
+  {
+    "id": "eleventh",
+    "translation": "eleventh"
+  },
+  {
+    "id": "twelveth",
+    "translation": "twelveth"
+  },
+  {
+    "id": "thirteenth",
+    "translation": "thirteenth"
+  },
+  {
+    "id": "fourteenth",
+    "translation": "fourteenth"
+  },
+  {
+    "id": "fifteenth",
+    "translation": "fifteenth"
+  },
+  {
+    "id": "sixteenth",
+    "translation": "sixteenth"
+  },
+  {
+    "id": "seventeenth",
+    "translation": "seventeenth"
+  },
+  {
+    "id": "eighteenth",
+    "translation": "eighteenth"
+  },
+  {
+    "id": "nineteenth",
+    "translation": "nineteenth"
+  },
+  {
+    "id": "twenteth",
+    "translation": "twenteth"
+  },
+  {
+    "id": "twentyfirst",
+    "translation": "twentyfirst"
+  },
+  {
+    "id": "twentysecond",
+    "translation": "twentysecond"
+  },
+  {
+    "id": "twentythird",
+    "translation": "twentythird"
+  },
+  {
+    "id": "twentyfourth",
+    "translation": "twentyfourth"
+  },
+  {
+    "id": "twentyfifth",
+    "translation": "twentyfifth"
+  },
+  {
+    "id": "twentysixth",
+    "translation": "twentysixth"
+  },
+  {
+    "id": "twentyseventh",
+    "translation": "twentyseventh"
+  },
+  {
+    "id": "twentyeight",
+    "translation": "twentyeight"
+  },
+  {
+    "id": "twentynineth",
+    "translation": "twentynineth"
+  },
+  {
+    "id": "thirteth",
+    "translation": "thirteth"
+  },
+  {
+    "id": "thirtyfirst",
+    "translation": "thirtyfirst"
   }
 ]

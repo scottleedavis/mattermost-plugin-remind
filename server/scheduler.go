@@ -1,6 +1,10 @@
 package main
 
-import "time"
+import (
+	// "strings"
+	"time"
+	// "github.com/mattermost/mattermost-server/model"
+)
 
 /*
 import (
@@ -64,43 +68,47 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
 	// response := ":thumbsup: I will remind " + target + useToString + " \"" + request.Reminder.Message + "\" " + when
 	// return response, nil
 
-	useTo := strings.HasPrefix(request.Reminder.Message, T("app.reminder.chrono.to"))
-	var useToString string
-	if useTo {
-		useToString = " " + T("app.reminder.chrono.to")
-	} else {
-		useToString = ""
-	}
+	// TODO ////////////////////////////////////////////////////////////////////////////////////
 
-	request.Reminder.Id = model.NewId()
-	request.Reminder.TeamId = request.TeamId
-	request.Reminder.UserId = request.UserId
-	request.Reminder.Completed = emptyTime.Format(time.RFC3339)
+	// useTo := strings.HasPrefix(request.Reminder.Message, T("app.reminder.chrono.to"))
+	// var useToString string
+	// if useTo {
+	// 	useToString = " " + T("app.reminder.chrono.to")
+	// } else {
+	// 	useToString = ""
+	// }
 
-	if cErr := a.createOccurrences(request); cErr != nil {
-		mlog.Error(cErr.Error())
-		return T(model.REMIND_EXCEPTION_TEXT), nil
-	}
+	// request.Reminder.Id = model.NewId()
+	// request.Reminder.TeamId = request.TeamId
+	// request.Reminder.Username = request.Username
+	// request.Reminder.Completed = p.emptyTime.Format(time.RFC3339)
 
-	schan := a.Srv.Store.Remind().SaveReminder(&request.Reminder)
-	if result := <-schan; result.Err != nil {
-		mlog.Error(result.Err.Message)
-		return T(model.REMIND_EXCEPTION_TEXT), nil
-	}
+	// if cErr := p.createOccurrences(request); cErr != nil {
+	// 	mlog.Error(cErr.Error())
+	// 	return T(model.REMIND_EXCEPTION_TEXT), nil
+	// }
 
-	if request.Reminder.Target == T("app.reminder.me") {
-		request.Reminder.Target = T("app.reminder.you")
-	}
+	// schan := a.Srv.Store.Remind().SaveReminder(&request.Reminder)
+	// if result := <-schan; result.Err != nil {
+	// 	mlog.Error(result.Err.Message)
+	// 	return T(model.REMIND_EXCEPTION_TEXT), nil
+	// }
 
-	var responseParameters = map[string]interface{}{
-		"Target":  request.Reminder.Target,
-		"UseTo":   useToString,
-		"Message": request.Reminder.Message,
-		"When":    a.formatWhen(request.UserId, request.Reminder.When, request.Occurrences[0].Occurrence, false),
-	}
-	response := T("app.reminder.response", responseParameters)
+	// if request.Reminder.Target == T("app.reminder.me") {
+	// 	request.Reminder.Target = T("app.reminder.you")
+	// }
 
-	return response, nil
+	// var responseParameters = map[string]interface{}{
+	// 	"Target":  request.Reminder.Target,
+	// 	"UseTo":   useToString,
+	// 	"Message": request.Reminder.Message,
+	// 	"When":    a.formatWhen(request.UserId, request.Reminder.When, request.Occurrences[0].Occurrence, false),
+	// }
+	// response := T("app.reminder.response", responseParameters)
+
+	// return response, nil
+
+	return "this is a test", nil
 }
 
 func (p *Plugin) Run() {
