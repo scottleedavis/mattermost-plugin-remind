@@ -1,20 +1,11 @@
 package main
 
 import (
-	// "strings"
+	"github.com/mattermost/mattermost-server/model"
+	"strings"
 	"time"
-	// "github.com/mattermost/mattermost-server/model"
 )
 
-/*
-import (
-	// "fmt"
-	// "github.com/google/uuid"
-	// "time"
-)
-*/
-
-// TODO
 func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
 
 	user, _ := p.API.GetUserByUsername(request.Username)
@@ -36,45 +27,30 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
 	request.Reminder.Id = model.NewId()
 	request.Reminder.TeamId = request.TeamId
 	request.Reminder.Username = request.Username
-	request.Reminder.Completed = p.emptyTime.Format(time.RFC3339)
+	request.Reminder.Completed = p.emptyTime
 
 	if cErr := p.CreateOccurrences(request); cErr != nil {
 		p.API.LogError(cErr.Error())
-		return T(model.REMIND_EXCEPTION_TEXT), nil
+		return T("exception.response"), nil
 	}
 
-	// p.UpsertReminder(request)
+	if rErr := p.UpsertReminder(request); rErr != nil {
+		p.API.LogError(rErr.Error())
+		return T("exception.response"), nil
+	}
 
-	// if target == "me" {
-	// 	target = "you"
-	// }
+	if request.Reminder.Target == T("me") {
+		request.Reminder.Target = T("you")
+	}
 
-	// response := ":thumbsup: I will remind " + target + useToString + " \"" + request.Reminder.Message + "\" " + when
-	// return response, nil
+	var responseParameters = map[string]interface{}{
+		"Target":  request.Reminder.Target,
+		"UseTo":   useToString,
+		"Message": request.Reminder.Message,
+		"When":    p.formatWhen(request.Username, request.Reminder.When, request.Reminder.Occurrences[0].Occurrence.Format(time.RFC3339), false),
+	}
 
-	// TODO ////////////////////////////////////////////////////////////////////////////////////
-
-	// schan := a.Srv.Store.Remind().SaveReminder(&request.Reminder)
-	// if result := <-schan; result.Err != nil {
-	// 	mlog.Error(result.Err.Message)
-	// 	return T(model.REMIND_EXCEPTION_TEXT), nil
-	// }
-
-	// if request.Reminder.Target == T("me") {
-	// 	request.Reminder.Target = T("you")
-	// }
-
-	// var responseParameters = map[string]interface{}{
-	// 	"Target":  request.Reminder.Target,
-	// 	"UseTo":   useToString,
-	// 	"Message": request.Reminder.Message,
-	// 	"When":    a.formatWhen(request.UserId, request.Reminder.When, request.Occurrences[0].Occurrence, false),
-	// }
-	// response := T("response", responseParameters)
-
-	// return response, nil
-
-	return "this is a test", nil
+	return T("schedule.response", responseParameters), nil
 }
 
 func (p *Plugin) Run() {

@@ -23,5 +23,7 @@ type Plugin struct {
 
 	emptyTime time.Time
 
+	defaultTime time.Time
+
 	supportedLocales []string
 }

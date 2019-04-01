@@ -250,6 +250,170 @@ func (p *Plugin) findWhenEN(request *ReminderRequest) error {
 
 }
 
+func (p *Plugin) normalizeTime(text string, user *model.User) (string, error) {
+
+	T, _ := p.translation(user)
+
+	switch text {
+	case T("noon"):
+		return "12:00:00", nil
+	case T("midnight"):
+		return "00:00:00", nil
+	case T("one"),
+		T("two"),
+		T("three"),
+		T("four"),
+		T("five"),
+		T("six"),
+		T("seven"),
+		T("eight"),
+		T("nine"),
+		T("ten"),
+		T("eleven"),
+		T("twelve"):
+
+		num, wErr := p.wordToNumber(text, user)
+		if wErr != nil {
+			p.API.LogError(fmt.Sprintf("%v", wErr))
+			return "", wErr
+		}
+
+		wordTime := time.Now().Round(time.Hour).Add(time.Hour * time.Duration(num+2))
+
+		dateTimeSplit := p.regSplit(p.chooseClosest(user, &wordTime, false).Format(time.RFC3339), "T|Z")
+
+		switch len(dateTimeSplit) {
+		case 2:
+			tzSplit := strings.Split(dateTimeSplit[1], "-")
+			return tzSplit[0], nil
+		case 3:
+			break
+		default:
+			return "", errors.New("unrecognized dateTime format")
+		}
+
+		return dateTimeSplit[1], nil
+
+	case T("0"),
+		T("1"),
+		T("2"),
+		T("3"),
+		T("4"),
+		T("5"),
+		T("6"),
+		T("7"),
+		T("8"),
+		T("9"),
+		T("10"),
+		T("11"),
+		T("12"),
+		T("13"),
+		T("14"),
+		T("15"),
+		T("16"),
+		T("17"),
+		T("18"),
+		T("19"),
+		T("20"),
+		T("21"),
+		T("22"),
+		T("23"):
+
+		num, nErr := strconv.Atoi(text)
+		if nErr != nil {
+			return "", nErr
+		}
+
+		numTime := time.Now().Round(time.Hour).Add(time.Hour * time.Duration(num))
+		dateTimeSplit := p.regSplit(p.chooseClosest(user, &numTime, false).Format(time.RFC3339), "T|Z")
+
+		switch len(dateTimeSplit) {
+		case 2:
+			tzSplit := strings.Split(dateTimeSplit[1], "-")
+			return tzSplit[0], nil
+		case 3:
+			break
+		default:
+			return "", errors.New("unrecognized dateTime format")
+		}
+
+		return dateTimeSplit[1], nil
+
+	default:
+		break
+	}
+
+	t := text
+	if match, _ := regexp.MatchString("(1[012]|[1-9]):[0-5][0-9](\\s)?(?i)(am|pm)", t); match { // 12:30PM, 12:30 pm
+
+		t = strings.ToUpper(strings.Replace(t, " ", "", -1))
+		test, tErr := time.Parse(time.Kitchen, t)
+		if tErr != nil {
+			return "", tErr
+		}
+
+		dateTimeSplit := p.regSplit(test.Format(time.RFC3339), "T|Z")
+		if len(dateTimeSplit) != 3 {
+			return "", errors.New("unrecognized dateTime format")
+		}
+
+		return dateTimeSplit[1], nil
+	} else if match, _ := regexp.MatchString("(1[012]|[1-9]):[0-5][0-9]", t); match { // 12:30
+
+		nowkit := time.Now().Format(time.Kitchen)
+		ampm := string(nowkit[len(nowkit)-2:])
+		timeUnitSplit := strings.Split(t, ":")
+		hr, _ := strconv.Atoi(timeUnitSplit[0])
+
+		if hr > 11 {
+			ampm = strings.ToUpper(T("pm"))
+		}
+		if hr > 12 {
+			hr -= 12
+			timeUnitSplit[0] = strconv.Itoa(hr)
+		}
+
+		t = timeUnitSplit[0] + ":" + timeUnitSplit[1] + ampm
+
+		test, tErr := time.Parse(time.Kitchen, t)
+		if tErr != nil {
+			return "", tErr
+		}
+
+		dateTimeSplit := p.regSplit(p.chooseClosest(user, &test, false).Format(time.RFC3339), "T|Z")
+		if len(dateTimeSplit) != 3 {
+			return "", errors.New("unrecognized dateTime format")
+		}
+
+		return dateTimeSplit[1], nil
+
+	} else if match, _ := regexp.MatchString("(1[012]|[1-9])(\\s)?(?i)(am|pm)", t); match { // 5PM, 7 am
+
+		nowkit := time.Now().Format(time.Kitchen)
+		ampm := string(nowkit[len(nowkit)-2:])
+
+		timeSplit := p.regSplit(t, "(?i)(am|pm)")
+
+		test, tErr := time.Parse(time.Kitchen, timeSplit[0]+":00"+ampm)
+		if tErr != nil {
+			return "", tErr
+		}
+
+		dateTimeSplit := p.regSplit(p.chooseClosest(user, &test, false).Format(time.RFC3339), "T|Z")
+		if len(dateTimeSplit) != 3 {
+			return "", errors.New("unrecognized dateTime format")
+		}
+
+		return dateTimeSplit[1], nil
+	} else if match, _ := regexp.MatchString("(1[012]|[1-9])[0-5][0-9]", t); match { // 1200
+
+		return t[:len(t)-2] + ":" + t[len(t)-2:] + ":00", nil
+
+	}
+
+	return "", errors.New("unable to normalize time")
+}
+
 func (p *Plugin) normalizeDate(text string, user *model.User) (string, error) {
 
 	location := p.location(user)

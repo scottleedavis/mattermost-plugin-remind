@@ -64,19 +64,19 @@ func (p *Plugin) GetReminders(username string) []Reminder {
 	return reminders
 }
 
-func (p *Plugin) UpsertReminder(request ReminderRequest) {
+func (p *Plugin) UpsertReminder(request *ReminderRequest) error {
 
 	user, uErr := p.API.GetUserByUsername(request.Username)
 
 	if uErr != nil {
 		p.API.LogError("failed to query user %s", request.Username)
-		return
+		return uErr
 	}
 
 	bytes, bErr := p.API.KVGet(user.Username)
 	if bErr != nil {
 		p.API.LogError("failed KVGet %s", bErr)
-		return
+		return bErr
 	}
 
 	var reminders []Reminder
@@ -93,10 +93,12 @@ func (p *Plugin) UpsertReminder(request ReminderRequest) {
 
 	if rErr != nil {
 		p.API.LogError("failed to marshal reminders %s", user.Username)
-		return
+		return rErr
 	}
 
 	p.API.KVSet(user.Username, ro)
+
+	return nil
 }
 
 func (p *Plugin) TriggerReminders() {
