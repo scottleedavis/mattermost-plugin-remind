@@ -13,9 +13,13 @@ import (
 // TODO
 func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
 
-	return request.Payload, nil
-	// user, _ := p.API.GetUserByUsername(request.Username)
-	// T := GetUserTranslations(user.Locale)
+	user, _ := p.API.GetUserByUsername(request.Username)
+	T, _ := p.translation(user)
+
+	if pErr := p.ParseRequest(request); pErr != nil {
+		p.API.LogError(pErr.Error())
+		return T("exception.response"), nil
+	}
 
 	// var when string
 	// var target string
@@ -59,6 +63,44 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
 
 	// response := ":thumbsup: I will remind " + target + useToString + " \"" + request.Reminder.Message + "\" " + when
 	// return response, nil
+
+	useTo := strings.HasPrefix(request.Reminder.Message, T("app.reminder.chrono.to"))
+	var useToString string
+	if useTo {
+		useToString = " " + T("app.reminder.chrono.to")
+	} else {
+		useToString = ""
+	}
+
+	request.Reminder.Id = model.NewId()
+	request.Reminder.TeamId = request.TeamId
+	request.Reminder.UserId = request.UserId
+	request.Reminder.Completed = emptyTime.Format(time.RFC3339)
+
+	if cErr := a.createOccurrences(request); cErr != nil {
+		mlog.Error(cErr.Error())
+		return T(model.REMIND_EXCEPTION_TEXT), nil
+	}
+
+	schan := a.Srv.Store.Remind().SaveReminder(&request.Reminder)
+	if result := <-schan; result.Err != nil {
+		mlog.Error(result.Err.Message)
+		return T(model.REMIND_EXCEPTION_TEXT), nil
+	}
+
+	if request.Reminder.Target == T("app.reminder.me") {
+		request.Reminder.Target = T("app.reminder.you")
+	}
+
+	var responseParameters = map[string]interface{}{
+		"Target":  request.Reminder.Target,
+		"UseTo":   useToString,
+		"Message": request.Reminder.Message,
+		"When":    a.formatWhen(request.UserId, request.Reminder.When, request.Occurrences[0].Occurrence, false),
+	}
+	response := T("app.reminder.response", responseParameters)
+
+	return response, nil
 }
 
 func (p *Plugin) Run() {

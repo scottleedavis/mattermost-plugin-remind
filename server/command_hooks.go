@@ -41,7 +41,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	if strings.HasSuffix(args.Command, T("help")) {
 		return &model.CommandResponse{
 			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-			Text:         fmt.Sprintf(T("help-response")),
+			Text:         fmt.Sprintf(T("help.response")),
 		}, nil
 	}
 
@@ -76,7 +76,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		if err != nil {
 			return &model.CommandResponse{
 				ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-				Text:         fmt.Sprintf(T("exception-response")),
+				Text:         fmt.Sprintf(T("exception.response")),
 			}, nil
 		}
 
@@ -88,7 +88,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 
 	return &model.CommandResponse{
 		ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-		Text:         fmt.Sprintf(T("exception-response")),
+		Text:         fmt.Sprintf(T("exception.response")),
 	}, nil
 
 }

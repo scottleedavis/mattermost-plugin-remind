@@ -1,6 +1,6 @@
 [
   {
-    "id": "exception-response",
+    "id": "exception.response",
     "translation": "Sorry, I didn’t quite get that. I’m easily confused. Perhaps try the words in a different order? This usually works: `/remind [@someone or ~channel] [what] [when]`.\n"
   },
   {
@@ -8,7 +8,7 @@
   	"translation": "help"
   },
   {
-    "id": "help-response",
+    "id": "help.response",
     "translation": ":wave: Need some help with `/remind`?\nUse `/remind` to set a reminder for yourself, someone else, or for a channel. Some examples include:\n* `/remind me to drink water at 3pm every day`\n* `/remind me on June 1st to wish Linda happy birthday`\n* `/remind ~team-alpha to update the project status every Monday at 9am`\n* `/remind @jessica about the interview in 3 hours`\n* `/remind @peter tomorrow \"Please review the office seating plan\"`\nOr, use `/remind list` to see the list of all your reminders.\n"
   },
   {
@@ -16,11 +16,95 @@
     "translation": "clear"
   },
   {
-  	"id": "clear-response",
+  	"id": "clear.response",
   	"translation": "Reminders cleared.\n"
   },
   {
   	"id": "me",
   	"translation": "me"
+  },
+  {
+  	"id": "in",
+  	"translation": "in"
+  },
+  {
+  	"id": "at",
+  	"translation": "at"
+  },
+    {
+  	"id": "on",
+  	"translation": "on"
+  },
+  {
+  	"id": "every",
+  	"translation": "every"
+  },
+  {
+  	"id": "everyday",
+  	"translation": "everyday"
+  },
+  {
+  	"id": "today",
+  	"translation": "today"
+  },
+  {
+  	"id": "tomorrow",
+  	"translation": "tomorrow"
+  },
+  {
+  	"id": "monday",
+  	"translation": "monday"
+  },
+  {
+  	"id": "tuesday",
+  	"translation": "tuesday"
+  },
+  {
+  	"id": "wednesday",
+  	"translation": "wednesday"
+  },
+  {
+  	"id": "thursday",
+  	"translation": "thursday"
+  },
+  {
+  	"id": "friday",
+  	"translation": "friday"
+  },
+  {
+  	"id": "saturday",
+  	"translation": "saturday"
+  },
+  {
+  	"id": "sunday",
+  	"translation": "sunday"
+  },
+  {
+  	"id": "mondays",
+  	"translation": "mondays"
+  },
+  {
+  	"id": "tuesdays",
+  	"translation": "tuesdays"
+  },
+  {
+  	"id": "wednesdays",
+  	"translation": "wednesdays"
+  },
+  {
+  	"id": "thursdays",
+  	"translation": "thursdays"
+  },
+  {
+  	"id": "fridays",
+  	"translation": "fridays"
+  },
+  {
+  	"id": "saturdays",
+  	"translation": "saturdays"
+  },
+  {
+  	"id": "sundays",
+  	"translation": "sundays"
   }
 ]
