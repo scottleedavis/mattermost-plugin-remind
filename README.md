@@ -3,18 +3,11 @@
 ### Began during [Mattermost Plugins Hackathon 2018](https://forum.mattermost.org/t/virtual-hackathon/5471)
 
 ##### current status
-* timezone aware
-* reminders with messages can be set
-  * only one pattern currently supported 
-    * `/remind (me or @user or ~channel) "message" in X seconds`
+* converting [mattermost-server based version](https://github.com/scottleedavis/mattermost-server/tree/MM-10580) to this plugin
     
 ##### planned
 * feature parity with [mattermost-remind](http://github.com/scottleedavis/mattermost-remind)
 * unit testing
-* structure/packaging/style mimicking [mattermost-plugin-zoom](https://github.com/mattermost/mattermost-plugin-zoom)
-* complete webapp functionality
-* any additional requests
-
 
 ### usage
 
@@ -35,7 +28,6 @@ See the full list of [Usage Examples](https://github.com/scottleedavis/mattermos
 * [Mattermost](https://mattermost.com/)
 * [Go](https://golang.org/)
 * [Dep](https://github.com/golang/dep)
-* [HTTPPie](https://httpie.org/)
 
 ### setup
 Mattermost config.json changes
