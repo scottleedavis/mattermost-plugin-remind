@@ -2,7 +2,7 @@
     "id": "io.github.mattermost-plugin-remind",
     "name": "Remind Bot Plugin",
     "description": "Set Reminders",
-    "version": "0.0.2",
+    "version": "0.0.1",
     "server": {
         "executables": {
             "linux-amd64": "server/dist/plugin-linux-amd64",

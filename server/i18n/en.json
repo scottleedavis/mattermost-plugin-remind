@@ -16,6 +16,62 @@
   	"translation": ":thumbsup: I will remind {{.Target}}{{.UseTo}} \"{{.Message}}\" {{.When}}"
   },
   {
+  	"id": "reminder.message",
+  	"translation": "{{.FinalTarget}} asked me to remind you \"{{.Message}}\"."
+  },
+  {
+    "id": "button.complete",
+    "translation": "Mark as Complete"
+  },
+  {
+    "id": "button.delete",
+    "translation": "Delete"
+  },
+  {
+    "id": "button.snooze",
+    "translation": "Snooze"
+  },
+  {
+    "id": "button.snooze.20min",
+    "translation": "20 minutes"
+  },
+  {
+    "id": "snooze.20min",
+    "translation": "Ok! I’ll remind you \"{{.Message}}\" in 20 minutes"
+  },
+  {
+    "id": "button.snooze.1hr",
+    "translation": "1 hour"
+  },
+  {
+    "id": "snooze.1hr",
+    "translation": "Ok! I’ll remind you \"{{.Message}}\" in 1 hour"
+  },
+  {
+    "id": "button.snooze.3hr",
+    "translation": "3 hourS"
+  },
+  {
+    "id": "snooze.3hr",
+    "translation": "Ok! I’ll remind you \"{{.Message}}\" in 3 hours"
+  },
+  {
+    "id": "button.snooze.tomorrow",
+    "translation": "Tomorrow at 9AM"
+  },
+  {
+    "id": "snooze.tomorrow",
+    "translation": "Ok! I’ll remind you \"{{.Message}}\" at 9am tommorrow"
+  },
+  {
+    "id": "button.snooze.nextweek",
+    "translation": "Next week"
+  },
+  {
+    "id": "snooze.nextweek",
+    "translation": "Ok! I’ll remind you \"{{.Message}}\" at 9am Monday"
+  },
+  {
     "id": "clear",
     "translation": "clear"
   },

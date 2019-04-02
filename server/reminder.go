@@ -105,276 +105,188 @@ func (p *Plugin) TriggerReminders() {
 
 	bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", time.Now().Round(time.Second))))
 
-	p.API.LogDebug("*")
-
 	if err != nil {
 		p.API.LogError("failed KVGet %s", err)
-	} else if string(bytes[:]) == "" {
-	} else {
+	}
 
-		p.API.LogDebug(string(bytes[:]))
+	p.API.LogInfo("*")
 
-		var reminderOccurrences []Occurrence
-		roErr := json.Unmarshal(bytes, &reminderOccurrences)
-		if roErr != nil {
-			p.API.LogError("Failed to unmarshal reminder occurrences " + fmt.Sprintf("%v", roErr))
+	if string(bytes[:]) != "" {
+
+		var occurrences []Occurrence
+		oErr := json.Unmarshal(bytes, &occurrences)
+		if oErr != nil {
+			p.API.LogError("Failed to unmarshal reminder occurrences " + fmt.Sprintf("%v", oErr))
 			return
 		}
 
-		p.API.LogDebug(fmt.Sprintf("%v", reminderOccurrences))
+		p.API.LogInfo(fmt.Sprintf("%v", occurrences))
 
-		for _, ReminderOccurrence := range reminderOccurrences {
+		for _, occurrence := range occurrences {
 
-			user, err := p.API.GetUserByUsername(ReminderOccurrence.Username)
-
-			if err != nil {
+			user, uErr := p.API.GetUserByUsername(occurrence.Username)
+			if uErr != nil {
 				p.API.LogError("failed to query user %s", user.Id)
 				continue
 			}
-
-			bytes, b_err := p.API.KVGet(user.Username)
-			if b_err != nil {
-				p.API.LogError("failed KVGet %s", b_err)
-				return
+			bytes, bErr := p.API.KVGet(user.Username)
+			if bErr != nil {
+				p.API.LogError("failed KVGet %s", bErr)
+				continue
 			}
-
 			var reminders []Reminder
-			uerr := json.Unmarshal(bytes, &reminders)
-
-			if uerr != nil {
+			rsErr := json.Unmarshal(bytes, &reminders)
+			if rsErr != nil {
+				p.API.LogError("failed json Unmarshal %s", rsErr)
 				continue
 			}
 
-			reminder := p.findReminder(reminders, ReminderOccurrence)
+			T, _ := p.translation(user)
+			reminder := p.findReminder(reminders, occurrence)
 
 			p.API.LogDebug(fmt.Sprintf("%v", reminder))
 
-			if strings.HasPrefix(reminder.Target, "@") || strings.HasPrefix(reminder.Target, "me") { //@user
+			if strings.HasPrefix(reminder.Target, "@") || strings.HasPrefix(reminder.Target, T("me")) { //@user
 
-				p.API.LogDebug("DM: " + fmt.Sprintf("%v", p.remindUserId) + "__" + fmt.Sprintf("%v", user.Id))
 				channel, cErr := p.API.GetDirectChannel(p.remindUserId, user.Id)
-
 				if cErr != nil {
-					p.API.LogError("fail to get direct channel ", fmt.Sprintf("%v", cErr))
-				} else {
-					p.API.LogDebug("got direct channel " + fmt.Sprintf("%v", channel))
-
-					var finalTarget string
-					finalTarget = reminder.Target
-					if finalTarget == "me" {
-						finalTarget = "You"
-					} else {
-						finalTarget = "@" + user.Username
-					}
-
-					if _, err = p.API.CreatePost(&model.Post{
-						UserId:    p.remindUserId,
-						ChannelId: channel.Id,
-						Message:   fmt.Sprintf(finalTarget + " asked me to remind you \"" + reminder.Message + "\"."),
-					}); err != nil {
-						p.API.LogError(
-							"failed to post DM message",
-							"user_id", user.Id,
-							"error", err.Error(),
-						)
-					}
+					p.API.LogError("failed to create channel %s", cErr)
+					continue
 				}
 
-			} else { //~ channel
+				finalTarget := reminder.Target
+				if finalTarget == T("me") {
+					finalTarget = T("you")
+				} else {
+					finalTarget = "@" + user.Username
+				}
 
-				channel, cErr := p.API.GetChannelByName(reminder.TeamId, strings.Replace(reminder.Target, "~", "", -1), false)
+				messageParameters := map[string]interface{}{
+					"FinalTarget": finalTarget,
+					"Message":     reminder.Message,
+				}
+
+				interactivePost := model.Post{
+					ChannelId:     channel.Id,
+					PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
+					UserId:        p.remindUserId,
+					Message:       T("reminder.message", messageParameters),
+					Props: model.StringInterface{
+						"attachments": []*model.SlackAttachment{
+							{
+								Actions: []*model.PostAction{
+									{
+										Integration: &model.PostActionIntegration{
+											Context: model.StringInterface{
+												"reminderId":   reminder.Id,
+												"occurrenceId": occurrence.Id,
+												"action":       "complete",
+											},
+											URL: "mattermost://remind",
+										},
+										Name: T("button.complete"),
+										Type: "action",
+									},
+									{
+										Integration: &model.PostActionIntegration{
+											Context: model.StringInterface{
+												"reminderId":   reminder.Id,
+												"occurrenceId": occurrence.Id,
+												"action":       "delete",
+											},
+											URL: "mattermost://remind",
+										},
+										Name: T("button.delete"),
+										Type: "action",
+									},
+									{
+										Integration: &model.PostActionIntegration{
+											Context: model.StringInterface{
+												"reminderId":   reminder.Id,
+												"occurrenceId": occurrence.Id,
+												"action":       "snooze",
+											},
+											URL: "mattermost://remind",
+										},
+										Name: T("button.snooze"),
+										Type: "select",
+										Options: []*model.PostActionOptions{
+											{
+												Text:  T("button.snooze.20min"),
+												Value: "20min",
+											},
+											{
+												Text:  T("button.snooze.1hr"),
+												Value: "1hr",
+											},
+											{
+												Text:  T("button.snooze.3hr"),
+												Value: "3hrs",
+											},
+											{
+												Text:  T("button.snooze.tomorrow"),
+												Value: "tomorrow",
+											},
+											{
+												Text:  T("button.snooze.nextweek"),
+												Value: "nextweek",
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				}
+
+				if _, pErr := p.API.CreatePost(&interactivePost); pErr != nil {
+					p.API.LogError(fmt.Sprintf("%v", pErr))
+					continue
+				}
+
+				if occurrence.Repeat != "" {
+					p.rescheduleOccurrence(&occurrence)
+				}
+
+			} else if strings.HasPrefix(reminder.Target, "~") { //~ channel
+
+				channel, cErr := p.API.GetChannelByName(
+					reminder.TeamId,
+					strings.Replace(reminder.Target, "~", "", -1),
+					false,
+				)
 
 				if cErr != nil {
 					p.API.LogError("fail to get channel " + fmt.Sprintf("%v", cErr))
 				} else {
-					p.API.LogDebug("got channel " + fmt.Sprintf("%v", channel))
 
-					if _, err = p.API.CreatePost(&model.Post{
-						UserId:    p.remindUserId,
-						ChannelId: channel.Id,
-						Message:   fmt.Sprintf("@" + user.Username + " asked me to remind you \"" + reminder.Message + "\"."),
-					}); err != nil {
-						p.API.LogError(
-							"failed to post DM message",
-							"user_id", user.Id,
-							"error", err.Error(),
-						)
+					var messageParameters = map[string]interface{}{
+						"FinalTarget": "@" + user.Username,
+						"Message":     reminder.Message,
 					}
+
+					interactivePost := model.Post{
+						ChannelId:     channel.Id,
+						PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
+						UserId:        p.remindUserId,
+						Message:       T("reminder.message", messageParameters),
+						Props:         model.StringInterface{},
+					}
+
+					if _, pErr := p.API.CreatePost(&interactivePost); pErr != nil {
+						p.API.LogError(fmt.Sprintf("%v", pErr))
+					}
+
+					if occurrence.Repeat != "" {
+						p.rescheduleOccurrence(&occurrence)
+					}
+
 				}
 			}
 
 		}
 
 	}
-
-
-	//TODO replace/merge the above with the following code.  ///////////////////////////////
-
-	// t := time.Now().Round(time.Second).Format(time.RFC3339)
-	// schan := a.Srv.Store.Remind().GetByTime(t)
-
-	// if result := <-schan; result.Err != nil {
-	// 	mlog.Error(result.Err.Message)
-	// } else {
-	// 	occurrences := result.Data.(model.Occurrences)
-
-	// 	if len(occurrences) == 0 {
-	// 		return
-	// 	}
-
-	// 	for _, occurrence := range occurrences {
-
-	// 		reminder := model.Reminder{}
-
-	// 		schan = a.Srv.Store.Remind().GetReminder(occurrence.ReminderId)
-	// 		if result := <-schan; result.Err != nil {
-	// 			continue
-	// 		} else {
-	// 			reminder = result.Data.(model.Reminder)
-	// 		}
-
-	// 		user, _ := a.GetUser(reminder.UserId)
-	// 		T, _ := a.translation(user)
-
-	// 		if strings.HasPrefix(reminder.Target, "@") || strings.HasPrefix(reminder.Target, T("app.reminder.me")) {
-
-	// 			channel, cErr := a.GetOrCreateDirectChannel(remindUser.Id, user.Id)
-	// 			if cErr != nil {
-	// 				continue
-	// 			}
-
-	// 			finalTarget := reminder.Target
-	// 			if finalTarget == T("app.reminder.me") {
-	// 				finalTarget = T("app.reminder.you")
-	// 			} else {
-	// 				finalTarget = "@" + user.Username
-	// 			}
-
-	// 			var messageParameters = map[string]interface{}{
-	// 				"FinalTarget": finalTarget,
-	// 				"Message":     reminder.Message,
-	// 			}
-
-	// 			interactivePost := model.Post{
-	// 				ChannelId:     channel.Id,
-	// 				PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
-	// 				UserId:        remindUser.Id,
-	// 				Message:       T("app.reminder.message", messageParameters),
-	// 				Props: model.StringInterface{
-	// 					"attachments": []*model.SlackAttachment{
-	// 						{
-	// 							Actions: []*model.PostAction{
-	// 								{
-	// 									Integration: &model.PostActionIntegration{
-	// 										Context: model.StringInterface{
-	// 											"reminderId":   reminder.Id,
-	// 											"occurrenceId": occurrence.Id,
-	// 											"action":       "complete",
-	// 										},
-	// 										URL: "mattermost://remind",
-	// 									},
-	// 									Name: T("app.reminder.update.button.complete"),
-	// 									Type: "action",
-	// 								},
-	// 								{
-	// 									Integration: &model.PostActionIntegration{
-	// 										Context: model.StringInterface{
-	// 											"reminderId":   reminder.Id,
-	// 											"occurrenceId": occurrence.Id,
-	// 											"action":       "delete",
-	// 										},
-	// 										URL: "mattermost://remind",
-	// 									},
-	// 									Name: T("app.reminder.update.button.delete"),
-	// 									Type: "action",
-	// 								},
-	// 								{
-	// 									Integration: &model.PostActionIntegration{
-	// 										Context: model.StringInterface{
-	// 											"reminderId":   reminder.Id,
-	// 											"occurrenceId": occurrence.Id,
-	// 											"action":       "snooze",
-	// 										},
-	// 										URL: "mattermost://remind",
-	// 									},
-	// 									Name: T("app.reminder.update.button.snooze"),
-	// 									Type: "select",
-	// 									Options: []*model.PostActionOptions{
-	// 										{
-	// 											Text:  T("app.reminder.update.button.snooze.20min"),
-	// 											Value: "20min",
-	// 										},
-	// 										{
-	// 											Text:  T("app.reminder.update.button.snooze.1hr"),
-	// 											Value: "1hr",
-	// 										},
-	// 										{
-	// 											Text:  T("app.reminder.update.button.snooze.3hr"),
-	// 											Value: "3hrs",
-	// 										},
-	// 										{
-	// 											Text:  T("app.reminder.update.button.snooze.tomorrow"),
-	// 											Value: "tomorrow",
-	// 										},
-	// 										{
-	// 											Text:  T("app.reminder.update.button.snooze.nextweek"),
-	// 											Value: "nextweek",
-	// 										},
-	// 									},
-	// 								},
-	// 							},
-	// 						},
-	// 					},
-	// 				},
-	// 			}
-
-	// 			if _, pErr := a.CreatePostAsUser(&interactivePost, false); pErr != nil {
-	// 				mlog.Error(fmt.Sprintf("%v", pErr))
-	// 			}
-
-	// 			if occurrence.Repeat != "" {
-	// 				a.RescheduleOccurrence(&occurrence)
-	// 			}
-
-	// 		} else if strings.HasPrefix(reminder.Target, "~") {
-
-	// 			channel, cErr := a.GetChannelByName(
-	// 				strings.Replace(reminder.Target, "~", "", -1),
-	// 				reminder.TeamId,
-	// 				false,
-	// 			)
-
-	// 			if cErr != nil {
-	// 				mlog.Error(cErr.Message)
-	// 				continue
-	// 			}
-
-	// 			var messageParameters = map[string]interface{}{
-	// 				"FinalTarget": "@" + user.Username,
-	// 				"Message":     reminder.Message,
-	// 			}
-
-	// 			interactivePost := model.Post{
-	// 				ChannelId:     channel.Id,
-	// 				PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
-	// 				UserId:        remindUser.Id,
-	// 				Message:       T("app.reminder.message", messageParameters),
-	// 				Props:         model.StringInterface{},
-	// 			}
-
-	// 			if _, pErr := a.CreatePostAsUser(&interactivePost, false); pErr != nil {
-	// 				mlog.Error(fmt.Sprintf("%v", pErr))
-	// 			}
-
-	// 			if occurrence.Repeat != "" {
-	// 				a.RescheduleOccurrence(&occurrence)
-	// 			}
-
-	// 		}
-
-	// 	}
-
-	// }
 
 }
 
@@ -388,9 +300,56 @@ func (p *Plugin) DeleteReminders(user *model.User) string {
 	return T("clear.response")
 }
 
-func (p *Plugin) findReminder(reminders []Reminder, reminderOccurrence Occurrence) Reminder {
+func (p *Plugin) rescheduleOccurrence(occurrence *Occurrence) {
+
+	user, _ := p.API.GetUserByUsername(occurrence.Username)
+	_, locale := p.translation(user)
+
+	var times []time.Time
+
+	switch locale {
+	case "en":
+		times, _ = p.rescheduleOccurrenceEN(occurrence)
+	default:
+		times, _ = p.rescheduleOccurrenceEN(occurrence)
+	}
+
+	if len(times) > 1 {
+		for _, ts := range times {
+			if ts.Weekday() == occurrence.Occurrence.Weekday() {
+				occurrence.Occurrence = ts
+				p.upsertOccurrence(occurrence)
+				return
+			}
+		}
+	} else {
+		occurrence.Occurrence = times[0]
+		p.upsertOccurrence(occurrence)
+	}
+
+}
+
+func (p *Plugin) rescheduleOccurrenceEN(occurrence *Occurrence) ([]time.Time, error) {
+
+	user, _ := p.API.GetUserByUsername(occurrence.Username)
+	T, _ := p.translation(user)
+
+	if strings.HasPrefix(occurrence.Repeat, T("in")) {
+		return p.in(occurrence.Repeat, user)
+	} else if strings.HasPrefix(occurrence.Repeat, T("at")) {
+		return p.at(occurrence.Repeat, user)
+	} else if strings.HasPrefix(occurrence.Repeat, T("on")) {
+		return p.on(occurrence.Repeat, user)
+	} else if strings.HasPrefix(occurrence.Repeat, T("every")) {
+		return p.every(occurrence.Repeat, user)
+	} else {
+		return p.freeForm(occurrence.Repeat, user)
+	}
+}
+
+func (p *Plugin) findReminder(reminders []Reminder, occurrence Occurrence) Reminder {
 	for _, reminder := range reminders {
-		if reminder.Id == reminderOccurrence.ReminderId {
+		if reminder.Id == occurrence.ReminderId {
 			return reminder
 		}
 	}
