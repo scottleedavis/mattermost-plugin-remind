@@ -5,7 +5,7 @@ HTTP ?= $(shell command -v http 2> /dev/null)
 CURL ?= $(shell command -v curl 2> /dev/null)
 MANIFEST_FILE ?= plugin.json
 
-# Verify environment, and define PLUGIN_ID, PLUGIN_VERSION, HAS_SERVER and HAS_WEBAPP as needed.
+# Verify environment, and define PLUGIN_ID, PLUGIN_VERSION, and HAS_SERVER as needed.
 include build/setup.mk
 
 BUNDLE_NAME ?= $(PLUGIN_ID)-$(PLUGIN_VERSION).tar.gz
@@ -20,12 +20,9 @@ apply:
 
 ## Runs govet and gofmt against all packages.
 .PHONY: check-style
-check-style: server/.depensure webapp/.npminstall gofmt govet
+check-style: server/.depensure gofmt govet
 	@echo Checking for style guide compliance
 
-ifneq ($(HAS_WEBAPP),)
-	cd webapp && npm run lint
-endif
 
 ## Runs gofmt against all packages.
 .PHONY: gofmt
@@ -75,20 +72,6 @@ ifneq ($(HAS_SERVER),)
 	cd server && cp -a i18n dist/i18n
 endif
 
-## Ensures NPM dependencies are installed without having to run this all the time.
-webapp/.npminstall:
-ifneq ($(HAS_WEBAPP),)
-	cd webapp && $(NPM) install
-	touch $@
-endif
-
-## Builds the webapp, if it exists.
-.PHONY: webapp
-webapp: webapp/.npminstall
-ifneq ($(HAS_WEBAPP),)
-	cd webapp && $(NPM) run build;
-endif
-
 ## Generates a tar bundle of the plugin for install.
 .PHONY: bundle
 bundle:
@@ -99,17 +82,13 @@ ifneq ($(HAS_SERVER),)
 	mkdir -p dist/$(PLUGIN_ID)/server/dist;
 	cp -r server/dist/* dist/$(PLUGIN_ID)/server/dist/;
 endif
-ifneq ($(HAS_WEBAPP),)
-	mkdir -p dist/$(PLUGIN_ID)/webapp/dist;
-	cp -r webapp/dist/* dist/$(PLUGIN_ID)/webapp/dist/;
-endif
 	cd dist && tar -cvzf $(BUNDLE_NAME) $(PLUGIN_ID)
 
 	@echo plugin built at: dist/$(BUNDLE_NAME)
 
 ## Builds and bundles the plugin.
 .PHONY: dist
-dist:	apply server webapp bundle
+dist:	apply server bundle
 
 ## Installs the plugin to a (development) server.
 .PHONY: deploy
@@ -140,19 +119,16 @@ else
 	@echo "No supported deployment method available. Install plugin manually."
 endif
 
-## Runs any lints and unit tests defined for the server and webapp, if they exist.
+## Runs any lints and unit tests defined for the server, if it exists.
 .PHONY: test
-test: server/.depensure webapp/.npminstall
+test: server/.depensure
 ifneq ($(HAS_SERVER),)
 	cd server && $(GO) test -race -v ./...
-endif
-ifneq ($(HAS_WEBAPP),)
-	cd webapp && $(NPM) run fix;
 endif
 
 ## Creates a coverage report for the server code.
 .PHONY: coverage
-coverage: server/.depensure webapp/.npminstall
+coverage: server/.depensure
 ifneq ($(HAS_SERVER),)
 	cd server && $(GO) test -race -coverprofile=coverage.txt ./...
 	@cd server && $(GO) tool cover -html=coverage.txt
@@ -165,11 +141,6 @@ clean:
 ifneq ($(HAS_SERVER),)
 	rm -fr server/dist
 	rm -fr server/.depensure
-endif
-ifneq ($(HAS_WEBAPP),)
-	rm -fr webapp/.npminstall
-	rm -fr webapp/dist
-	rm -fr webapp/node_modules
 endif
 	rm -fr build/bin/
 

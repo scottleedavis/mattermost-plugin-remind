@@ -2,16 +2,13 @@
     "id": "io.github.mattermost-plugin-remind",
     "name": "Remind Bot Plugin",
     "description": "Set Reminders",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "server": {
         "executables": {
             "linux-amd64": "server/dist/plugin-linux-amd64",
             "darwin-amd64": "server/dist/plugin-darwin-amd64",
             "windows-amd64": "server/dist/plugin-windows-amd64.exe"
         }
-    },
-    "webapp": {
-        "bundle_path": "webapp/dist/main.js"
     },
     "settings_schema": {
         "header": "",

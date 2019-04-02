@@ -5,5 +5,5 @@ var manifest = struct {
 	Version string
 }{
 	Id:      "io.github.mattermost-plugin-remind",
-	Version: "0.0.1",
+	Version: "0.0.2",
 }
