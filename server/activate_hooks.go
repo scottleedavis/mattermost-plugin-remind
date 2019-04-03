@@ -51,6 +51,8 @@ func (p *Plugin) OnActivate() error {
 
 	p.emptyTime = time.Time{}.AddDate(1, 1, 1)
 	p.supportedLocales = []string{"en"}
+	p.ServerConfig = p.API.GetConfig()
+
 	p.Run()
 
 	return nil
@@ -64,7 +66,7 @@ func (p *Plugin) OnDeactivate() error {
 	}
 
 	p.Stop()
-	p.deleteBotUser()
+	// p.deleteBotUser()
 
 	for _, team := range teams {
 		if err := p.API.UnregisterCommand(team.Id, CommandTrigger); err != nil {

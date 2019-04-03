@@ -4,6 +4,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/plugin"
 )
 
@@ -16,6 +17,8 @@ type Plugin struct {
 	// configuration is the active plugin configuration. Consult getConfiguration and
 	// setConfiguration for usage.
 	configuration *configuration
+
+	ServerConfig *model.Config
 
 	remindUserId string
 

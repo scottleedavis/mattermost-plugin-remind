@@ -109,7 +109,7 @@ func (p *Plugin) TriggerReminders() {
 		p.API.LogError("failed KVGet %s", err)
 	}
 
-	p.API.LogInfo("*")
+	// p.API.LogInfo("*")
 
 	if string(bytes[:]) != "" {
 
@@ -166,6 +166,8 @@ func (p *Plugin) TriggerReminders() {
 					"Message":     reminder.Message,
 				}
 
+				siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
+
 				interactivePost := model.Post{
 					ChannelId:     channel.Id,
 					PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
@@ -182,7 +184,7 @@ func (p *Plugin) TriggerReminders() {
 												"occurrenceId": occurrence.Id,
 												"action":       "complete",
 											},
-											URL: "mattermost://remind",
+											URL: fmt.Sprintf("%s/plugins/%s/api/v1/complete", siteURL, manifest.Id),
 										},
 										Name: T("button.complete"),
 										Type: "action",
@@ -194,7 +196,7 @@ func (p *Plugin) TriggerReminders() {
 												"occurrenceId": occurrence.Id,
 												"action":       "delete",
 											},
-											URL: "mattermost://remind",
+											URL: fmt.Sprintf("%s/plugins/%s/api/v1/delete", siteURL, manifest.Id),
 										},
 										Name: T("button.delete"),
 										Type: "action",
@@ -206,7 +208,7 @@ func (p *Plugin) TriggerReminders() {
 												"occurrenceId": occurrence.Id,
 												"action":       "snooze",
 											},
-											URL: "mattermost://remind",
+											URL: fmt.Sprintf("%s/plugins/%s/api/v1/snooze", siteURL, manifest.Id),
 										},
 										Name: T("button.snooze"),
 										Type: "select",

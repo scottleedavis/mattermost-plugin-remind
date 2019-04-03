@@ -1,5 +1,5 @@
 {
-    "id": "io.github.mattermost-plugin-remind",
+    "id": "com.github.scottleedavis.mattermost-plugin-remind",
     "name": "Remind Bot Plugin",
     "description": "Set Reminders",
     "version": "0.0.1",
