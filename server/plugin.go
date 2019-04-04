@@ -4,6 +4,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/plugin"
 )
@@ -19,6 +20,8 @@ type Plugin struct {
 	configuration *configuration
 
 	ServerConfig *model.Config
+
+	router *mux.Router
 
 	remindUserId string
 
