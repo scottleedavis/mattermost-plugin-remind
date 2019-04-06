@@ -150,6 +150,7 @@ func (p *Plugin) TriggerReminders() {
 
 			if strings.HasPrefix(reminder.Target, "@") || strings.HasPrefix(reminder.Target, T("me")) { //@user
 
+				p.API.LogInfo("REMIND USER ID: " + p.remindUserId + "====================================")
 				channel, cErr := p.API.GetDirectChannel(p.remindUserId, user.Id)
 				if cErr != nil {
 					p.API.LogError("failed to create channel %s", cErr)
