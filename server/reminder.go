@@ -103,7 +103,7 @@ func (p *Plugin) UpsertReminder(request *ReminderRequest) error {
 
 func (p *Plugin) TriggerReminders() {
 
-	bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", time.Now().Round(time.Second))))
+	bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", time.Now().UTC().Round(time.Second))))
 
 	if err != nil {
 		p.API.LogError("failed KVGet %s", err)
@@ -113,6 +113,8 @@ func (p *Plugin) TriggerReminders() {
 
 	if string(bytes[:]) != "" {
 
+		p.API.LogInfo("BOOOOOOOOOOOOOOOOOM")
+
 		var occurrences []Occurrence
 		oErr := json.Unmarshal(bytes, &occurrences)
 		if oErr != nil {
@@ -120,7 +122,7 @@ func (p *Plugin) TriggerReminders() {
 			return
 		}
 
-		p.API.LogInfo("==========================================> " + fmt.Sprintf("%v", occurrences))
+		p.API.LogInfo("occurrences :) :) ==========================================> " + fmt.Sprintf("%v", occurrences))
 
 		for _, occurrence := range occurrences {
 
@@ -144,7 +146,7 @@ func (p *Plugin) TriggerReminders() {
 			T, _ := p.translation(user)
 			reminder := p.findReminder(reminders, occurrence)
 
-			// p.API.LogDebug(fmt.Sprintf("%v", reminder))
+			p.API.LogDebug("reminder: ======================> " + fmt.Sprintf("%v", reminder))
 
 			if strings.HasPrefix(reminder.Target, "@") || strings.HasPrefix(reminder.Target, T("me")) { //@user
 

@@ -10,6 +10,7 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
 
 	user, _ := p.API.GetUserByUsername(request.Username)
 	T, _ := p.translation(user)
+	location := p.location(user)
 
 	if pErr := p.ParseRequest(request); pErr != nil {
 		p.API.LogError(pErr.Error())
@@ -50,7 +51,12 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
 		"Target":  request.Reminder.Target,
 		"UseTo":   useToString,
 		"Message": request.Reminder.Message,
-		"When":    p.formatWhen(request.Username, request.Reminder.When, request.Reminder.Occurrences[0].Occurrence.Format(time.RFC3339), false),
+		"When": p.formatWhen(
+			request.Username,
+			request.Reminder.When,
+			request.Reminder.Occurrences[0].Occurrence.In(location).Format(time.RFC3339),
+			false,
+		),
 	}
 
 	return T("schedule.response", responseParameters), nil
