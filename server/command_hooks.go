@@ -28,9 +28,7 @@ func (p *Plugin) registerCommand(teamId string) error {
 }
 
 func (p *Plugin) unregisterCommand(teamId string) error {
-
-	p.API.UnregisterCommand(teamId, CommandTrigger)
-	return nil
+	return p.API.UnregisterCommand(teamId, CommandTrigger)
 }
 
 func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*model.CommandResponse, *model.AppError) {

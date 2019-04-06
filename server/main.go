@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/mattermost/mattermost-server/model"
@@ -25,9 +26,14 @@ func (p *Plugin) translation(user *model.User) (i18n.TranslateFunc, string) {
 
 func (p *Plugin) location(user *model.User) *time.Location {
 	timezone := user.GetPreferredTimezone()
+	p.API.LogInfo("1) TIMEZONE TIMEZONE TIMEZONE : " + timezone)
 	if timezone == "" {
 		timezone, _ = time.Now().Zone()
 	}
-	location, _ := time.LoadLocation(timezone)
+	location, _ := time.LoadLocation("America/New_York") // ("timezone")
+	p.API.LogInfo("2) TIMEZONE TIMEZONE TIMEZONE : " + timezone)
+	p.API.LogInfo("location: " + location.String())
+	p.API.LogInfo(fmt.Sprintf("%v", time.Now().In(location)))
+
 	return location
 }

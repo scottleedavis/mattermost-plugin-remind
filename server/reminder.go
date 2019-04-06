@@ -120,7 +120,7 @@ func (p *Plugin) TriggerReminders() {
 			return
 		}
 
-		// p.API.LogInfo(fmt.Sprintf("%v", occurrences))
+		p.API.LogInfo("==========================================> " + fmt.Sprintf("%v", occurrences))
 
 		for _, occurrence := range occurrences {
 

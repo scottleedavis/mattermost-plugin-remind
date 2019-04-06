@@ -68,11 +68,14 @@ func (p *Plugin) OnDeactivate() error {
 	}
 
 	p.Stop()
-	p.deactivateBotUser()
+
+	if dErr := p.deactivateBotUser(); dErr != nil {
+		return dErr
+	}
 
 	for _, team := range teams {
-		if err := p.API.UnregisterCommand(team.Id, CommandTrigger); err != nil {
-			return errors.Wrap(err, "failed to unregister command")
+		if cErr := p.API.UnregisterCommand(team.Id, CommandTrigger); cErr != nil {
+			return errors.Wrap(cErr, "failed to unregister command")
 		}
 	}
 
@@ -85,17 +88,17 @@ func (p *Plugin) activateBotUser() (*model.Bot, error) {
 	if err != nil {
 		p.API.LogError("failed to get user remind")
 
-		bot := model.Bot{
+		b := model.Bot{
 			UserId:      model.NewId(),
 			Username:    "remind",
 			DisplayName: "Remind",
 			Description: "Sets and triggers reminders",
 		}
 
-		newBot, bErr := p.API.CreateBot(&bot)
-		if err != nil {
+		newBot, bErr := p.API.CreateBot(&b)
+		if bErr != nil {
 			p.API.LogError("failed to create remind user " + fmt.Sprintf("%v", err))
-			return newBot, bErr
+			return nil, bErr
 		}
 
 		p.remindUserId = newBot.UserId
@@ -109,14 +112,16 @@ func (p *Plugin) activateBotUser() (*model.Bot, error) {
 
 }
 
-func (p *Plugin) deactivateBotUser() {
+func (p *Plugin) deactivateBotUser() error {
 
 	botUser, err := p.API.GetBot(p.remindUserId, true)
 	if err != nil {
-		return
+		return err
 	}
-	derr := p.API.PermanentDeleteBot(botUser.UserId)
-	if derr != nil {
-		p.API.LogError("Failed to delete remind bot " + fmt.Sprintf("%v", derr))
+	dErr := p.API.PermanentDeleteBot(botUser.UserId)
+	if dErr != nil {
+		p.API.LogError("Failed to delete remind bot " + fmt.Sprintf("%v", dErr))
+		return dErr
 	}
+	return nil
 }
