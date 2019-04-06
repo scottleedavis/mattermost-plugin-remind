@@ -5,13 +5,11 @@ import (
 	"time"
 
 	"github.com/blang/semver"
-	"github.com/google/uuid"
-	"github.com/mattermost/mattermost-server/mlog"
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/pkg/errors"
 )
 
-const minimumServerVersion = "5.4.0"
+const minimumServerVersion = "5.10.0"
 
 func (p *Plugin) checkServerVersion() error {
 	serverVersion, err := semver.Parse(p.API.GetServerVersion())
@@ -32,12 +30,14 @@ func (p *Plugin) OnActivate() error {
 		return err
 	}
 
+	// configuration := p.getConfiguration()10
+
 	teams, err := p.API.GetTeams()
 	if err != nil {
 		return errors.Wrap(err, "failed to query teams OnActivate")
 	}
 
-	p.createBotUser()
+	p.activateBotUser()
 
 	for _, team := range teams {
 		if err := p.registerCommand(team.Id); err != nil {
@@ -46,7 +46,7 @@ func (p *Plugin) OnActivate() error {
 	}
 
 	if err := TranslationsPreInit(); err != nil {
-		mlog.Error(err.Error())
+		return errors.Wrap(err, "failed to initialize translations OnActivate message")
 	}
 
 	p.emptyTime = time.Time{}.AddDate(1, 1, 1)
@@ -68,7 +68,7 @@ func (p *Plugin) OnDeactivate() error {
 	}
 
 	p.Stop()
-	// p.deleteBotUser()
+	p.deactivateBotUser()
 
 	for _, team := range teams {
 		if err := p.API.UnregisterCommand(team.Id, CommandTrigger); err != nil {
@@ -79,47 +79,44 @@ func (p *Plugin) OnDeactivate() error {
 	return nil
 }
 
-func (p *Plugin) createBotUser() (*model.User, error) {
+func (p *Plugin) activateBotUser() (*model.Bot, error) {
 
-	user, err := p.API.GetUserByUsername("remind")
+	bot, err := p.API.GetBot("remind", true)
 	if err != nil {
 		p.API.LogError("failed to get user remind")
 
-		guid, gerr := uuid.NewRandom()
-		if gerr != nil {
-			p.API.LogError("failed to generate guid")
-			return nil, gerr
+		bot := model.Bot{
+			UserId:      model.NewId(),
+			Username:    "remind",
+			DisplayName: "Remind",
+			Description: "Sets and triggers reminders",
 		}
 
-		user := model.User{Email: "-@-.-", Nickname: "Remind", Password: guid.String(), Username: "remind", Roles: model.SYSTEM_USER_ROLE_ID}
-
-		cuser, err := p.API.CreateUser(&user)
+		newBot, bErr := p.API.CreateBot(&bot)
 		if err != nil {
 			p.API.LogError("failed to create remind user " + fmt.Sprintf("%v", err))
-			return cuser, err
+			return newBot, bErr
 		}
 
-		p.remindUserId = cuser.Id
+		p.remindUserId = newBot.UserId
 
-		return cuser, nil
+		return newBot, nil
 	}
 
-	p.API.LogDebug("user.Id " + user.Id)
+	p.remindUserId = bot.UserId
 
-	p.remindUserId = user.Id
-
-	return user, nil
+	return bot, nil
 
 }
 
-func (p *Plugin) deleteBotUser() {
+func (p *Plugin) deactivateBotUser() {
 
-	user, err := p.API.GetUserByUsername("remind")
+	botUser, err := p.API.GetBot(p.remindUserId, true)
 	if err != nil {
 		return
 	}
-	derr := p.API.DeleteUser(user.Id)
+	derr := p.API.PermanentDeleteBot(botUser.UserId)
 	if derr != nil {
-		p.API.LogError("Failed to delete remind user " + fmt.Sprintf("%v", derr))
+		p.API.LogError("Failed to delete remind bot " + fmt.Sprintf("%v", derr))
 	}
 }

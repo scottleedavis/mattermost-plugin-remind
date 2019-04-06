@@ -48,6 +48,14 @@
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:f03d1f27dee54a6f51200778991db9b7a91e9d9cc42395ba813fc9efc490a9a2"
+  name = "github.com/gorilla/mux"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "c5c6c98bc25355028a63748a498942a6398ccd22"
+  version = "v1.7.1"
+
+[[projects]]
   branch = "master"
   digest = "1:abef72680f73c5aae861627aac61947c4d160c60110ed283c14ae77b63a0a0c2"
   name = "github.com/gorilla/websocket"
@@ -384,7 +392,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/blang/semver",
-    "github.com/google/uuid",
+    "github.com/gorilla/mux",
     "github.com/mattermost/mattermost-server/mlog",
     "github.com/mattermost/mattermost-server/model",
     "github.com/mattermost/mattermost-server/plugin",

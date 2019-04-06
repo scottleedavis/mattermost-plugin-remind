@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/plugin"
 )
 
@@ -27,9 +28,19 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 func (p *Plugin) handleComplete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 
-	p.API.LogInfo(vars["test"])
-	p.API.LogInfo(vars["action"])
-	p.API.LogInfo(vars["Context"])
-	p.API.LogInfo(vars["attachments"])
+	p.API.LogInfo(vars["id"])
+	p.API.LogInfo(vars["name"])
+	p.API.LogInfo(vars["type"])
+	p.API.LogInfo(vars["datasource"])
+	p.API.LogInfo(vars["integration"])
 
+	response := &model.PostActionIntegrationResponse{}
+	response.EphemeralText = "bobs your uncle"
+	writePostActionIntegrationResponse(w, response)
+}
+
+func writePostActionIntegrationResponse(w http.ResponseWriter, response *model.PostActionIntegrationResponse) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(response.ToJson())
 }

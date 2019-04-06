@@ -17,9 +17,9 @@ func (p *Plugin) registerCommand(teamId string) error {
 		Trigger:          CommandTrigger,
 		AutoComplete:     true,
 		AutoCompleteHint: "[@someone or ~channel] [what] [when]",
-		AutoCompleteDesc: "Tests Translation",
+		AutoCompleteDesc: "Set a reminder",
 		DisplayName:      "Remind Plugin Command",
-		Description:      "Set a reminder",
+		Description:      "A command used to set a reminder",
 	}); err != nil {
 		return errors.Wrap(err, "failed to register command")
 	}

@@ -120,7 +120,7 @@ func (p *Plugin) TriggerReminders() {
 			return
 		}
 
-		p.API.LogInfo(fmt.Sprintf("%v", occurrences))
+		// p.API.LogInfo(fmt.Sprintf("%v", occurrences))
 
 		for _, occurrence := range occurrences {
 
@@ -180,21 +180,16 @@ func (p *Plugin) TriggerReminders() {
 									{
 										Integration: &model.PostActionIntegration{
 											Context: model.StringInterface{
-												"test":         "123456789",
-												"reminderId":   reminder.Id,
-												"occurrenceId": occurrence.Id,
-												"action":       "complete",
+												"test": "123456789",
+												//"reminderId":   reminder.Id,
+												//"occurrenceId": occurrence.Id,
+												//"action":       "complete",
 											},
-											URL: fmt.Sprintf("%s:8065/plugins/%s/api/v1/complete", siteURL, manifest.Id),
+											// URL: fmt.Sprintf("skawtus-T420:1234/plugins/%s/api/v1/complete", manifest.Id),
+											URL: fmt.Sprintf("%s/plugins/%s/api/v1/complete", siteURL, manifest.Id),
 										},
+										Type: model.POST_ACTION_TYPE_BUTTON,
 										Name: T("button.complete"),
-										Options: []*model.PostActionOptions{
-											{
-												Text:  "foooo",
-												Value: "value",
-											},
-										},
-										Type: "action",
 									},
 									{
 										Integration: &model.PostActionIntegration{

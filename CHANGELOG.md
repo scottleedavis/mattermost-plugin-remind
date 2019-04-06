@@ -8,6 +8,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added
 - Initial release
 
-## 0.0.2 - 2019-04-01
+## 0.1.0 - 2019-04-01
 ### Updated
 - Initial port from server based bot

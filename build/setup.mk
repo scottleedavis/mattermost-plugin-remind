@@ -25,6 +25,9 @@ HAS_SERVER ?= $(shell build/bin/manifest has_server)
 # Determine if a webapp is defined in the manifest.
 HAS_WEBAPP ?= $(shell build/bin/manifest has_webapp)
 
+# Determine if a /public folder is in use
+HAS_PUBLIC ?= $(wildcard public/.)
+
 # Try looking for dep in $(GOPATH) in case $(GOPATH)/bin isn't in $(PATH).
 GOPATH ?= $(shell $(GO) env GOPATH)
 ifeq ($(DEP),)
