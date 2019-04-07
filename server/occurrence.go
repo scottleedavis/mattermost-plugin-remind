@@ -214,7 +214,7 @@ func (p *Plugin) inEN(when string, user *model.User) (times []time.Time, err err
 		p.API.LogInfo("location: " + location.String() + " ===============================================>")
 		// times = append(times, time.Now().In(location).Round(time.Second).Add(time.Second*time.Duration(i)))
 		times = append(times, time.Now().UTC().Round(time.Second).Add(time.Second*time.Duration(i)))
-		p.API.LogInfo(fmt.Sprintf("%v", times) + "----------------------------------------")
+		p.API.LogInfo("**********times***** " + fmt.Sprintf("%v", times) + "----------------------------------------")
 
 		return times, nil
 

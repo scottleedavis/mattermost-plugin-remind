@@ -69,9 +69,9 @@ func (p *Plugin) OnDeactivate() error {
 
 	p.Stop()
 
-	if dErr := p.deactivateBotUser(); dErr != nil {
-		return dErr
-	}
+	// if dErr := p.deactivateBotUser(); dErr != nil {
+	// return dErr
+	// }
 
 	for _, team := range teams {
 		if cErr := p.API.UnregisterCommand(team.Id, CommandTrigger); cErr != nil {

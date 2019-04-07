@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/mattermost/mattermost-server/model"
 	"strings"
 	"time"
+
+	"github.com/mattermost/mattermost-server/model"
 )
 
 func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
