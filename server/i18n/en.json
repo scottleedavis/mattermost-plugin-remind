@@ -20,6 +20,14 @@
   	"translation": "{{.FinalTarget}} asked me to remind you \"{{.Message}}\"."
   },
   {
+    "id": "action.complete",
+    "translation": "Ok! I’ve marked the reminder \"{{.Message}}\" as complete."
+  },
+  {
+    "id": "action.delete",
+    "translation": "Ok! I’ve deleted the reminder \"{{.Message}}\"."
+  },
+  {
     "id": "button.complete",
     "translation": "Mark as Complete"
   },

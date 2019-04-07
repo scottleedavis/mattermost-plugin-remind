@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	// "fmt"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -44,58 +44,54 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 
 func (p *Plugin) handleComplete(w http.ResponseWriter, r *http.Request, action *Action) {
 
-	// p.API.LogInfo("UserId: " + fmt.Sprintf("%v", action.UserID))
-	// p.API.LogInfo("PostID: " + fmt.Sprintf("%v", action.PostID))
-	// p.API.LogInfo("Context: " + fmt.Sprintf("%v", action.Context))
-
-	/*
-		if result := <-a.Srv.Store.Remind().GetReminder(reminderId); result.Err != nil {
-			return result.Err
-		} else {
-			reminder := result.Data.(model.Reminder)
-			reminder.Completed = time.Now().Format(time.RFC3339)
-			if result := <-a.Srv.Store.Remind().SaveReminder(&reminder); result.Err != nil {
-				return result.Err
-			}
-			if result := <-a.Srv.Store.Remind().DeleteForReminder(reminderId); result.Err != nil {
-				return result.Err
-			}
-			var updateParameters = map[string]interface{}{
-				"Message": reminder.Message,
-			}
-			update.Message = "~~" + post.Message + "~~\n" + T("app.reminder.update.complete", updateParameters)
-		}
-	*/
-
-	//get reminder
 	reminder := p.GetReminder(action.UserID, action.Context.ReminderID)
-	//remove occurrences
+
 	for _, occurrence := range reminder.Occurrences {
 		p.ClearScheduledOccurrence(reminder, occurrence)
 	}
-	// complete reminder
+
 	reminder.Completed = time.Now().UTC()
 	p.UpdateReminder(action.UserID, reminder)
-	//strike through original reminder
+
 	if post, pErr := p.API.GetPost(action.PostID); pErr != nil {
 		p.API.LogError("unable to get post " + pErr.Error())
-		response := &model.PostActionIntegrationResponse{}
-		writePostActionIntegrationResponseError(w, response)
+		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
 	} else {
 		var updateParameters = map[string]interface{}{
 			"Message": reminder.Message,
 		}
-		post.Message = "~~" + post.Message + "~~\n" + T("app.reminder.update.complete", updateParameters)
+		post.Message = "~~" + post.Message + "~~\n" + T("action.complete", updateParameters)
+		post.Props = model.StringInterface{}
 		p.API.UpdatePost(post)
-		response := &model.PostActionIntegrationResponse{}
-		response.EphemeralText = post.Message
-		writePostActionIntegrationResponseOk(w, response)
-
+		writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 	}
 
 }
 
 func (p *Plugin) handleDelete(w http.ResponseWriter, r *http.Request, action *Action) {
+
+	reminder := p.GetReminder(action.UserID, action.Context.ReminderID)
+
+	for _, occurrence := range reminder.Occurrences {
+		p.ClearScheduledOccurrence(reminder, occurrence)
+	}
+
+	message := reminder.Message
+	p.DeleteReminder(action.UserID, reminder)
+
+	if post, pErr := p.API.GetPost(action.PostID); pErr != nil {
+		p.API.LogError("unable to get post " + pErr.Error())
+		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
+	} else {
+		p.API.LogInfo(fmt.Sprintf("%v", post.Props))
+		var deleteParameters = map[string]interface{}{
+			"Message": message,
+		}
+		post.Message = T("action.delete", deleteParameters)
+		post.Props = model.StringInterface{}
+		p.API.UpdatePost(post)
+		writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
+	}
 
 }
 
