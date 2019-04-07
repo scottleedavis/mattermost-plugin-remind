@@ -53,8 +53,6 @@ func (p *Plugin) OnActivate() error {
 	p.supportedLocales = []string{"en"}
 	p.ServerConfig = p.API.GetConfig()
 
-	p.router = p.InitAPI()
-
 	p.Run()
 
 	return nil

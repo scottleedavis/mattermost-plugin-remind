@@ -118,8 +118,6 @@ func (p *Plugin) TriggerReminders() {
 			return
 		}
 
-		p.API.LogInfo("occurrences :) :) ==========================================> " + fmt.Sprintf("%v", occurrences))
-
 		for _, occurrence := range occurrences {
 
 			user, uErr := p.API.GetUserByUsername(occurrence.Username)
@@ -141,8 +139,6 @@ func (p *Plugin) TriggerReminders() {
 
 			T, _ := p.translation(user)
 			reminder := p.findReminder(reminders, occurrence)
-
-			p.API.LogDebug("reminder: ======================> " + fmt.Sprintf("%v", reminder))
 
 			if strings.HasPrefix(reminder.Target, "@") || strings.HasPrefix(reminder.Target, T("me")) { //@user
 
@@ -176,15 +172,14 @@ func (p *Plugin) TriggerReminders() {
 							{
 								Actions: []*model.PostAction{
 									{
+										Id: model.NewId(),
 										Integration: &model.PostActionIntegration{
 											Context: model.StringInterface{
-												"test": "123456789",
-												//"reminderId":   reminder.Id,
-												//"occurrenceId": occurrence.Id,
-												//"action":       "complete",
+												"reminder_id":   reminder.Id,
+												"occurrence_id": occurrence.Id,
+												"action":        "complete",
 											},
-											// URL: fmt.Sprintf("skawtus-T420:1234/plugins/%s/api/v1/complete", manifest.Id),
-											URL: fmt.Sprintf("%s/plugins/%s/api/v1/complete", siteURL, manifest.Id),
+											URL: fmt.Sprintf("%s/plugins/%s/api/v1/complete?reminder_id="+reminder.Id+"&occurrence_id="+occurrence.Id, siteURL, manifest.Id),
 										},
 										Type: model.POST_ACTION_TYPE_BUTTON,
 										Name: T("button.complete"),
@@ -196,7 +191,7 @@ func (p *Plugin) TriggerReminders() {
 												"occurrenceId": occurrence.Id,
 												"action":       "delete",
 											},
-											URL: fmt.Sprintf("%s:8065/plugins/%s/api/v1/delete", siteURL, manifest.Id),
+											URL: fmt.Sprintf("%s/plugins/%s/api/v1/delete", siteURL, manifest.Id),
 										},
 										Name: T("button.delete"),
 										Type: "action",
@@ -208,7 +203,7 @@ func (p *Plugin) TriggerReminders() {
 												"occurrenceId": occurrence.Id,
 												"action":       "snooze",
 											},
-											URL: fmt.Sprintf("%s:8065/plugins/%s/api/v1/snooze", siteURL, manifest.Id),
+											URL: fmt.Sprintf("%s/plugins/%s/api/v1/snooze", siteURL, manifest.Id),
 										},
 										Name: T("button.snooze"),
 										Type: "select",
