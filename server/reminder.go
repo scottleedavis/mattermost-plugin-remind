@@ -148,7 +148,7 @@ func (p *Plugin) TriggerReminders() {
 
 				channel, cErr := p.API.GetDirectChannel(p.remindUserId, user.Id)
 				if cErr != nil {
-					p.API.LogError("failed to create channel %s", cErr)
+					p.API.LogError("failed to create channel " + cErr.Error())
 					continue
 				}
 

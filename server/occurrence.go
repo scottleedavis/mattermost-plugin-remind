@@ -377,7 +377,7 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 				normalizedWhen = normalizedWhen + ":00"
 			}
 		}
-		t, pErr := time.Parse(time.Kitchen, normalizedWhen+strings.ToUpper(whenSplit[2]))
+		t, pErr := time.ParseInLocation(time.Kitchen, normalizedWhen+strings.ToUpper(whenSplit[2]), location)
 		if pErr != nil {
 			p.API.LogError(fmt.Sprintf("%v", pErr))
 		}
@@ -407,13 +407,14 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 			}
 
 		}
-		t, pErr := time.Parse(time.Kitchen, strings.ToUpper(normalizedWhen))
+		t, pErr := time.ParseInLocation(time.Kitchen, strings.ToUpper(normalizedWhen), location)
 		if pErr != nil {
 			p.API.LogError(fmt.Sprintf("%v", pErr))
 		}
 
 		now := time.Now().In(location).Round(time.Hour * time.Duration(24))
 		occurrence := t.AddDate(now.Year(), int(now.Month())-1, now.Day()-1)
+
 		return []time.Time{p.chooseClosest(user, &occurrence, true).UTC()}, nil
 
 	}
@@ -424,7 +425,7 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 
 		now := time.Now().In(location)
 
-		noon, pErr := time.Parse(time.Kitchen, "12:00PM")
+		noon, pErr := time.ParseInLocation(time.Kitchen, "12:00PM", location)
 		if pErr != nil {
 			p.API.LogError(fmt.Sprintf("%v", pErr))
 			return []time.Time{}, pErr
@@ -437,7 +438,7 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 
 		now := time.Now().In(location)
 
-		midnight, pErr := time.Parse(time.Kitchen, "12:00AM")
+		midnight, pErr := time.ParseInLocation(time.Kitchen, "12:00AM", location)
 		if pErr != nil {
 			p.API.LogError(fmt.Sprintf("%v", pErr))
 			return []time.Time{}, pErr
@@ -459,15 +460,17 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 		T("eleven"),
 		T("twelve"):
 
-		nowkit := time.Now().In(location).Format(time.Kitchen)
-		ampm := string(nowkit[len(nowkit)-2:])
+		now := time.Now().In(location)
+		ampm := string(now.Format(time.Kitchen)[len(now.Format(time.Kitchen))-2:])
 
 		num, wErr := p.wordToNumber(normalizedWhen, user)
 		if wErr != nil {
 			return []time.Time{}, wErr
 		}
 
-		wordTime, _ := time.Parse(time.Kitchen, strconv.Itoa(num)+":00"+ampm)
+		wordTime, _ := time.ParseInLocation(time.Kitchen, strconv.Itoa(num)+":00"+ampm, location)
+		wordTime = wordTime.AddDate(now.Year(), int(now.Month())-1, now.Day()-1)
+
 		return []time.Time{p.chooseClosest(user, &wordTime, false).UTC()}, nil
 
 	case T("0"),
@@ -484,15 +487,17 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 		T("11"),
 		T("12"):
 
-		nowkit := time.Now().In(location).Format(time.Kitchen)
-		ampm := string(nowkit[len(nowkit)-2:])
+		now := time.Now().In(location)
+		ampm := string(now.Format(time.Kitchen)[len(now.Format(time.Kitchen))-2:])
 
 		num, wErr := strconv.Atoi(normalizedWhen)
 		if wErr != nil {
 			return []time.Time{}, wErr
 		}
 
-		wordTime, _ := time.Parse(time.Kitchen, strconv.Itoa(num)+":00"+ampm)
+		wordTime, _ := time.ParseInLocation(time.Kitchen, strconv.Itoa(num)+":00"+ampm, location)
+		wordTime = wordTime.AddDate(now.Year(), int(now.Month())-1, now.Day()-1)
+
 		return []time.Time{p.chooseClosest(user, &wordTime, false).UTC()}, nil
 
 	default:
@@ -517,7 +522,7 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 			normalizedWhen = strings.Join(timeSplit, ":")
 		}
 
-		t, pErr := time.Parse(time.Kitchen, strings.ToUpper(normalizedWhen+ampm))
+		t, pErr := time.ParseInLocation(time.Kitchen, strings.ToUpper(normalizedWhen+ampm), location)
 		if pErr != nil {
 			return []time.Time{}, pErr
 		}

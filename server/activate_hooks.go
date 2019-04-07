@@ -82,36 +82,33 @@ func (p *Plugin) OnDeactivate() error {
 	return nil
 }
 
-
-
-
 // func (p *Plugin) activateBotUser() (*model.Bot, error) {
 func (p *Plugin) activateBotUser() (*model.User, error) {
 
-	if bot2, err2 := p.API.GetBot(CommandTrigger, true); err2 != nil {
-		p.API.LogError("===========> BOT DOES NOT EXIST: " + err2.Error())
+	// if bot2, err2 := p.API.GetBot(CommandTrigger+"_bot", true); err2 != nil {
+	// 	p.API.LogError("===========> BOT DOES NOT EXIST: " + err2.Error())
 
-		b := model.Bot{
-			// UserId: manifest.Id,
-			// UserId:      cuser.Id,
-			Username:    CommandTrigger + "_bot_2",
-			OwnerId:     manifest.Id,
-			DisplayName: "Remind",
-			Description: "Sets and triggers reminders",
-		}
+	// 	b := model.Bot{
+	// 		// UserId: manifest.Id,
+	// 		// UserId:      cuser.Id,
+	// 		Username:    CommandTrigger + "_bot",
+	// 		OwnerId:     manifest.Id,
+	// 		DisplayName: "Remind",
+	// 		Description: "Sets and triggers reminders",
+	// 	}
 
-		newBot, bErr := p.API.CreateBot(&b)
-		if bErr != nil {
-			p.API.LogError(fmt.Sprintf("failed to create %s bot: %v", CommandTrigger, bErr))
-			return nil, bErr
-		} else {
-			/// TODO BOT CREATED IS HAPPENING.  debug how it is created/save
-			p.API.LogInfo("BOT CREATED ========================================> " + fmt.Sprintf("%v", newBot))
-		}
+	// 	newBot, bErr := p.API.CreateBot(&b)
+	// 	if bErr != nil {
+	// 		p.API.LogError(fmt.Sprintf("failed to create %s bot: %v", CommandTrigger, bErr))
+	// 		return nil, bErr
+	// 	} else {
+	// 		/// TODO BOT CREATED IS HAPPENING.  debug how it is created/save
+	// 		p.API.LogInfo("BOT CREATED ========================================> " + fmt.Sprintf("%v", newBot))
+	// 	}
 
-	} else {
-		p.API.LogError("===========> BOT EXISTS: " + fmt.Sprintf("%v", bot2))
-	}
+	// } else {
+	// 	p.API.LogError("===========> BOT EXISTS: " + fmt.Sprintf("%v", bot2))
+	// }
 
 	bot, err := p.API.GetUserByUsername(CommandTrigger)
 	if err != nil {
@@ -131,31 +128,11 @@ func (p *Plugin) activateBotUser() (*model.User, error) {
 			return nil, cerr
 		}
 
-		// b := model.Bot{
-		// 	// UserId: manifest.Id,
-		// 	// UserId:      cuser.Id,
-		// 	Username:    CommandTrigger + "_bot",
-		// 	OwnerId:     manifest.Id,
-		// 	DisplayName: "Remind",
-		// 	Description: "Sets and triggers reminders",
-		// }
-
-		// newBot, bErr := p.API.CreateBot(&b)
-		// if bErr != nil {
-		// 	p.API.LogError(fmt.Sprintf("failed to create %s user: %v", CommandTrigger, bErr))
-		// 	return nil, bErr
-		// } else {
-		// 	p.API.LogInfo("BOT CREATED ========================================> " + fmt.Sprintf("%v", newBot))
-		// }
-
-		// p.remindUserId = newBot.UserId
 		p.remindUserId = cuser.Id
 
-		// return newBot, nil
 		return cuser, nil
 	}
 
-	// p.remindUserId = bot.UserId
 	p.remindUserId = bot.Id
 
 	return bot, nil
