@@ -31,18 +31,15 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
 	request.Reminder.Username = request.Username
 	request.Reminder.Completed = p.emptyTime
 
-	p.API.LogInfo("1)=====================================>")
 	if cErr := p.CreateOccurrences(request); cErr != nil {
 		p.API.LogError(cErr.Error())
 		return T("exception.response"), nil
 	}
-	p.API.LogInfo("2)=====================================>")
 
 	if rErr := p.UpsertReminder(request); rErr != nil {
 		p.API.LogError(rErr.Error())
 		return T("exception.response"), nil
 	}
-	p.API.LogInfo("3)=====================================>")
 
 	if request.Reminder.Target == T("me") {
 		request.Reminder.Target = T("you")

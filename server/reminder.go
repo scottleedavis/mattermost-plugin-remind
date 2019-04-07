@@ -109,11 +109,7 @@ func (p *Plugin) TriggerReminders() {
 		p.API.LogError("failed KVGet %s", err)
 	}
 
-	// p.API.LogInfo("*")
-
 	if string(bytes[:]) != "" {
-
-		p.API.LogInfo("BOOOOOOOOOOOOOOOOOM")
 
 		var occurrences []Occurrence
 		oErr := json.Unmarshal(bytes, &occurrences)

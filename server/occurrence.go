@@ -187,7 +187,6 @@ func (p *Plugin) in(when string, user *model.User) (times []time.Time, err error
 
 func (p *Plugin) inEN(when string, user *model.User) (times []time.Time, err error) {
 
-	location := p.location(user)
 	T, _ := p.translation(user)
 
 	whenSplit := strings.Split(when, " ")
@@ -211,10 +210,7 @@ func (p *Plugin) inEN(when string, user *model.User) (times []time.Time, err err
 			}
 			i = num
 		}
-		p.API.LogInfo("location: " + location.String() + " ===============================================>")
-		// times = append(times, time.Now().In(location).Round(time.Second).Add(time.Second*time.Duration(i)))
 		times = append(times, time.Now().UTC().Round(time.Second).Add(time.Second*time.Duration(i)))
-		p.API.LogInfo("**********times***** " + fmt.Sprintf("%v", times) + "----------------------------------------")
 
 		return times, nil
 
@@ -233,7 +229,7 @@ func (p *Plugin) inEN(when string, user *model.User) (times []time.Time, err err
 			i = num
 		}
 
-		times = append(times, time.Now().In(location).Round(time.Second).Add(time.Minute*time.Duration(i)))
+		times = append(times, time.Now().UTC().Round(time.Second).Add(time.Minute*time.Duration(i)))
 
 		return times, nil
 
@@ -253,7 +249,7 @@ func (p *Plugin) inEN(when string, user *model.User) (times []time.Time, err err
 			i = num
 		}
 
-		times = append(times, time.Now().In(location).Round(time.Second).Add(time.Hour*time.Duration(i)))
+		times = append(times, time.Now().UTC().Round(time.Second).Add(time.Hour*time.Duration(i)))
 
 		return times, nil
 
@@ -272,7 +268,7 @@ func (p *Plugin) inEN(when string, user *model.User) (times []time.Time, err err
 			i = num
 		}
 
-		times = append(times, time.Now().In(location).Round(time.Second).Add(time.Hour*24*time.Duration(i)))
+		times = append(times, time.Now().UTC().Round(time.Second).Add(time.Hour*24*time.Duration(i)))
 
 		return times, nil
 
@@ -292,7 +288,7 @@ func (p *Plugin) inEN(when string, user *model.User) (times []time.Time, err err
 			i = num
 		}
 
-		times = append(times, time.Now().In(location).Round(time.Second).Add(time.Hour*24*7*time.Duration(i)))
+		times = append(times, time.Now().UTC().Round(time.Second).Add(time.Hour*24*7*time.Duration(i)))
 
 		return times, nil
 
@@ -311,7 +307,7 @@ func (p *Plugin) inEN(when string, user *model.User) (times []time.Time, err err
 			i = num
 		}
 
-		times = append(times, time.Now().In(location).Round(time.Second).Add(time.Hour*24*30*time.Duration(i)))
+		times = append(times, time.Now().UTC().Round(time.Second).Add(time.Hour*24*30*time.Duration(i)))
 
 		return times, nil
 
@@ -331,7 +327,7 @@ func (p *Plugin) inEN(when string, user *model.User) (times []time.Time, err err
 			i = num
 		}
 
-		times = append(times, time.Now().In(location).Round(time.Second).Add(time.Hour*24*30*time.Duration(i)))
+		times = append(times, time.Now().UTC().Round(time.Second).Add(time.Hour*24*30*time.Duration(i)))
 
 		return times, nil
 
@@ -357,6 +353,7 @@ func (p *Plugin) at(when string, user *model.User) (times []time.Time, err error
 func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err error) {
 
 	T, _ := p.translation(user)
+	location := p.location(user)
 
 	whenTrim := strings.Trim(when, " ")
 	whenSplit := strings.Split(whenTrim, " ")
@@ -385,9 +382,9 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 			p.API.LogError(fmt.Sprintf("%v", pErr))
 		}
 
-		now := time.Now().Round(time.Hour * time.Duration(24))
+		now := time.Now().In(location).Round(time.Hour * time.Duration(24))
 		occurrence := t.AddDate(now.Year(), int(now.Month())-1, now.Day()-1)
-		return []time.Time{p.chooseClosest(user, &occurrence, true)}, nil
+		return []time.Time{p.chooseClosest(user, &occurrence, true).UTC()}, nil
 
 	} else if strings.HasSuffix(normalizedWhen, T("pm")) ||
 		strings.HasSuffix(normalizedWhen, T("am")) {
@@ -415,9 +412,9 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 			p.API.LogError(fmt.Sprintf("%v", pErr))
 		}
 
-		now := time.Now().Round(time.Hour * time.Duration(24))
+		now := time.Now().In(location).Round(time.Hour * time.Duration(24))
 		occurrence := t.AddDate(now.Year(), int(now.Month())-1, now.Day()-1)
-		return []time.Time{p.chooseClosest(user, &occurrence, true)}, nil
+		return []time.Time{p.chooseClosest(user, &occurrence, true).UTC()}, nil
 
 	}
 
@@ -425,7 +422,7 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 
 	case T("noon"):
 
-		now := time.Now()
+		now := time.Now().In(location)
 
 		noon, pErr := time.Parse(time.Kitchen, "12:00PM")
 		if pErr != nil {
@@ -434,11 +431,11 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 		}
 
 		noon = noon.AddDate(now.Year(), int(now.Month())-1, now.Day()-1)
-		return []time.Time{p.chooseClosest(user, &noon, true)}, nil
+		return []time.Time{p.chooseClosest(user, &noon, true).UTC()}, nil
 
 	case T("midnight"):
 
-		now := time.Now()
+		now := time.Now().In(location)
 
 		midnight, pErr := time.Parse(time.Kitchen, "12:00AM")
 		if pErr != nil {
@@ -447,7 +444,7 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 		}
 
 		midnight = midnight.AddDate(now.Year(), int(now.Month())-1, now.Day()-1)
-		return []time.Time{p.chooseClosest(user, &midnight, true)}, nil
+		return []time.Time{p.chooseClosest(user, &midnight, true).UTC()}, nil
 
 	case T("one"),
 		T("two"),
@@ -462,7 +459,7 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 		T("eleven"),
 		T("twelve"):
 
-		nowkit := time.Now().Format(time.Kitchen)
+		nowkit := time.Now().In(location).Format(time.Kitchen)
 		ampm := string(nowkit[len(nowkit)-2:])
 
 		num, wErr := p.wordToNumber(normalizedWhen, user)
@@ -471,7 +468,7 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 		}
 
 		wordTime, _ := time.Parse(time.Kitchen, strconv.Itoa(num)+":00"+ampm)
-		return []time.Time{p.chooseClosest(user, &wordTime, false)}, nil
+		return []time.Time{p.chooseClosest(user, &wordTime, false).UTC()}, nil
 
 	case T("0"),
 		T("1"),
@@ -487,7 +484,7 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 		T("11"),
 		T("12"):
 
-		nowkit := time.Now().Format(time.Kitchen)
+		nowkit := time.Now().In(location).Format(time.Kitchen)
 		ampm := string(nowkit[len(nowkit)-2:])
 
 		num, wErr := strconv.Atoi(normalizedWhen)
@@ -496,7 +493,7 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 		}
 
 		wordTime, _ := time.Parse(time.Kitchen, strconv.Itoa(num)+":00"+ampm)
-		return []time.Time{p.chooseClosest(user, &wordTime, false)}, nil
+		return []time.Time{p.chooseClosest(user, &wordTime, false).UTC()}, nil
 
 	default:
 
@@ -525,9 +522,9 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 			return []time.Time{}, pErr
 		}
 
-		now := time.Now().Round(time.Hour * time.Duration(24))
-		occurrence := t.AddDate(now.Year(), int(now.Month())-1, now.Day()-1)
-		return []time.Time{p.chooseClosest(user, &occurrence, dayInterval)}, nil
+		now := time.Now().In(location).Round(time.Hour * time.Duration(24))
+		occurrence := t.In(location).AddDate(now.Year(), int(now.Month())-1, now.Day()-1)
+		return []time.Time{p.chooseClosest(user, &occurrence, dayInterval).UTC()}, nil
 
 	}
 }
@@ -548,6 +545,7 @@ func (p *Plugin) on(when string, user *model.User) (times []time.Time, err error
 func (p *Plugin) onEN(when string, user *model.User) (times []time.Time, err error) {
 
 	T, _ := p.translation(user)
+	location := p.location(user)
 
 	whenTrim := strings.Trim(when, " ")
 	whenSplit := strings.Split(whenTrim, " ")
@@ -610,10 +608,10 @@ func (p *Plugin) onEN(when string, user *model.User) (times []time.Time, err err
 			return []time.Time{}, pErr
 		}
 
-		nextDay := time.Now().AddDate(0, 0, day)
-		occurrence := wallClock.AddDate(nextDay.Year(), int(nextDay.Month())-1, nextDay.Day()-1)
+		nextDay := time.Now().In(location).AddDate(0, 0, day)
+		occurrence := wallClock.In(location).AddDate(nextDay.Year(), int(nextDay.Month())-1, nextDay.Day()-1)
 
-		return []time.Time{p.chooseClosest(user, &occurrence, false)}, nil
+		return []time.Time{p.chooseClosest(user, &occurrence, false).UTC()}, nil
 
 	case T("mondays"),
 		T("tuesdays"),
@@ -640,13 +638,13 @@ func (p *Plugin) onEN(when string, user *model.User) (times []time.Time, err err
 		if tErr != nil {
 			return []time.Time{}, tErr
 		}
-		return []time.Time{t}, nil
+		return []time.Time{t.UTC()}, nil
 	} else {
 		t, tErr := time.Parse(time.RFC3339, dateSplit[0]+"T"+timeUnit+"Z"+dateSplit[2])
 		if tErr != nil {
 			return []time.Time{}, tErr
 		}
-		return []time.Time{t}, nil
+		return []time.Time{t.UTC()}, nil
 	}
 
 }
@@ -667,6 +665,7 @@ func (p *Plugin) every(when string, user *model.User) (times []time.Time, err er
 func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err error) {
 
 	T, _ := p.translation(user)
+	location := p.location(user)
 
 	whenTrim := strings.Trim(when, " ")
 	whenSplit := strings.Split(whenTrim, " ")
@@ -727,9 +726,9 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 				return []time.Time{}, pErr
 			}
 
-			nextDay := time.Now().AddDate(0, 0, d)
-			occurrence := wallClock.AddDate(nextDay.Year(), int(nextDay.Month())-1, nextDay.Day()-1)
-			times = append(times, p.chooseClosest(user, &occurrence, false))
+			nextDay := time.Now().In(location).AddDate(0, 0, d)
+			occurrence := wallClock.In(location).AddDate(nextDay.Year(), int(nextDay.Month())-1, nextDay.Day()-1)
+			times = append(times, p.chooseClosest(user, &occurrence, false).UTC())
 
 			break
 		case T("sunday"),
@@ -768,9 +767,9 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 				return []time.Time{}, pErr
 			}
 
-			nextDay := time.Now().AddDate(0, 0, day)
-			occurrence := wallClock.AddDate(nextDay.Year(), int(nextDay.Month())-1, nextDay.Day()-1)
-			times = append(times, p.chooseClosest(user, &occurrence, false))
+			nextDay := time.Now().In(location).AddDate(0, 0, day)
+			occurrence := wallClock.In(location).AddDate(nextDay.Year(), int(nextDay.Month())-1, nextDay.Day()-1)
+			times = append(times, p.chooseClosest(user, &occurrence, false).UTC())
 			break
 		default:
 
@@ -788,7 +787,7 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 				if tErr != nil {
 					return []time.Time{}, tErr
 				}
-				times = append(times, t)
+				times = append(times, t.UTC())
 			}
 
 		}
@@ -815,6 +814,7 @@ func (p *Plugin) freeForm(when string, user *model.User) (times []time.Time, err
 func (p *Plugin) freeFormEN(when string, user *model.User) (times []time.Time, err error) {
 
 	T, _ := p.translation(user)
+	location := p.location(user)
 
 	whenTrim := strings.Trim(when, " ")
 	chronoUnit := strings.ToLower(whenTrim)
@@ -841,7 +841,7 @@ func (p *Plugin) freeFormEN(when string, user *model.User) (times []time.Time, e
 	case T("tomorrow"):
 		return p.on(
 			T("on")+" "+
-				time.Now().Add(time.Hour*24).Weekday().String()+" "+
+				time.Now().In(location).Add(time.Hour*24).Weekday().String()+" "+
 				T("at")+" "+
 				timeUnit,
 			user)
@@ -1000,13 +1000,13 @@ func (p *Plugin) chooseClosest(user *model.User, chosen *time.Time, dayInterval 
 	location := p.location(user)
 
 	if dayInterval {
-		if chosen.Before(time.Now()) {
+		if chosen.Before(time.Now().In(location)) {
 			return chosen.In(location).Round(time.Second).Add(time.Hour * 24 * time.Duration(1))
 		} else {
 			return *chosen
 		}
 	} else {
-		if chosen.Before(time.Now()) {
+		if chosen.Before(time.Now().In(location)) {
 			if chosen.Add(time.Hour * 12 * time.Duration(1)).Before(time.Now()) {
 				return chosen.In(location).Round(time.Second).Add(time.Hour * 24 * time.Duration(1))
 			} else {
