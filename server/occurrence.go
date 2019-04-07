@@ -608,7 +608,7 @@ func (p *Plugin) onEN(when string, user *model.User) (times []time.Time, err err
 		}
 
 		timeUnit = timeUnitSplit[0] + ":" + timeUnitSplit[1] + ampm
-		wallClock, pErr := time.Parse(time.Kitchen, timeUnit)
+		wallClock, pErr := time.ParseInLocation(time.Kitchen, timeUnit, location)
 		if pErr != nil {
 			return []time.Time{}, pErr
 		}
@@ -639,13 +639,13 @@ func (p *Plugin) onEN(when string, user *model.User) (times []time.Time, err err
 
 	if len(dateSplit) < 3 {
 		timeSplit := strings.Split(dateSplit[1], "-")
-		t, tErr := time.Parse(time.RFC3339, dateSplit[0]+"T"+timeUnit+"-"+timeSplit[1])
+		t, tErr := time.ParseInLocation(time.RFC3339, dateSplit[0]+"T"+timeUnit+"-"+timeSplit[1], location)
 		if tErr != nil {
 			return []time.Time{}, tErr
 		}
 		return []time.Time{t.UTC()}, nil
 	} else {
-		t, tErr := time.Parse(time.RFC3339, dateSplit[0]+"T"+timeUnit+"Z"+dateSplit[2])
+		t, tErr := time.ParseInLocation(time.RFC3339, dateSplit[0]+"T"+timeUnit+"Z"+dateSplit[2], location)
 		if tErr != nil {
 			return []time.Time{}, tErr
 		}
@@ -726,7 +726,7 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 			}
 
 			timeUnit = timeUnitSplit[0] + ":" + timeUnitSplit[1] + ampm
-			wallClock, pErr := time.Parse(time.Kitchen, timeUnit)
+			wallClock, pErr := time.ParseInLocation(time.Kitchen, timeUnit, location)
 			if pErr != nil {
 				return []time.Time{}, pErr
 			}
@@ -767,7 +767,7 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 			}
 
 			timeUnit = timeUnitSplit[0] + ":" + timeUnitSplit[1] + ampm
-			wallClock, pErr := time.Parse(time.Kitchen, timeUnit)
+			wallClock, pErr := time.ParseInLocation(time.Kitchen, timeUnit, location)
 			if pErr != nil {
 				return []time.Time{}, pErr
 			}
@@ -782,13 +782,13 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 
 			if len(dateSplit) < 3 {
 				timeSplit := strings.Split(dateSplit[1], "-")
-				t, tErr := time.Parse(time.RFC3339, dateSplit[0]+"T"+timeUnit+"-"+timeSplit[1])
+				t, tErr := time.ParseInLocation(time.RFC3339, dateSplit[0]+"T"+timeUnit+"-"+timeSplit[1], location)
 				if tErr != nil {
 					return []time.Time{}, tErr
 				}
 				times = append(times, t)
 			} else {
-				t, tErr := time.Parse(time.RFC3339, dateSplit[0]+"T"+timeUnit+"Z"+dateSplit[2])
+				t, tErr := time.ParseInLocation(time.RFC3339, dateSplit[0]+"T"+timeUnit+"Z"+dateSplit[2], location)
 				if tErr != nil {
 					return []time.Time{}, tErr
 				}
