@@ -2,8 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
+	// "fmt"
 	"net/http"
+	"time"
 
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/plugin"
@@ -12,7 +13,7 @@ import (
 // ActionContext passed from action buttons
 type ActionContext struct {
 	ReminderID   string `json:"reminder_id"`
-	OccurrenceId string `json:"occurrence_id"`
+	OccurrenceID string `json:"occurrence_id"`
 	Action       string `json:"action"`
 }
 
@@ -43,18 +44,54 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 
 func (p *Plugin) handleComplete(w http.ResponseWriter, r *http.Request, action *Action) {
 
-	p.API.LogInfo("UserId: " + fmt.Sprintf("%v", action.UserID))
-	p.API.LogInfo("PostID: " + fmt.Sprintf("%v", action.PostID))
-	p.API.LogInfo("Context: " + fmt.Sprintf("%v", action.Context))
+	// p.API.LogInfo("UserId: " + fmt.Sprintf("%v", action.UserID))
+	// p.API.LogInfo("PostID: " + fmt.Sprintf("%v", action.PostID))
+	// p.API.LogInfo("Context: " + fmt.Sprintf("%v", action.Context))
 
+	/*
+		if result := <-a.Srv.Store.Remind().GetReminder(reminderId); result.Err != nil {
+			return result.Err
+		} else {
+			reminder := result.Data.(model.Reminder)
+			reminder.Completed = time.Now().Format(time.RFC3339)
+			if result := <-a.Srv.Store.Remind().SaveReminder(&reminder); result.Err != nil {
+				return result.Err
+			}
+			if result := <-a.Srv.Store.Remind().DeleteForReminder(reminderId); result.Err != nil {
+				return result.Err
+			}
+			var updateParameters = map[string]interface{}{
+				"Message": reminder.Message,
+			}
+			update.Message = "~~" + post.Message + "~~\n" + T("app.reminder.update.complete", updateParameters)
+		}
+	*/
+
+	//get reminder
+	reminder := p.GetReminder(action.UserID, action.Context.ReminderID)
+	//remove occurrences
+	for _, occurrence := range reminder.Occurrences {
+		p.ClearScheduledOccurrence(reminder, occurrence)
+	}
 	// complete reminder
-
+	reminder.Completed = time.Now().UTC()
+	p.UpdateReminder(action.UserID, reminder)
 	//strike through original reminder
+	if post, pErr := p.API.GetPost(action.PostID); pErr != nil {
+		p.API.LogError("unable to get post " + pErr.Error())
+		response := &model.PostActionIntegrationResponse{}
+		writePostActionIntegrationResponseError(w, response)
+	} else {
+		var updateParameters = map[string]interface{}{
+			"Message": reminder.Message,
+		}
+		post.Message = "~~" + post.Message + "~~\n" + T("app.reminder.update.complete", updateParameters)
+		p.API.UpdatePost(post)
+		response := &model.PostActionIntegrationResponse{}
+		response.EphemeralText = post.Message
+		writePostActionIntegrationResponseOk(w, response)
 
-	// response := &model.PostActionIntegrationResponse{}
-	// response.EphemeralText = "TODO: ~~strikethrough original reminder~~"
-	// writePostActionIntegrationResponse(w, response)
-	// writePostActionIntegrationResponseOk(w, r)
+	}
 
 }
 

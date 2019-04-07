@@ -37,18 +37,40 @@ type ReminderRequest struct {
 	Reminder Reminder
 }
 
+func (p *Plugin) GetReminder(userId string, reminderId string) Reminder {
+
+	p.API.LogInfo("============================ begin of GetReminder")
+
+	user, uErr := p.API.GetUser(userId)
+	if uErr != nil {
+		return Reminder{}
+	}
+
+	reminders := p.GetReminders(user.Username)
+	for _, reminder := range reminders {
+		if reminder.Id == reminderId {
+			p.API.LogInfo("============================ end of GetReminder")
+			return reminder
+
+		}
+	}
+	p.API.LogInfo("============================ end of GetReminder(not found)")
+
+	return Reminder{}
+}
+
 func (p *Plugin) GetReminders(username string) []Reminder {
 
 	user, uErr := p.API.GetUserByUsername(username)
 
 	if uErr != nil {
-		p.API.LogError("failed to query user %s", username)
+		p.API.LogError("failed to query user " + username)
 		return []Reminder{}
 	}
 
 	bytes, bErr := p.API.KVGet(user.Username)
 	if bErr != nil {
-		p.API.LogError("failed KVGet %s", bErr)
+		p.API.LogError("failed KVGet " + bErr.Error())
 		return []Reminder{}
 	}
 
@@ -62,6 +84,48 @@ func (p *Plugin) GetReminders(username string) []Reminder {
 	}
 
 	return reminders
+}
+
+func (p *Plugin) UpdateReminder(userId string, reminder Reminder) error {
+
+	p.API.LogInfo("============================ begin of UpdateReminder")
+
+	user, uErr := p.API.GetUser(userId)
+
+	if uErr != nil {
+		p.API.LogError("failed to query user %s", user.Username)
+		return uErr
+	}
+
+	bytes, bErr := p.API.KVGet(user.Username)
+	if bErr != nil {
+		p.API.LogError("failed KVGet %s", bErr)
+		return bErr
+	}
+
+	var reminders []Reminder
+	if err := json.Unmarshal(bytes, &reminders); err != nil {
+		return err
+	}
+
+	for _, r := range reminders {
+		if r.Id == reminder.Id {
+			r = reminder
+		}
+	}
+
+	ro, rErr := json.Marshal(reminders)
+
+	if rErr != nil {
+		p.API.LogError("failed to marshal reminders %s", user.Username)
+		return rErr
+	}
+
+	p.API.LogInfo("============================ end of UpdateReminder")
+
+	p.API.KVSet(user.Username, ro)
+
+	return nil
 }
 
 func (p *Plugin) UpsertReminder(request *ReminderRequest) error {

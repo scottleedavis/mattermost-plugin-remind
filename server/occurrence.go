@@ -25,6 +25,42 @@ type Occurrence struct {
 	Repeat string
 }
 
+func (p *Plugin) ClearScheduledOccurrence(reminder Reminder, occurrence Occurrence) {
+
+	p.API.LogInfo("============================ begin of ClearScheduledOccurrence")
+
+	bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", occurrence.Occurrence)))
+	if err != nil {
+		p.API.LogError("failed KVGet %s", err)
+		return
+	}
+
+	var occurrences []Occurrence
+	if roErr := json.Unmarshal(bytes, &occurrences); roErr != nil {
+		return
+	} else {
+		p.API.LogDebug("existing " + fmt.Sprintf("%v", occurrences))
+	}
+
+	var occurrencesDelta []Occurrence
+	for _, o := range occurrences {
+		if o.ReminderId != reminder.Id {
+			occurrencesDelta = append(occurrencesDelta, occurrence)
+		}
+	}
+
+	ro, oErr := json.Marshal(occurrencesDelta)
+	if oErr != nil {
+		p.API.LogError("failed to marshal reminderOccurrences %s", occurrence.Id)
+		return
+	}
+
+	p.API.KVSet(string(fmt.Sprintf("%v", occurrence.Occurrence)), ro)
+
+	p.API.LogInfo("============================ end of ClearScheduledOccurrence")
+
+}
+
 func (p *Plugin) CreateOccurrences(request *ReminderRequest) error {
 
 	user, _ := p.API.GetUserByUsername(request.Username)
