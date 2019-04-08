@@ -8,6 +8,58 @@
   	"translation": "help"
   },
   {
+    "id": "list_inchannel",
+    "translation": "**In this channel:**"
+  },
+  {
+    "id": "list_upcoming",
+    "translation": "**Upcoming:**"
+  },
+  {
+    "id": "list_recurring",
+    "translation": "**Recurring:**"
+  },
+  {
+    "id": "list_past_and_incomplete",
+    "translation": "**Past and incomplete:**"
+  },
+  {
+    "id": "list_channel",
+    "translation": "**Channel reminders**"
+  },
+  {
+    "id": "list_footer",
+    "translation": "[View completed reminders]() · [Close list]()"
+  },
+  {
+    "id": "list.element.upcoming",
+    "translation": "* \"{{.Message}}\" {{.Occurrence}} [Complete]() [Delete]()"
+  },
+  {
+    "id": "list.element.upcoming.snoozed",
+    "translation": "* \"{{.Message}}\" (snoozed until {{.Snoozed}}) [Complete]() [Delete]()"
+  },
+  {
+    "id": "list.element.recurring",
+    "translation": "* \"{{.Message}}\" {{.Occurrence}} [Delete]()"
+  },
+  {
+    "id": "list.element.recurring.snoozed",
+    "translation": "* \"{{.Message}}\" {{.Occurrence}} (snoozed until {{.Snoozed}}) [Delete]()"
+  },
+  {
+    "id": "list.element.past",
+    "translation": "* \"{{.Message}}\"  [Complete]() · [Delete]() · Snooze: [15 mins]() · [1 hr]() · [Tomorrow]()"
+  },
+  {
+    "id": "list.element.channel",
+    "translation": "* \"{{.Message}}\"  [Delete]()"
+  },
+  {
+    "id": "list.element.inchannel",
+    "translation": "* \"{{.Message}}\"  [Delete]()"
+  },
+  {
     "id": "help.response",
     "translation": ":wave: Need some help with `/remind`?\nUse `/remind` to set a reminder for yourself, someone else, or for a channel. Some examples include:\n* `/remind me to drink water at 3pm every day`\n* `/remind me on June 1st to wish Linda happy birthday`\n* `/remind ~team-alpha to update the project status every Monday at 9am`\n* `/remind @jessica about the interview in 3 hours`\n* `/remind @peter tomorrow \"Please review the office seating plan\"`\nOr, use `/remind list` to see the list of all your reminders.\n"
   },

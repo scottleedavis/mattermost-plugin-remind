@@ -225,8 +225,6 @@ func (p *Plugin) TriggerReminders() {
 
 func (p *Plugin) GetReminder(userId string, reminderId string) Reminder {
 
-	p.API.LogInfo("============================ begin of GetReminder")
-
 	user, uErr := p.API.GetUser(userId)
 	if uErr != nil {
 		return Reminder{}
@@ -235,12 +233,9 @@ func (p *Plugin) GetReminder(userId string, reminderId string) Reminder {
 	reminders := p.GetReminders(user.Username)
 	for _, reminder := range reminders {
 		if reminder.Id == reminderId {
-			p.API.LogInfo("============================ end of GetReminder")
 			return reminder
-
 		}
 	}
-	p.API.LogInfo("============================ end of GetReminder(not found)")
 
 	return Reminder{}
 }
@@ -274,8 +269,6 @@ func (p *Plugin) GetReminders(username string) []Reminder {
 
 func (p *Plugin) UpdateReminder(userId string, reminder Reminder) error {
 
-	p.API.LogInfo("============================ begin of UpdateReminder")
-
 	user, uErr := p.API.GetUser(userId)
 
 	if uErr != nil {
@@ -306,8 +299,6 @@ func (p *Plugin) UpdateReminder(userId string, reminder Reminder) error {
 		p.API.LogError("failed to marshal reminders %s", user.Username)
 		return rErr
 	}
-
-	p.API.LogInfo("============================ end of UpdateReminder")
 
 	p.API.KVSet(user.Username, ro)
 
@@ -353,8 +344,6 @@ func (p *Plugin) UpsertReminder(request *ReminderRequest) error {
 
 func (p *Plugin) DeleteReminder(userId string, reminder Reminder) error {
 
-	p.API.LogInfo("============================ begin of DeleteReminder")
-
 	user, uErr := p.API.GetUser(userId)
 
 	if uErr != nil {
@@ -386,8 +375,6 @@ func (p *Plugin) DeleteReminder(userId string, reminder Reminder) error {
 		p.API.LogError("failed to marshal reminders %s", user.Username)
 		return rErr
 	}
-
-	p.API.LogInfo("============================ end of DeleteReminder")
 
 	p.API.KVSet(user.Username, ro)
 
