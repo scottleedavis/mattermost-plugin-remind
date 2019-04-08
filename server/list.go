@@ -20,6 +20,10 @@ func (p *Plugin) ListReminders(user *model.User, channelId string) string {
 
 	reminders := p.GetReminders(user.Username)
 
+	if len(reminders) == 0 {
+		return T("no.reminders")   //TODO || len(reminders that are not completed) == 0
+	}
+
 	for _, reminder := range reminders {
 		occurrences := reminder.Occurrences
 		if len(occurrences) > 0 {

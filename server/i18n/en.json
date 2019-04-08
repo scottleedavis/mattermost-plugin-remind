@@ -8,6 +8,10 @@
   	"translation": "help"
   },
   {
+    "id": "no.reminders",
+    "translation": "I cannot find any reminders for you.  Type `/remind` to set one."
+  },
+  {
     "id": "list.reminders",
     "translation": "A list of your reminders is in a DM with @{{.RemindUser}}."
   },
