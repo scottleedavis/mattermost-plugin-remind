@@ -287,13 +287,16 @@ func (p *Plugin) UpdateReminder(userId string, reminder Reminder) error {
 		return err
 	}
 
+	updatedReminders := []Reminder{}
 	for _, r := range reminders {
 		if r.Id == reminder.Id {
-			r = reminder
+			updatedReminders = append(updatedReminders, reminder)
+		} else {
+			updatedReminders = append(updatedReminders, r)
 		}
 	}
 
-	ro, rErr := json.Marshal(reminders)
+	ro, rErr := json.Marshal(updatedReminders)
 
 	if rErr != nil {
 		p.API.LogError("failed to marshal reminders %s", user.Username)

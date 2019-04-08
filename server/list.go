@@ -85,6 +85,7 @@ func (p *Plugin) ListReminders(user *model.User, channelId string) string {
 	channel, cErr := p.API.GetDirectChannel(p.remindUserId, user.Id)
 	if cErr != nil {
 		p.API.LogError("failed to create channel " + cErr.Error())
+		return ""
 	}
 
 	interactivePost := model.Post{
@@ -106,73 +107,91 @@ func (p *Plugin) ListReminders(user *model.User, channelId string) string {
 		}
 		return T("list.reminders", messageParameters)
 	}
-
-	// messageParameters := map[string]interface{}{
-	// "FinalTarget": "fofo",              //finalTarget,
-	// "Message":     "message used here", //reminder.Message,
-	// }
-	// siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
-
-	// channel, cErr := p.API.GetDirectChannel(p.remindUserId, user.Id)
-	// if cErr != nil {
-	// 	p.API.LogError("failed to create channel " + cErr.Error())
-	// }
-
-	// interactivePost := model.Post{
-	// 	ChannelId:     channel.Id,
-	// 	PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
-	// 	UserId:        p.remindUserId,
-	// 	Props: model.StringInterface{
-	// "attachments": []*model.SlackAttachment{
-	/////////////////////////////////////////////////////////////////////////////////
-	// return []*model.SlackAttachment{
-	// 	{
-	// 		Text: T("reminder.message", messageParameters),
-	// 		Actions: []*model.PostAction{
-	// 			{
-	// 				Integration: &model.PostActionIntegration{
-	// 					Context: model.StringInterface{
-	// 						"reminder_id":   1234,
-	// 						"occurrence_id": 1234,
-	// 						"action":        "complete",
-	// 					},
-	// 					URL: fmt.Sprintf("%s/plugins/%s/api/v1/complete", siteURL, manifest.Id),
-	// 				},
-	// 				Type: model.POST_ACTION_TYPE_BUTTON,
-	// 				Name: T("button.complete"),
-	// 			},
-	// 			{
-	// 				Integration: &model.PostActionIntegration{
-	// 					Context: model.StringInterface{
-	// 						"reminder_id":   1234,
-	// 						"occurrence_id": 1234,
-	// 						"action":        "delete",
-	// 					},
-	// 					URL: fmt.Sprintf("%s/plugins/%s/api/v1/delete", siteURL, manifest.Id),
-	// 				},
-	// 				Name: T("button.delete"),
-	// 				Type: "action",
-	// 			},
-	// 		},
-	// 	},
-	// }
-	// 	},
-	// }
-	////////////////////////////////////////////////////////////////////////////////////////
-	// if _, pErr := p.API.CreatePost(&interactivePost); pErr != nil {
-	// p.API.LogError(fmt.Sprintf("%v", pErr))
-	// }
-
 }
 
-// if len(upcomingOccurrences) > 0 {
-// 	output = strings.Join([]string{
-// 		output,
-// 		T("list_upcoming"),
-// 		p.listReminderGroup(user, &upcomingOccurrences, &reminders, "upcoming"),
-// 		"\n",
-// 	}, "\n")
-// }
+func (p *Plugin) UpdateListReminders(userId string, postId string) {
+
+	user, _ := p.API.GetUser(userId)
+
+	var upcomingOccurrences []Occurrence
+	var recurringOccurrences []Occurrence
+	var pastOccurrences []Occurrence
+	var channelOccurrences []Occurrence
+
+	reminders := p.GetReminders(user.Username)
+
+	for _, reminder := range reminders {
+		occurrences := reminder.Occurrences
+		if len(occurrences) > 0 {
+			for _, occurrence := range occurrences {
+				t := occurrence.Occurrence
+				s := occurrence.Snoozed
+
+				if !strings.HasPrefix(reminder.Target, "~") &&
+					reminder.Completed == p.emptyTime &&
+					(occurrence.Repeat == "" && t.After(time.Now())) ||
+					(s != p.emptyTime && s.After(time.Now())) {
+					upcomingOccurrences = append(upcomingOccurrences, occurrence)
+				}
+
+				if !strings.HasPrefix(reminder.Target, "~") &&
+					occurrence.Repeat != "" && (t.After(time.Now()) ||
+					(s != p.emptyTime && s.After(time.Now()))) {
+					recurringOccurrences = append(recurringOccurrences, occurrence)
+				}
+
+				if !strings.HasPrefix(reminder.Target, "~") &&
+					reminder.Completed == p.emptyTime &&
+					t.Before(time.Now()) &&
+					s == p.emptyTime {
+					pastOccurrences = append(pastOccurrences, occurrence)
+				}
+
+				if strings.HasPrefix(reminder.Target, "~") &&
+					reminder.Completed == p.emptyTime &&
+					t.After(time.Now()) {
+					channelOccurrences = append(channelOccurrences, occurrence)
+				}
+
+			}
+		}
+	}
+
+	attachments := []*model.SlackAttachment{}
+
+	if len(upcomingOccurrences) > 0 {
+		for _, o := range upcomingOccurrences {
+			attachments = append(attachments, p.addAttachment(user, o, reminders, "upcoming"))
+		}
+	}
+
+	if len(upcomingOccurrences) > 0 {
+		for _, o := range recurringOccurrences {
+			attachments = append(attachments, p.addAttachment(user, o, reminders, "recurring"))
+		}
+	}
+
+	if len(upcomingOccurrences) > 0 {
+		for _, o := range pastOccurrences {
+			attachments = append(attachments, p.addAttachment(user, o, reminders, "past"))
+		}
+	}
+	if len(upcomingOccurrences) > 0 {
+		for _, o := range channelOccurrences {
+			attachments = append(attachments, p.addAttachment(user, o, reminders, "channel"))
+		}
+	}
+
+	if post, pErr := p.API.GetPost(postId); pErr != nil {
+		p.API.LogError("unable to get list reminders post " + pErr.Error())
+	} else {
+		post.Props = model.StringInterface{
+			"attachments": attachments,
+		}
+		defer p.API.UpdatePost(post)
+	}
+}
+
 func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminders []Reminder, gType string) *model.SlackAttachment {
 
 	location := p.location(user)
@@ -191,7 +210,6 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 	if s != p.emptyTime {
 		formattedSnooze = p.formatWhen(user.Username, reminder.When, s.In(location).Format(time.RFC3339), true)
 	}
-
 	var messageParameters = map[string]interface{}{
 		"Message":    reminder.Message,
 		"Occurrence": formattedOccurrence,
@@ -214,7 +232,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							Context: model.StringInterface{
 								"reminder_id":   reminder.Id,
 								"occurrence_id": occurrence.Id,
-								"action":        "complete",
+								"action":        "complete/list",
 							},
 							URL: fmt.Sprintf("%s/plugins/%s/api/v1/complete", siteURL, manifest.Id),
 						},
@@ -226,7 +244,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							Context: model.StringInterface{
 								"reminder_id":   reminder.Id,
 								"occurrence_id": occurrence.Id,
-								"action":        "delete",
+								"action":        "delete/list",
 							},
 							URL: fmt.Sprintf("%s/plugins/%s/api/v1/delete", siteURL, manifest.Id),
 						},
@@ -250,7 +268,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							Context: model.StringInterface{
 								"reminder_id":   reminder.Id,
 								"occurrence_id": occurrence.Id,
-								"action":        "delete",
+								"action":        "delete/list",
 							},
 							URL: fmt.Sprintf("%s/plugins/%s/api/v1/delete", siteURL, manifest.Id),
 						},
@@ -274,7 +292,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							Context: model.StringInterface{
 								"reminder_id":   reminder.Id,
 								"occurrence_id": occurrence.Id,
-								"action":        "complete",
+								"action":        "complete/list",
 							},
 							URL: fmt.Sprintf("%s/plugins/%s/api/v1/complete", siteURL, manifest.Id),
 						},
@@ -286,7 +304,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							Context: model.StringInterface{
 								"reminder_id":   reminder.Id,
 								"occurrence_id": occurrence.Id,
-								"action":        "delete",
+								"action":        "delete/list",
 							},
 							URL: fmt.Sprintf("%s/plugins/%s/api/v1/delete", siteURL, manifest.Id),
 						},
@@ -298,7 +316,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							Context: model.StringInterface{
 								"reminder_id":   reminder.Id,
 								"occurrence_id": occurrence.Id,
-								"action":        "snooze",
+								"action":        "snooze/list",
 							},
 							URL: fmt.Sprintf("%s/plugins/%s/api/v1/snooze", siteURL, manifest.Id),
 						},
@@ -344,7 +362,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							Context: model.StringInterface{
 								"reminder_id":   reminder.Id,
 								"occurrence_id": occurrence.Id,
-								"action":        "delete",
+								"action":        "delete/list",
 							},
 							URL: fmt.Sprintf("%s/plugins/%s/api/v1/delete", siteURL, manifest.Id),
 						},
