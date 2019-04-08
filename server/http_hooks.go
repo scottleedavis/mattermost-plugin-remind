@@ -28,6 +28,7 @@ type Action struct {
 	Context *ActionContext `json:"context"`
 }
 
+// TODO use ephemeral posts when they are no longer not experimental
 func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
 
 	var action *Action

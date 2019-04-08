@@ -8,56 +8,60 @@
   	"translation": "help"
   },
   {
-    "id": "list_inchannel",
+    "id": "list.reminders",
+    "translation": "A list of your reminders is in a DM with @{{.RemindUser}}."
+  },
+  {
+    "id": "list.inchannel",
     "translation": "**In this channel:**"
   },
   {
-    "id": "list_upcoming",
+    "id": "list.upcoming",
     "translation": "**Upcoming:**"
   },
   {
-    "id": "list_recurring",
+    "id": "list.recurring",
     "translation": "**Recurring:**"
   },
   {
-    "id": "list_past_and_incomplete",
+    "id": "list.past.and.incomplete",
     "translation": "**Past and incomplete:**"
   },
   {
-    "id": "list_channel",
+    "id": "list.channel",
     "translation": "**Channel reminders**"
   },
   {
-    "id": "list_footer",
+    "id": "list.footer",
     "translation": "[View completed reminders]() · [Close list]()"
   },
   {
     "id": "list.element.upcoming",
-    "translation": "* \"{{.Message}}\" {{.Occurrence}} [Complete]() [Delete]()"
+    "translation": "\"{{.Message}}\" {{.Occurrence}}"
   },
   {
     "id": "list.element.upcoming.snoozed",
-    "translation": "* \"{{.Message}}\" (snoozed until {{.Snoozed}}) [Complete]() [Delete]()"
+    "translation": "\"{{.Message}}\" (snoozed until {{.Snoozed}})"
   },
   {
     "id": "list.element.recurring",
-    "translation": "* \"{{.Message}}\" {{.Occurrence}} [Delete]()"
+    "translation": "\"{{.Message}}\" {{.Occurrence}}"
   },
   {
     "id": "list.element.recurring.snoozed",
-    "translation": "* \"{{.Message}}\" {{.Occurrence}} (snoozed until {{.Snoozed}}) [Delete]()"
+    "translation": "\"{{.Message}}\" {{.Occurrence}} (snoozed until {{.Snoozed}})"
   },
   {
     "id": "list.element.past",
-    "translation": "* \"{{.Message}}\"  [Complete]() · [Delete]() · Snooze: [15 mins]() · [1 hr]() · [Tomorrow]()"
+    "translation": "\"{{.Message}}\""
   },
   {
     "id": "list.element.channel",
-    "translation": "* \"{{.Message}}\"  [Delete]()"
+    "translation": "\"{{.Message}}\""
   },
   {
     "id": "list.element.inchannel",
-    "translation": "* \"{{.Message}}\"  [Delete]()"
+    "translation": "\"{{.Message}}\""
   },
   {
     "id": "help.response",
