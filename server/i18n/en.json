@@ -28,6 +28,26 @@
     "translation": "Ok! I’ve deleted the reminder \"{{.Message}}\"."
   },
   {
+    "id": "action.snooze.20min",
+    "translation": "Ok! I’ll remind you \"{{.Message}}\" in 20 minutes"
+  },
+  {
+    "id": "action.snooze.1hr",
+    "translation": "Ok! I’ll remind you \"{{.Message}}\" in 1 hour"
+  },
+  {
+    "id": "action.snooze.3hr",
+    "translation": "Ok! I’ll remind you \"{{.Message}}\" in 3 hours"
+  },
+  {
+    "id": "action.snooze.tomorrow",
+    "translation": "Ok! I’ll remind you \"{{.Message}}\" at 9am tommorrow"
+  },
+  {
+    "id": "action.snooze.nextweek",
+    "translation": "Ok! I’ll remind you \"{{.Message}}\" at 9am Monday"
+  },
+  {
     "id": "button.complete",
     "translation": "Mark as Complete"
   },
@@ -57,7 +77,7 @@
   },
   {
     "id": "button.snooze.3hr",
-    "translation": "3 hourS"
+    "translation": "3 hours"
   },
   {
     "id": "snooze.3hr",

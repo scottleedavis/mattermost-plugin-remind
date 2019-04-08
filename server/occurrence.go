@@ -208,6 +208,36 @@ func (p *Plugin) upsertOccurrence(occurrence *Occurrence) []Occurrence {
 
 }
 
+func (p *Plugin) upsertSnoozedOccurrence(occurrence *Occurrence) []Occurrence {
+
+	bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", occurrence.Snoozed)))
+	if err != nil {
+		p.API.LogError("failed KVGet %s", err)
+		return nil
+	}
+
+	var occurrences []Occurrence
+	roErr := json.Unmarshal(bytes, &occurrences)
+	if roErr != nil {
+		p.API.LogDebug("new snoozed occurrence " + string(fmt.Sprintf("%v", occurrence.Snoozed)))
+	} else {
+		p.API.LogDebug("existing " + fmt.Sprintf("%v", occurrences))
+	}
+
+	occurrences = append(occurrences, *occurrence)
+	ro, __ := json.Marshal(occurrences)
+
+	if __ != nil {
+		p.API.LogError("failed to marshal reminderOccurrences %s", occurrence.Id)
+		return occurrences
+	}
+
+	p.API.KVSet(string(fmt.Sprintf("%v", occurrence.Snoozed)), ro)
+
+	return occurrences
+
+}
+
 func (p *Plugin) in(when string, user *model.User) (times []time.Time, err error) {
 
 	_, locale := p.translation(user)
