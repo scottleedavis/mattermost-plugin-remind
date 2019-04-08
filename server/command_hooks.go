@@ -46,7 +46,8 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	if strings.HasSuffix(args.Command, T("list")) {
 		return &model.CommandResponse{
 			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-			Text:         fmt.Sprintf(p.ListReminders(user, args.ChannelId)),
+			// Text:         fmt.Sprintf(p.ListReminders(user, args.ChannelId)),
+			Attachments: p.ListRemindersNew(user, args.ChannelId),
 		}, nil
 	}
 

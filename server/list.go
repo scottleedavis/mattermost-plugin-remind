@@ -1,12 +1,214 @@
 package main
 
 import (
-	// "fmt"
+	"fmt"
 	"strings"
 	"time"
 
 	"github.com/mattermost/mattermost-server/model"
 )
+
+func (p *Plugin) ListRemindersNew(user *model.User, channelId string) []*model.SlackAttachment {
+
+	// T, _ := p.translation(user)
+	// location := p.location(user)
+
+	var upcomingOccurrences []Occurrence
+	var recurringOccurrences []Occurrence
+	var pastOccurrences []Occurrence
+	var channelOccurrences []Occurrence
+
+	reminders := p.GetReminders(user.Username)
+
+	// output := ""
+
+	for _, reminder := range reminders {
+		occurrences := reminder.Occurrences
+		if len(occurrences) > 0 {
+			for _, occurrence := range occurrences {
+				t := occurrence.Occurrence
+				s := occurrence.Snoozed
+
+				if !strings.HasPrefix(reminder.Target, "~") &&
+					reminder.Completed == p.emptyTime &&
+					(occurrence.Repeat == "" && t.After(time.Now())) ||
+					(s != p.emptyTime && s.After(time.Now())) {
+					upcomingOccurrences = append(upcomingOccurrences, occurrence)
+				}
+
+				if !strings.HasPrefix(reminder.Target, "~") &&
+					occurrence.Repeat != "" && (t.After(time.Now()) ||
+					(s != p.emptyTime && s.After(time.Now()))) {
+					recurringOccurrences = append(recurringOccurrences, occurrence)
+				}
+
+				if !strings.HasPrefix(reminder.Target, "~") &&
+					reminder.Completed == p.emptyTime &&
+					t.Before(time.Now()) &&
+					s == p.emptyTime {
+					pastOccurrences = append(pastOccurrences, occurrence)
+				}
+
+				if strings.HasPrefix(reminder.Target, "~") &&
+					reminder.Completed == p.emptyTime &&
+					t.After(time.Now()) {
+					channelOccurrences = append(channelOccurrences, occurrence)
+				}
+
+			}
+		}
+	}
+
+	attachments := []*model.SlackAttachment{}
+
+	if len(upcomingOccurrences) > 0 {
+		// output = strings.Join([]string{
+		// 	output,
+		// 	T("list_upcoming"),
+		// 	p.listReminderGroup(user, &upcomingOccurrences, &reminders, "upcoming"),
+		// 	"\n",
+		// }, "\n")
+		for _, o := range upcomingOccurrences {
+			attachments = append(attachments, p.addAttachment(user, o, reminders, "upcoming"))
+		}
+	}
+
+	return attachments
+	// messageParameters := map[string]interface{}{
+	// "FinalTarget": "fofo",              //finalTarget,
+	// "Message":     "message used here", //reminder.Message,
+	// }
+	// siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
+
+	// channel, cErr := p.API.GetDirectChannel(p.remindUserId, user.Id)
+	// if cErr != nil {
+	// 	p.API.LogError("failed to create channel " + cErr.Error())
+	// }
+
+	// interactivePost := model.Post{
+	// 	ChannelId:     channel.Id,
+	// 	PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
+	// 	UserId:        p.remindUserId,
+	// 	Props: model.StringInterface{
+	// "attachments": []*model.SlackAttachment{
+	/////////////////////////////////////////////////////////////////////////////////
+	// return []*model.SlackAttachment{
+	// 	{
+	// 		Text: T("reminder.message", messageParameters),
+	// 		Actions: []*model.PostAction{
+	// 			{
+	// 				Integration: &model.PostActionIntegration{
+	// 					Context: model.StringInterface{
+	// 						"reminder_id":   1234,
+	// 						"occurrence_id": 1234,
+	// 						"action":        "complete",
+	// 					},
+	// 					URL: fmt.Sprintf("%s/plugins/%s/api/v1/complete", siteURL, manifest.Id),
+	// 				},
+	// 				Type: model.POST_ACTION_TYPE_BUTTON,
+	// 				Name: T("button.complete"),
+	// 			},
+	// 			{
+	// 				Integration: &model.PostActionIntegration{
+	// 					Context: model.StringInterface{
+	// 						"reminder_id":   1234,
+	// 						"occurrence_id": 1234,
+	// 						"action":        "delete",
+	// 					},
+	// 					URL: fmt.Sprintf("%s/plugins/%s/api/v1/delete", siteURL, manifest.Id),
+	// 				},
+	// 				Name: T("button.delete"),
+	// 				Type: "action",
+	// 			},
+	// 		},
+	// 	},
+	// }
+	// 	},
+	// }
+	////////////////////////////////////////////////////////////////////////////////////////
+	// if _, pErr := p.API.CreatePost(&interactivePost); pErr != nil {
+	// p.API.LogError(fmt.Sprintf("%v", pErr))
+	// }
+
+}
+
+// if len(upcomingOccurrences) > 0 {
+// 	output = strings.Join([]string{
+// 		output,
+// 		T("list_upcoming"),
+// 		p.listReminderGroup(user, &upcomingOccurrences, &reminders, "upcoming"),
+// 		"\n",
+// 	}, "\n")
+// }
+func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminders []Reminder, gType string) *model.SlackAttachment {
+
+	location := p.location(user)
+	T, _ := p.translation(user)
+
+	siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
+
+	// for _, occurrence := range occurrences {
+
+	reminder := p.findReminder(reminders, occurrence)
+	t := occurrence.Occurrence
+	s := occurrence.Snoozed
+
+	formattedOccurrence := ""
+	formattedOccurrence = p.formatWhen(user.Username, reminder.When, t.In(location).Format(time.RFC3339), false)
+
+	formattedSnooze := ""
+	if s != p.emptyTime {
+		formattedSnooze = p.formatWhen(user.Username, reminder.When, s.In(location).Format(time.RFC3339), true)
+	}
+
+	var messageParameters = map[string]interface{}{
+		"Message":    reminder.Message,
+		"Occurrence": formattedOccurrence,
+		"Snoozed":    formattedSnooze,
+	}
+	if !t.Equal(p.emptyTime) {
+		switch gType {
+		case "upcoming":
+			output := ""
+			if formattedSnooze == "" {
+				output = T("list.element.upcoming", messageParameters)
+			} else {
+				output = T("list.element.upcoming.snoozed", messageParameters)
+			}
+			return &model.SlackAttachment{
+				Text: output,
+				Actions: []*model.PostAction{
+					{
+						Integration: &model.PostActionIntegration{
+							Context: model.StringInterface{
+								"reminder_id":   reminder.Id,
+								"occurrence_id": occurrence.Id,
+								"action":        "complete",
+							},
+							URL: fmt.Sprintf("%s/plugins/%s/api/v1/complete", siteURL, manifest.Id),
+						},
+						Type: model.POST_ACTION_TYPE_BUTTON,
+						Name: T("button.complete"),
+					},
+					{
+						Integration: &model.PostActionIntegration{
+							Context: model.StringInterface{
+								"reminder_id":   reminder.Id,
+								"occurrence_id": occurrence.Id,
+								"action":        "delete",
+							},
+							URL: fmt.Sprintf("%s/plugins/%s/api/v1/delete", siteURL, manifest.Id),
+						},
+						Name: T("button.delete"),
+						Type: "action",
+					},
+				},
+			}
+		}
+	}
+	// }
+	return &model.SlackAttachment{}
+}
 
 func (p *Plugin) ListReminders(user *model.User, channelId string) string {
 

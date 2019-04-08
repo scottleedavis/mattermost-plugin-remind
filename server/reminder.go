@@ -102,10 +102,10 @@ func (p *Plugin) TriggerReminders() {
 					ChannelId:     channel.Id,
 					PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
 					UserId:        p.remindUserId,
-					Message:       T("reminder.message", messageParameters),
 					Props: model.StringInterface{
 						"attachments": []*model.SlackAttachment{
 							{
+								Text: T("reminder.message", messageParameters),
 								Actions: []*model.PostAction{
 									{
 										Id: model.NewId(),
