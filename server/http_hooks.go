@@ -53,6 +53,8 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 		p.handleSnoozeList(w, r, action)
 	case "close/list":
 		p.handleCloseList(w, r, action)
+	case "next/reminders":
+		p.handleNextReminders(w, r, action)
 	default:
 		response := &model.PostActionIntegrationResponse{}
 		writePostActionIntegrationResponseError(w, response)
@@ -370,6 +372,10 @@ func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request, action
 
 func (p *Plugin) handleCloseList(w http.ResponseWriter, r *http.Request, action *Action) {
 	p.API.DeletePost(action.PostID)
+}
+
+func (p *Plugin) handleNextReminders(w http.ResponseWriter, r *http.Request, action *Action) {
+
 }
 
 func writePostActionIntegrationResponseOk(w http.ResponseWriter, response *model.PostActionIntegrationResponse) {

@@ -108,6 +108,18 @@
     "translation": "Ok! I’ll remind you \"{{.Message}}\" at 9am Monday"
   },
   {
+    "id": "button.next.reminders",
+    "translation": "Next {{.ReminderCount}} reminders"
+  },
+  {
+    "id": "button.previous.reminders",
+    "translation": "Previous {{.ReminderCount}} reminders"
+  },
+  {
+    "id": "reminders.page.numbers",
+    "translation": "Reminders {{.Start}} of {{.Stop}} (of {{.Total}})"
+  },
+  {
     "id": "button.complete",
     "translation": "Mark as Complete"
   },
