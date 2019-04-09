@@ -68,10 +68,29 @@ func (p *Plugin) handleComplete(w http.ResponseWriter, r *http.Request, action *
 		p.API.LogError("unable to get post " + pErr.Error())
 		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
 	} else {
+
+		user, uError := p.API.GetUser(action.UserID)
+		if uError != nil {
+			p.API.LogError(uError.Error())
+			return
+		}
+		finalTarget := reminder.Target
+		if finalTarget == T("me") {
+			finalTarget = T("you")
+		} else {
+			finalTarget = "@" + user.Username
+		}
+
+		messageParameters := map[string]interface{}{
+			"FinalTarget": finalTarget,
+			"Message":     reminder.Message,
+		}
+
 		var updateParameters = map[string]interface{}{
 			"Message": reminder.Message,
 		}
-		post.Message = "~~" + post.Message + "~~\n" + T("action.complete", updateParameters)
+
+		post.Message = "~~" + T("reminder.message", messageParameters) + "~~\n" + T("action.complete", updateParameters)
 		post.Props = model.StringInterface{}
 		p.API.UpdatePost(post)
 		writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
