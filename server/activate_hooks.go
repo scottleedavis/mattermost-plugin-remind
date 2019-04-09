@@ -83,30 +83,65 @@ func (p *Plugin) OnDeactivate() error {
 // func (p *Plugin) activateBotUser() (*model.Bot, error) {
 func (p *Plugin) activateBotUser() (*model.User, error) {
 
-	// if bot2, err2 := p.API.GetBot(CommandTrigger+"_bot", true); err2 != nil {
-	// 	p.API.LogError("===========> BOT DOES NOT EXIST: " + err2.Error())
+	/*
+		//TEST
+		if bot2, err2 := p.API.GetBot(CommandTrigger+"_bot", true); err2 != nil {
+			p.API.LogError("===========> BOT DOES NOT EXIST: " + err2.Error())
 
-	// 	b := model.Bot{
-	// 		// UserId: manifest.Id,
-	// 		// UserId:      cuser.Id,
-	// 		Username:    CommandTrigger + "_bot",
-	// 		OwnerId:     manifest.Id,
-	// 		DisplayName: "Remind",
-	// 		Description: "Sets and triggers reminders",
-	// 	}
+			b := model.Bot{
+				// UserId: manifest.Id,
+				UserId:      CommandTrigger + "_bot",
+				Username:    CommandTrigger + "_bot",
+				OwnerId:     manifest.Id,
+				DisplayName: "Remind",
+				Description: "Sets and triggers reminders",
+			}
 
-	// 	newBot, bErr := p.API.CreateBot(&b)
-	// 	if bErr != nil {
-	// 		p.API.LogError(fmt.Sprintf("failed to create %s bot: %v", CommandTrigger, bErr))
-	// 		return nil, bErr
-	// 	} else {
-	// 		/// TODO BOT CREATED IS HAPPENING.  debug how it is created/save
-	// 		p.API.LogInfo("BOT CREATED ========================================> " + fmt.Sprintf("%v", newBot))
-	// 	}
+			newBot, bErr := p.API.CreateBot(&b)
+			if bErr != nil {
+				p.API.LogError(fmt.Sprintf("failed to create %s bot: %v", CommandTrigger, bErr))
+				return nil, bErr
+			} else {
+				/// TODO BOT CREATED IS HAPPENING.  debug how it is created/save
+				p.API.LogInfo("BOT CREATED ========================================> " + fmt.Sprintf("%v", newBot))
+				//TEST
+				skawtusUser, _ := p.API.GetUserByUsername("skawtus")
+				channel, cErr := p.API.GetDirectChannel(newBot.UserId, skawtusUser.Id)
+				if cErr != nil {
+					p.API.LogError("failed to create channel " + cErr.Error())
+				}
 
-	// } else {
-	// 	p.API.LogError("===========> BOT EXISTS: " + fmt.Sprintf("%v", bot2))
-	// }
+				botPost := model.Post{
+					ChannelId:     channel.Id,
+					PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
+					UserId:        newBot.UserId,
+					Message:       "ahahahaha",
+				}
+				p.API.CreatePost(&botPost)
+				//end test
+			}
+
+		} else {
+
+			p.API.LogError("===========> BOT EXISTS: " + fmt.Sprintf("%v", bot2))
+			//TEST
+			skawtusUser, _ := p.API.GetUserByUsername("skawtus")
+			channel, cErr := p.API.GetDirectChannel(bot2.UserId, skawtusUser.Id)
+			if cErr != nil {
+				p.API.LogError("failed to create channel " + cErr.Error())
+			}
+
+			botPost := model.Post{
+				ChannelId:     channel.Id,
+				PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
+				UserId:        bot2.UserId,
+				Message:       "ahahahaha",
+			}
+			p.API.CreatePost(&botPost)
+			//end test
+		}
+		//END TEST
+	*/
 
 	bot, err := p.API.GetUserByUsername(CommandTrigger)
 	if err != nil {
