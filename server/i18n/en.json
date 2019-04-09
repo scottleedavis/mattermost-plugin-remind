@@ -112,8 +112,20 @@
     "translation": "Mark as Complete"
   },
   {
+    "id": "button.view.complete",
+    "translation": "View Completed Reminders"
+  },
+  {
     "id": "button.delete",
     "translation": "Delete"
+  },
+  {
+    "id": "button.delete.complete",
+    "translation": "Delete all completed"
+  },
+  {
+    "id": "button.close.list",
+    "translation": "Close list"
   },
   {
     "id": "button.snooze",

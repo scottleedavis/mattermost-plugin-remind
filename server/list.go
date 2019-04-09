@@ -21,7 +21,7 @@ func (p *Plugin) ListReminders(user *model.User, channelId string) string {
 	reminders := p.GetReminders(user.Username)
 
 	if len(reminders) == 0 {
-		return T("no.reminders") //TODO || len(reminders that are not completed) == 0
+		return T("no.reminders")
 	}
 
 	for _, reminder := range reminders {
@@ -84,6 +84,50 @@ func (p *Plugin) ListReminders(user *model.User, channelId string) string {
 		for _, o := range channelOccurrences {
 			attachments = append(attachments, p.addAttachment(user, o, reminders, "channel"))
 		}
+	}
+
+	completedCount := 0
+	for _, reminder := range reminders {
+		if reminder.Completed != p.emptyTime {
+			completedCount += 1
+		}
+	}
+	if completedCount > 0 {
+		siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
+		attachments = append(attachments, &model.SlackAttachment{
+			Actions: []*model.PostAction{
+				{
+					Integration: &model.PostActionIntegration{
+						Context: model.StringInterface{
+							"action": "view/complete/list",
+						},
+						URL: fmt.Sprintf("%s/plugins/%s/api/v1/complete", siteURL, manifest.Id),
+					},
+					Type: model.POST_ACTION_TYPE_BUTTON,
+					Name: T("button.view.complete"),
+				},
+				{
+					Integration: &model.PostActionIntegration{
+						Context: model.StringInterface{
+							"action": "delete/complete/list",
+						},
+						URL: fmt.Sprintf("%s/plugins/%s/api/v1/delete", siteURL, manifest.Id),
+					},
+					Name: T("button.delete.complete"),
+					Type: "action",
+				},
+				{
+					Integration: &model.PostActionIntegration{
+						Context: model.StringInterface{
+							"action": "close/list",
+						},
+						URL: fmt.Sprintf("%s/plugins/%s/api/v1/delete", siteURL, manifest.Id),
+					},
+					Name: T("button.close.list"),
+					Type: "action",
+				},
+			},
+		})
 	}
 
 	channel, cErr := p.API.GetDirectChannel(p.remindUserId, user.Id)
@@ -379,6 +423,47 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 	}
 
 	return &model.SlackAttachment{}
+}
+
+func (p *Plugin) ListCompletedReminders(userId string, postId string) {
+
+	user, uErr := p.API.GetUser(userId)
+	if uErr != nil {
+		p.API.LogError(uErr.Error())
+	}
+	reminders := p.GetReminders(user.Username)
+
+	var output string
+	output = ""
+	for _, reminder := range reminders {
+		if reminder.Completed != p.emptyTime {
+			location := p.location(user)
+			output = strings.Join([]string{output, "* \"" + reminder.Message + "\" " + fmt.Sprintf("%v", reminder.Completed.In(location).Format(time.RFC3339))}, "\n")
+		}
+	}
+
+	if post, pErr := p.API.GetPost(postId); pErr != nil {
+		p.API.LogError(pErr.Error())
+	} else {
+		post.Message = output
+		post.Props = model.StringInterface{}
+		p.API.UpdatePost(post)
+	}
+}
+
+func (p *Plugin) DeleteCompletedReminders(userId string) {
+
+	user, uErr := p.API.GetUser(userId)
+	if uErr != nil {
+		p.API.LogError(uErr.Error())
+	}
+	reminders := p.GetReminders(user.Username)
+	for _, reminder := range reminders {
+		if reminder.Completed != p.emptyTime {
+			p.DeleteReminder(userId, reminder)
+		}
+	}
+
 }
 
 /*

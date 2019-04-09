@@ -39,14 +39,20 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 		p.handleComplete(w, r, action)
 	case "complete/list":
 		p.handleCompleteList(w, r, action)
+	case "view/complete/list":
+		p.handleViewCompleteList(w, r, action)
 	case "delete":
 		p.handleDelete(w, r, action)
 	case "delete/list":
 		p.handleDeleteList(w, r, action)
+	case "delete/complete/list":
+		p.handleDeleteCompleteList(w, r, action)
 	case "snooze":
 		p.handleSnooze(w, r, action)
 	case "snooze/list":
 		p.handleSnoozeList(w, r, action)
+	case "close/list":
+		p.handleCloseList(w, r, action)
 	default:
 		response := &model.PostActionIntegrationResponse{}
 		writePostActionIntegrationResponseError(w, response)
@@ -112,6 +118,10 @@ func (p *Plugin) handleCompleteList(w http.ResponseWriter, r *http.Request, acti
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
+func (p *Plugin) handleViewCompleteList(w http.ResponseWriter, r *http.Request, action *Action) {
+	p.ListCompletedReminders(action.UserID, action.PostID)
+}
+
 func (p *Plugin) handleDelete(w http.ResponseWriter, r *http.Request, action *Action) {
 
 	reminder := p.GetReminder(action.UserID, action.Context.ReminderID)
@@ -148,6 +158,13 @@ func (p *Plugin) handleDeleteList(w http.ResponseWriter, r *http.Request, action
 	}
 
 	p.DeleteReminder(action.UserID, reminder)
+	p.UpdateListReminders(action.UserID, action.PostID)
+	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
+}
+
+func (p *Plugin) handleDeleteCompleteList(w http.ResponseWriter, r *http.Request, action *Action) {
+
+	p.DeleteCompletedReminders(action.UserID)
 	p.UpdateListReminders(action.UserID, action.PostID)
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
@@ -349,6 +366,10 @@ func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request, action
 		p.UpdateListReminders(action.UserID, action.PostID)
 		writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 	}
+}
+
+func (p *Plugin) handleCloseList(w http.ResponseWriter, r *http.Request, action *Action) {
+	p.API.DeletePost(action.PostID)
 }
 
 func writePostActionIntegrationResponseOk(w http.ResponseWriter, response *model.PostActionIntegrationResponse) {

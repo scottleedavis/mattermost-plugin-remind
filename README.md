@@ -1,13 +1,8 @@
 # mattermost-plugin-remind
 
-### Began during [Mattermost Plugins Hackathon 2018](https://forum.mattermost.org/t/virtual-hackathon/5471)
+a reminder slashcommand bot
 
-##### current status
-* converting [mattermost-server based version](https://github.com/scottleedavis/mattermost-server/tree/MM-10580) to this plugin
-    
-##### planned
-* feature parity with [mattermost-remind](http://github.com/scottleedavis/mattermost-remind)
-* unit testing
+![buttons.png](buttons.png)
 
 ### usage
 
