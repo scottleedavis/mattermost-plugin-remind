@@ -2,7 +2,7 @@
 
 a reminder slashcommand bot
 
-![buttons.png](buttons.png | height=150)
+![buttons.png](buttons.png | width=150)
 
 ### usage
 
