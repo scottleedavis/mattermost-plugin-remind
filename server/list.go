@@ -10,7 +10,7 @@ import (
 
 func (p *Plugin) ListReminders(user *model.User, channelId string) string {
 
-	T, _ := p.translation(user)
+	// T, _ := p.translation(user) /// this should be needed... ???
 	// location := p.location(user)
 
 	var upcomingOccurrences []Occurrence
@@ -228,6 +228,50 @@ func (p *Plugin) UpdateListReminders(userId string, postId string) {
 		for _, o := range channelOccurrences {
 			attachments = append(attachments, p.addAttachment(user, o, reminders, "channel"))
 		}
+	}
+
+	completedCount := 0
+	for _, reminder := range reminders {
+		if reminder.Completed != p.emptyTime {
+			completedCount += 1
+		}
+	}
+	if completedCount > 0 {
+		siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
+		attachments = append(attachments, &model.SlackAttachment{
+			Actions: []*model.PostAction{
+				{
+					Integration: &model.PostActionIntegration{
+						Context: model.StringInterface{
+							"action": "view/complete/list",
+						},
+						URL: fmt.Sprintf("%s/plugins/%s/api/v1/complete", siteURL, manifest.Id),
+					},
+					Type: model.POST_ACTION_TYPE_BUTTON,
+					Name: T("button.view.complete"),
+				},
+				{
+					Integration: &model.PostActionIntegration{
+						Context: model.StringInterface{
+							"action": "delete/complete/list",
+						},
+						URL: fmt.Sprintf("%s/plugins/%s/api/v1/delete", siteURL, manifest.Id),
+					},
+					Name: T("button.delete.complete"),
+					Type: "action",
+				},
+				{
+					Integration: &model.PostActionIntegration{
+						Context: model.StringInterface{
+							"action": "close/list",
+						},
+						URL: fmt.Sprintf("%s/plugins/%s/api/v1/delete", siteURL, manifest.Id),
+					},
+					Name: T("button.close.list"),
+					Type: "action",
+				},
+			},
+		})
 	}
 
 	if post, pErr := p.API.GetPost(postId); pErr != nil {

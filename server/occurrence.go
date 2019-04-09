@@ -393,7 +393,7 @@ func (p *Plugin) inEN(when string, user *model.User) (times []time.Time, err err
 			i = num
 		}
 
-		times = append(times, time.Now().UTC().Round(time.Second).Add(time.Hour*24*30*time.Duration(i)))
+		times = append(times, time.Now().UTC().Round(time.Second).Add(time.Hour*24*365*time.Duration(i)))
 
 		return times, nil
 
