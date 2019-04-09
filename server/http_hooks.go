@@ -19,6 +19,7 @@ type ActionContext struct {
 	OccurrenceID   string `json:"occurrence_id"`
 	Action         string `json:"action"`
 	SelectedOption string `json:"selected_option"`
+	Offset         int    `json:"offset"`
 }
 
 // Action type for decoding action buttons
@@ -53,7 +54,7 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 		p.handleSnoozeList(w, r, action)
 	case "close/list":
 		p.handleCloseList(w, r, action)
-	case "next/reminders":
+	case "next/reminders", "previous/reminders":
 		p.handleNextReminders(w, r, action)
 	default:
 		response := &model.PostActionIntegrationResponse{}
@@ -116,7 +117,7 @@ func (p *Plugin) handleCompleteList(w http.ResponseWriter, r *http.Request, acti
 
 	reminder.Completed = time.Now().UTC()
 	p.UpdateReminder(action.UserID, reminder)
-	p.UpdateListReminders(action.UserID, action.PostID)
+	p.UpdateListReminders(action.UserID, action.PostID, 1)
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
@@ -160,14 +161,14 @@ func (p *Plugin) handleDeleteList(w http.ResponseWriter, r *http.Request, action
 	}
 
 	p.DeleteReminder(action.UserID, reminder)
-	p.UpdateListReminders(action.UserID, action.PostID)
+	p.UpdateListReminders(action.UserID, action.PostID, 1)
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
 func (p *Plugin) handleDeleteCompleteList(w http.ResponseWriter, r *http.Request, action *Action) {
 
 	p.DeleteCompletedReminders(action.UserID)
-	p.UpdateListReminders(action.UserID, action.PostID)
+	p.UpdateListReminders(action.UserID, action.PostID, 1)
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
@@ -365,7 +366,7 @@ func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request, action
 			}
 		}
 
-		p.UpdateListReminders(action.UserID, action.PostID)
+		p.UpdateListReminders(action.UserID, action.PostID, 1)
 		writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 	}
 }
@@ -375,7 +376,8 @@ func (p *Plugin) handleCloseList(w http.ResponseWriter, r *http.Request, action 
 }
 
 func (p *Plugin) handleNextReminders(w http.ResponseWriter, r *http.Request, action *Action) {
-
+	p.UpdateListReminders(action.UserID, action.PostID, action.Context.Offset)
+	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
 func writePostActionIntegrationResponseOk(w http.ResponseWriter, response *model.PostActionIntegrationResponse) {

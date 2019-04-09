@@ -8,7 +8,7 @@ import (
 	"github.com/mattermost/mattermost-server/model"
 )
 
-const RemindersPerPage = 1 //3
+const RemindersPerPage = 2 //3
 
 func (p *Plugin) ListReminders(user *model.User, channelId string) string {
 
@@ -138,9 +138,9 @@ func (p *Plugin) ListReminders(user *model.User, channelId string) string {
 			"ReminderCount": RemindersPerPage,
 		}
 		remindersPageCount := map[string]interface{}{
-			"Start": 1,  //string(1),
-			"Stop":  3,  //string(RemindersPerPage),
-			"Total": 10, //string(len(reminders) - completedCount),
+			"Start": 1,
+			"Stop":  RemindersPerPage,
+			"Total": (len(reminders) - completedCount),
 		}
 		attachments = append(attachments, &model.SlackAttachment{
 			Text: T("reminders.page.numbers", remindersPageCount),
@@ -196,7 +196,7 @@ func (p *Plugin) ListReminders(user *model.User, channelId string) string {
 	}
 }
 
-func (p *Plugin) UpdateListReminders(userId string, postId string) {
+func (p *Plugin) UpdateListReminders(userId string, postId string, offset int) {
 
 	user, _ := p.API.GetUser(userId)
 
@@ -246,26 +246,49 @@ func (p *Plugin) UpdateListReminders(userId string, postId string) {
 
 	attachments := []*model.SlackAttachment{}
 
+	offsetCount := 1
+	endOffset := offset + RemindersPerPage
+
 	if len(upcomingOccurrences) > 0 {
 		for _, o := range upcomingOccurrences {
-			attachments = append(attachments, p.addAttachment(user, o, reminders, "upcoming"))
+			offsetCount += 1
+			if offsetCount > offset && offsetCount <= endOffset {
+				attachments = append(attachments, p.addAttachment(user, o, reminders, "upcoming"))
+			} else {
+				break
+			}
 		}
 	}
 
 	if len(upcomingOccurrences) > 0 {
 		for _, o := range recurringOccurrences {
-			attachments = append(attachments, p.addAttachment(user, o, reminders, "recurring"))
+			offsetCount += 1
+			if offsetCount > offset && offsetCount <= endOffset {
+				attachments = append(attachments, p.addAttachment(user, o, reminders, "recurring"))
+			} else {
+				break
+			}
 		}
 	}
 
 	if len(upcomingOccurrences) > 0 {
 		for _, o := range pastOccurrences {
-			attachments = append(attachments, p.addAttachment(user, o, reminders, "past"))
+			offsetCount += 1
+			if offsetCount > offset && offsetCount <= endOffset {
+				attachments = append(attachments, p.addAttachment(user, o, reminders, "past"))
+			} else {
+				break
+			}
 		}
 	}
 	if len(upcomingOccurrences) > 0 {
 		for _, o := range channelOccurrences {
-			attachments = append(attachments, p.addAttachment(user, o, reminders, "channel"))
+			offsetCount += 1
+			if offsetCount > offset && offsetCount <= endOffset {
+				attachments = append(attachments, p.addAttachment(user, o, reminders, "channel"))
+			} else {
+				break
+			}
 		}
 	}
 
@@ -298,6 +321,55 @@ func (p *Plugin) UpdateListReminders(userId string, postId string) {
 					},
 					Name: T("button.delete.complete"),
 					Type: "action",
+				},
+				{
+					Integration: &model.PostActionIntegration{
+						Context: model.StringInterface{
+							"action": "close/list",
+						},
+						URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
+					},
+					Name: T("button.close.list"),
+					Type: "action",
+				},
+			},
+		})
+	}
+
+	if (len(reminders) - completedCount) > RemindersPerPage {
+		siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
+		reminderCount := map[string]interface{}{
+			"ReminderCount": RemindersPerPage,
+		}
+		remindersPageCount := map[string]interface{}{
+			"Start": offset,
+			"Stop":  endOffset,
+			"Total": (len(reminders) - completedCount),
+		}
+		attachments = append(attachments, &model.SlackAttachment{
+			Text: T("reminders.page.numbers", remindersPageCount),
+			Actions: []*model.PostAction{
+				{
+					Integration: &model.PostActionIntegration{
+						Context: model.StringInterface{
+							"action": "previous/reminders",
+							"offset": endOffset - RemindersPerPage,
+						},
+						URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
+					},
+					Type: model.POST_ACTION_TYPE_BUTTON,
+					Name: T("button.previous.reminders", reminderCount),
+				},
+				{
+					Integration: &model.PostActionIntegration{
+						Context: model.StringInterface{
+							"action": "next/reminders",
+							"offset": endOffset,
+						},
+						URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
+					},
+					Type: model.POST_ACTION_TYPE_BUTTON,
+					Name: T("button.next.reminders", reminderCount),
 				},
 				{
 					Integration: &model.PostActionIntegration{
