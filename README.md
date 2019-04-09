@@ -1,8 +1,8 @@
 # mattermost-plugin-remind
 
-a reminder slashcommand bot
+### a plugin slashcommand bot that schedules reminders for Mattermost
 
-![buttons.png](buttons.png | width=150)
+<img src="buttons.png" width="100">
 
 ### usage
 
