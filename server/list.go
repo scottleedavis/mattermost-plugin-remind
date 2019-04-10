@@ -12,162 +12,29 @@ const RemindersPerPage = 2 //3
 
 func (p *Plugin) ListReminders(user *model.User, channelId string) string {
 
-	// T, _ := p.translation(user) /// this should be needed... ???
-	// location := p.location(user)
-
-	var upcomingOccurrences []Occurrence
-	var recurringOccurrences []Occurrence
-	var pastOccurrences []Occurrence
-	var channelOccurrences []Occurrence
-
+	offset := 1
 	reminders := p.GetReminders(user.Username)
 
 	if len(reminders) == 0 {
 		return T("no.reminders")
 	}
 
-	for _, reminder := range reminders {
-		occurrences := reminder.Occurrences
-		if len(occurrences) > 0 {
-			for _, occurrence := range occurrences {
-				t := occurrence.Occurrence
-				s := occurrence.Snoozed
+	upcomingOccurrences,
+		recurringOccurrences,
+		pastOccurrences,
+		channelOccurrences := p.categorizeOccurrences(reminders)
 
-				if !strings.HasPrefix(reminder.Target, "~") &&
-					reminder.Completed == p.emptyTime &&
-					(occurrence.Repeat == "" && t.After(time.Now())) ||
-					(s != p.emptyTime && s.After(time.Now())) {
-					upcomingOccurrences = append(upcomingOccurrences, occurrence)
-				}
+	attachments, endOffset := p.pagedOccurrences(
+		user,
+		reminders,
+		upcomingOccurrences,
+		recurringOccurrences,
+		pastOccurrences,
+		channelOccurrences,
+		offset)
 
-				if !strings.HasPrefix(reminder.Target, "~") &&
-					occurrence.Repeat != "" && (t.After(time.Now()) ||
-					(s != p.emptyTime && s.After(time.Now()))) {
-					recurringOccurrences = append(recurringOccurrences, occurrence)
-				}
-
-				if !strings.HasPrefix(reminder.Target, "~") &&
-					reminder.Completed == p.emptyTime &&
-					t.Before(time.Now()) &&
-					s == p.emptyTime {
-					pastOccurrences = append(pastOccurrences, occurrence)
-				}
-
-				if strings.HasPrefix(reminder.Target, "~") &&
-					reminder.Completed == p.emptyTime &&
-					t.After(time.Now()) {
-					channelOccurrences = append(channelOccurrences, occurrence)
-				}
-
-			}
-		}
-	}
-
-	attachments := []*model.SlackAttachment{}
-
-	if len(upcomingOccurrences) > 0 {
-		for _, o := range upcomingOccurrences {
-			attachments = append(attachments, p.addAttachment(user, o, reminders, "upcoming"))
-		}
-	}
-
-	if len(upcomingOccurrences) > 0 {
-		for _, o := range recurringOccurrences {
-			attachments = append(attachments, p.addAttachment(user, o, reminders, "recurring"))
-		}
-	}
-
-	if len(upcomingOccurrences) > 0 {
-		for _, o := range pastOccurrences {
-			attachments = append(attachments, p.addAttachment(user, o, reminders, "past"))
-		}
-	}
-	if len(upcomingOccurrences) > 0 {
-		for _, o := range channelOccurrences {
-			attachments = append(attachments, p.addAttachment(user, o, reminders, "channel"))
-		}
-	}
-
-	completedCount := 0
-	for _, reminder := range reminders {
-		if reminder.Completed != p.emptyTime {
-			completedCount += 1
-		}
-	}
-	if completedCount > 0 {
-		siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
-		attachments = append(attachments, &model.SlackAttachment{
-			Actions: []*model.PostAction{
-				{
-					Integration: &model.PostActionIntegration{
-						Context: model.StringInterface{
-							"action": "view/complete/list",
-						},
-						URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
-					},
-					Type: model.POST_ACTION_TYPE_BUTTON,
-					Name: T("button.view.complete"),
-				},
-				{
-					Integration: &model.PostActionIntegration{
-						Context: model.StringInterface{
-							"action": "delete/complete/list",
-						},
-						URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
-					},
-					Name: T("button.delete.complete"),
-					Type: "action",
-				},
-				{
-					Integration: &model.PostActionIntegration{
-						Context: model.StringInterface{
-							"action": "close/list",
-						},
-						URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
-					},
-					Name: T("button.close.list"),
-					Type: "action",
-				},
-			},
-		})
-	}
-
-	if (len(reminders) - completedCount) > RemindersPerPage {
-		siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
-		reminderCount := map[string]interface{}{
-			"ReminderCount": RemindersPerPage,
-		}
-		remindersPageCount := map[string]interface{}{
-			"Start": 1,
-			"Stop":  RemindersPerPage,
-			"Total": (len(reminders) - completedCount),
-		}
-		attachments = append(attachments, &model.SlackAttachment{
-			Text: T("reminders.page.numbers", remindersPageCount),
-			Actions: []*model.PostAction{
-				{
-					Integration: &model.PostActionIntegration{
-						Context: model.StringInterface{
-							"action": "next/reminders",
-						},
-						URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
-					},
-					Type: model.POST_ACTION_TYPE_BUTTON,
-					Name: T("button.next.reminders", reminderCount),
-				},
-				{
-					Integration: &model.PostActionIntegration{
-						Context: model.StringInterface{
-							"action": "close/list",
-						},
-						URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
-					},
-					Name: T("button.close.list"),
-					Type: "action",
-				},
-			},
-		})
-	}
+	completedCount, attachments := p.completedReminders(reminders, attachments)
+	attachments = p.pageControl(len(reminders), completedCount, offset, endOffset, attachments)
 
 	channel, cErr := p.API.GetDirectChannel(p.remindUserId, user.Id)
 	if cErr != nil {
@@ -199,13 +66,40 @@ func (p *Plugin) ListReminders(user *model.User, channelId string) string {
 func (p *Plugin) UpdateListReminders(userId string, postId string, offset int) {
 
 	user, _ := p.API.GetUser(userId)
-
-	var upcomingOccurrences []Occurrence
-	var recurringOccurrences []Occurrence
-	var pastOccurrences []Occurrence
-	var channelOccurrences []Occurrence
-
 	reminders := p.GetReminders(user.Username)
+
+	upcomingOccurrences,
+		recurringOccurrences,
+		pastOccurrences,
+		channelOccurrences := p.categorizeOccurrences(reminders)
+
+	attachments, endOffset := p.pagedOccurrences(
+		user,
+		reminders,
+		upcomingOccurrences,
+		recurringOccurrences,
+		pastOccurrences,
+		channelOccurrences,
+		offset)
+
+	completedCount, attachments := p.completedReminders(reminders, attachments)
+	attachments = p.pageControl(len(reminders), completedCount, offset, endOffset, attachments)
+
+	if post, pErr := p.API.GetPost(postId); pErr != nil {
+		p.API.LogError("unable to get list reminders post " + pErr.Error())
+	} else {
+		post.Props = model.StringInterface{
+			"attachments": attachments,
+		}
+		defer p.API.UpdatePost(post)
+	}
+}
+
+func (p *Plugin) categorizeOccurrences(reminders []Reminder) (
+	upcomingOccurrences []Occurrence,
+	recurringOccurrences []Occurrence,
+	pastOccurrences []Occurrence,
+	channelOccurrences []Occurrence) {
 
 	for _, reminder := range reminders {
 		occurrences := reminder.Occurrences
@@ -216,14 +110,13 @@ func (p *Plugin) UpdateListReminders(userId string, postId string, offset int) {
 
 				if !strings.HasPrefix(reminder.Target, "~") &&
 					reminder.Completed == p.emptyTime &&
-					(occurrence.Repeat == "" && t.After(time.Now())) ||
-					(s != p.emptyTime && s.After(time.Now())) {
+					((occurrence.Repeat == "" && t.After(time.Now())) ||
+						(s != p.emptyTime && s.After(time.Now()))) {
 					upcomingOccurrences = append(upcomingOccurrences, occurrence)
 				}
 
 				if !strings.HasPrefix(reminder.Target, "~") &&
-					occurrence.Repeat != "" && (t.After(time.Now()) ||
-					(s != p.emptyTime && s.After(time.Now()))) {
+					occurrence.Repeat != "" && t.After(time.Now()) {
 					recurringOccurrences = append(recurringOccurrences, occurrence)
 				}
 
@@ -244,10 +137,21 @@ func (p *Plugin) UpdateListReminders(userId string, postId string, offset int) {
 		}
 	}
 
-	attachments := []*model.SlackAttachment{}
+	return upcomingOccurrences, recurringOccurrences, pastOccurrences, channelOccurrences
+
+}
+
+func (p *Plugin) pagedOccurrences(
+	user *model.User,
+	reminders []Reminder,
+	upcomingOccurrences []Occurrence,
+	recurringOccurrences []Occurrence,
+	pastOccurrences []Occurrence,
+	channelOccurrences []Occurrence,
+	offset int) (attachments []*model.SlackAttachment, endOffset int) {
 
 	offsetCount := 1
-	endOffset := offset + RemindersPerPage
+	endOffset = offset + RemindersPerPage
 
 	if len(upcomingOccurrences) > 0 {
 		for _, o := range upcomingOccurrences {
@@ -260,7 +164,7 @@ func (p *Plugin) UpdateListReminders(userId string, postId string, offset int) {
 		}
 	}
 
-	if len(upcomingOccurrences) > 0 {
+	if len(recurringOccurrences) > 0 {
 		for _, o := range recurringOccurrences {
 			offsetCount += 1
 			if offsetCount > offset && offsetCount <= endOffset {
@@ -271,7 +175,7 @@ func (p *Plugin) UpdateListReminders(userId string, postId string, offset int) {
 		}
 	}
 
-	if len(upcomingOccurrences) > 0 {
+	if len(pastOccurrences) > 0 {
 		for _, o := range pastOccurrences {
 			offsetCount += 1
 			if offsetCount > offset && offsetCount <= endOffset {
@@ -281,7 +185,7 @@ func (p *Plugin) UpdateListReminders(userId string, postId string, offset int) {
 			}
 		}
 	}
-	if len(upcomingOccurrences) > 0 {
+	if len(channelOccurrences) > 0 {
 		for _, o := range channelOccurrences {
 			offsetCount += 1
 			if offsetCount > offset && offsetCount <= endOffset {
@@ -292,7 +196,15 @@ func (p *Plugin) UpdateListReminders(userId string, postId string, offset int) {
 		}
 	}
 
-	completedCount := 0
+	return attachments, endOffset
+
+}
+
+func (p *Plugin) completedReminders(reminders []Reminder, attachments []*model.SlackAttachment) (
+	completedCount int,
+	outputAttachments []*model.SlackAttachment) {
+
+	completedCount = 0
 	for _, reminder := range reminders {
 		if reminder.Completed != p.emptyTime {
 			completedCount += 1
@@ -336,63 +248,98 @@ func (p *Plugin) UpdateListReminders(userId string, postId string, offset int) {
 		})
 	}
 
-	if (len(reminders) - completedCount) > RemindersPerPage {
+	outputAttachments = attachments
+	return completedCount, outputAttachments
+}
+
+// attachments = p.pageControl(len(reminders), completedCount, offset, endOffset, attachments)
+func (p *Plugin) pageControl(reminderCount int, completedCount int, offset int, endOffset int, attachments []*model.SlackAttachment) (
+	outputAttachments []*model.SlackAttachment) {
+
+	activeReminderCount := reminderCount - completedCount
+
+	if activeReminderCount > RemindersPerPage {
 		siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
 		reminderCount := map[string]interface{}{
 			"ReminderCount": RemindersPerPage,
 		}
 		remindersPageCount := map[string]interface{}{
 			"Start": offset,
-			"Stop":  endOffset,
-			"Total": (len(reminders) - completedCount),
+			"Stop":  RemindersPerPage,
+			"Total": activeReminderCount,
 		}
-		attachments = append(attachments, &model.SlackAttachment{
-			Text: T("reminders.page.numbers", remindersPageCount),
-			Actions: []*model.PostAction{
-				{
-					Integration: &model.PostActionIntegration{
-						Context: model.StringInterface{
-							"action": "previous/reminders",
-							"offset": endOffset - RemindersPerPage,
+
+		if offset <= 1 {
+			attachments = append(attachments, &model.SlackAttachment{
+				Text: T("reminders.page.numbers", remindersPageCount),
+				Actions: []*model.PostAction{
+					{
+						Integration: &model.PostActionIntegration{
+							Context: model.StringInterface{
+								"action": "next/reminders",
+								"offset": endOffset,
+							},
+							URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
 						},
-						URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
+						Type: model.POST_ACTION_TYPE_BUTTON,
+						Name: T("button.next.reminders", reminderCount),
 					},
-					Type: model.POST_ACTION_TYPE_BUTTON,
-					Name: T("button.previous.reminders", reminderCount),
-				},
-				{
-					Integration: &model.PostActionIntegration{
-						Context: model.StringInterface{
-							"action": "next/reminders",
-							"offset": endOffset,
+					{
+						Integration: &model.PostActionIntegration{
+							Context: model.StringInterface{
+								"action": "close/list",
+							},
+							URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
 						},
-						URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
+						Name: T("button.close.list"),
+						Type: "action",
 					},
-					Type: model.POST_ACTION_TYPE_BUTTON,
-					Name: T("button.next.reminders", reminderCount),
 				},
-				{
-					Integration: &model.PostActionIntegration{
-						Context: model.StringInterface{
-							"action": "close/list",
+			})
+		} else {
+			attachments = append(attachments, &model.SlackAttachment{
+				Text: T("reminders.page.numbers", remindersPageCount),
+				Actions: []*model.PostAction{
+					{
+						Integration: &model.PostActionIntegration{
+							Context: model.StringInterface{
+								"action": "previous/reminders",
+								"offset": endOffset - RemindersPerPage,
+							},
+							URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
 						},
-						URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
+						Type: model.POST_ACTION_TYPE_BUTTON,
+						Name: T("button.previous.reminders", reminderCount),
 					},
-					Name: T("button.close.list"),
-					Type: "action",
+					{
+						Integration: &model.PostActionIntegration{
+							Context: model.StringInterface{
+								"action": "next/reminders",
+								"offset": endOffset,
+							},
+							URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
+						},
+						Type: model.POST_ACTION_TYPE_BUTTON,
+						Name: T("button.next.reminders", reminderCount),
+					},
+					{
+						Integration: &model.PostActionIntegration{
+							Context: model.StringInterface{
+								"action": "close/list",
+							},
+							URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
+						},
+						Name: T("button.close.list"),
+						Type: "action",
+					},
 				},
-			},
-		})
+			})
+		}
+
 	}
 
-	if post, pErr := p.API.GetPost(postId); pErr != nil {
-		p.API.LogError("unable to get list reminders post " + pErr.Error())
-	} else {
-		post.Props = model.StringInterface{
-			"attachments": attachments,
-		}
-		defer p.API.UpdatePost(post)
-	}
+	outputAttachments = attachments
+	return outputAttachments
 }
 
 func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminders []Reminder, gType string) *model.SlackAttachment {
