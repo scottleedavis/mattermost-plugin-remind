@@ -376,6 +376,7 @@ func (p *Plugin) handleCloseList(w http.ResponseWriter, r *http.Request, action 
 }
 
 func (p *Plugin) handleNextReminders(w http.ResponseWriter, r *http.Request, action *Action) {
+	p.API.LogInfo("+++++++++ Starting with Offset: " + fmt.Sprintf("%v", action.Context.Offset))
 	p.UpdateListReminders(action.UserID, action.PostID, action.Context.Offset)
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }

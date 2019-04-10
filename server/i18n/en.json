@@ -109,15 +109,15 @@
   },
   {
     "id": "button.next.reminders",
-    "translation": "Next {{.ReminderCount}} reminders"
+    "translation": "Next {{.ReminderCount}} Reminders"
   },
   {
     "id": "button.previous.reminders",
-    "translation": "Previous {{.ReminderCount}} reminders"
+    "translation": "Previous {{.ReminderCount}} Reminders"
   },
   {
     "id": "reminders.page.numbers",
-    "translation": "Reminders {{.Start}} of {{.Stop}} (of {{.Total}})"
+    "translation": "Reminders {{.Start}} to {{.Stop}} (of {{.Total}})"
   },
   {
     "id": "button.complete",
@@ -133,11 +133,11 @@
   },
   {
     "id": "button.delete.complete",
-    "translation": "Delete all completed"
+    "translation": "Delete all Completed"
   },
   {
     "id": "button.close.list",
-    "translation": "Close list"
+    "translation": "Close List"
   },
   {
     "id": "button.snooze",
