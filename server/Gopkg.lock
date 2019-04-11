@@ -10,6 +10,14 @@
   version = "v3.5.1"
 
 [[projects]]
+  digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  pruneopts = "NUT"
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
+
+[[projects]]
   branch = "master"
   digest = "1:665c8850f673be8d358fe61ab00412049e685202aa7466ae5c72ad50d89c84f7"
   name = "github.com/dyatlov/go-opengraph"
@@ -87,12 +95,13 @@
 
 [[projects]]
   branch = "release-5.10"
-  digest = "1:1da5652cf8f0e32ad6ccf3398f5e77c74630b6810a6b14a6288e1c99e941bd8c"
+  digest = "1:473009744b85bfcd82c6018bc230435f554d4a7bb110eb09f39ca2702bf41ec4"
   name = "github.com/mattermost/mattermost-server"
   packages = [
     "mlog",
     "model",
     "plugin",
+    "plugin/plugintest",
     "services/timezones",
     "utils",
     "utils/fileutils",
@@ -156,12 +165,39 @@
   version = "v0.8.1"
 
 [[projects]]
+  digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  pruneopts = "NUT"
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:82307f4529b4a99657d2891b3b75cd99ebef238f55c1448109abbd6c24705174"
   name = "github.com/scottleedavis/go-timezone"
   packages = ["."]
   pruneopts = "NUT"
   revision = "86ab5c422d0b978c24932f0e571b57737ee97ab5"
   version = "v0.1.2"
+
+[[projects]]
+  digest = "1:60a46e2410edbf02b419f833372dd1d24d7aa1b916a990a7370e792fada1eadd"
+  name = "github.com/stretchr/objx"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "477a77ecc69700c7cdeb1fa9e129548e1c1c393c"
+  version = "v0.1.1"
+
+[[projects]]
+  digest = "1:4fec2fe9ce617252d634de83ca8dd5f9c7c391637540896542c80ab63f071f51"
+  name = "github.com/stretchr/testify"
+  packages = [
+    "assert",
+    "mock",
+  ]
+  pruneopts = "NUT"
+  revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
+  version = "v1.3.0"
 
 [[projects]]
   digest = "1:22f696cee54865fb8e9ff91df7b633f6b8f22037a8015253c6b6a71ca82219c7"
@@ -336,10 +372,13 @@
     "github.com/mattermost/mattermost-server/mlog",
     "github.com/mattermost/mattermost-server/model",
     "github.com/mattermost/mattermost-server/plugin",
+    "github.com/mattermost/mattermost-server/plugin/plugintest",
     "github.com/mattermost/mattermost-server/utils/fileutils",
     "github.com/nicksnyder/go-i18n/i18n",
     "github.com/pkg/errors",
     "github.com/scottleedavis/go-timezone",
+    "github.com/stretchr/testify/assert",
+    "github.com/stretchr/testify/mock",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

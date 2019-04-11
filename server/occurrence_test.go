@@ -2,806 +2,653 @@ package main
 
 import (
 	"testing"
-	// "github.com/mattermost/mattermost-server/model"
-	// "github.com/mattermost/mattermost-server/plugin/plugintest"
-	// "github.com/stretchr/testify/assert"
-	// "github.com/stretchr/testify/mock"
+	"time"
+
+	"github.com/mattermost/mattermost-server/model"
+	"github.com/mattermost/mattermost-server/plugin/plugintest"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestIn(t *testing.T) {
-	// th := Setup()
-	// defer th.TearDown()
 
-	// th.Server.InitReminders()
-	// defer th.Server.StopReminders()
-	// user, _ := th.App.GetUserByUsername(model.REMIND_BOTNAME)
-	// //T := utils.GetUserTranslations(user.Locale)
+	setupAPI := func() *plugintest.API {
+		api := &plugintest.API{}
+		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogInfo", mock.Anything).Maybe()
+		return api
+	}
 
-	// when := "in one second"
-	// times, iErr := th.App.in(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("in one second doesn't parse")
-	// }
-	// var duration time.Duration
-	// duration = times[0].Round(time.Second).Sub(time.Now().Round(time.Second))
-	// assert.Equal(t, duration, time.Second)
+	t.Run("if inEN locale is used", func(t *testing.T) {
 
-	// when = "in 712 minutes"
-	// times, iErr = th.App.in(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("in 712 minutes doesn't parse")
-	// }
-	// duration = times[0].Round(time.Second).Sub(time.Now().Round(time.Second))
-	// assert.Equal(t, duration, time.Minute*time.Duration(712))
+		api := setupAPI()
+		defer api.AssertExpectations(t)
 
-	// when = "in three hours"
-	// times, iErr = th.App.in(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("in three hours doesn't parse")
-	// }
-	// duration = times[0].Round(time.Second).Sub(time.Now().Round(time.Second))
-	// assert.Equal(t, duration, time.Hour*time.Duration(3))
+		p := &Plugin{}
+		p.API = api
 
-	// when = "in 24 hours"
-	// times, iErr = th.App.in(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("in 24 hours doesn't parse")
-	// }
-	// duration = times[0].Round(time.Second).Sub(time.Now().Round(time.Second))
-	// assert.Equal(t, duration, time.Hour*time.Duration(24))
+		user := &model.User{
+			Email:    "-@-.-",
+			Nickname: "TestUser",
+			Password: model.NewId(),
+			Username: "testuser",
+			Roles:    model.SYSTEM_USER_ROLE_ID,
+			Locale:   "en",
+		}
 
-	// when = "in 2 days"
-	// times, iErr = th.App.in(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("in 2 days doesn't parse")
-	// }
-	// duration = times[0].Round(time.Second).Sub(time.Now().Round(time.Second))
-	// assert.Equal(t, duration, time.Hour*time.Duration(24)*time.Duration(2))
+		times, err := p.inEN("in one second", user)
+		testTimes := []time.Time{
+			time.Now().Round(time.Second).Add(time.Second * time.Duration(1)).UTC(),
+		}
+		assert.Nil(t, err)
+		assert.Equal(t, times, testTimes)
 
-	// when = "in 90 weeks"
-	// times, iErr = th.App.in(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("in 90 weeks doesn't parse")
-	// }
-	// duration = times[0].Round(time.Second).Sub(time.Now().Round(time.Second))
-	// assert.Equal(t, duration, time.Hour*time.Duration(24)*time.Duration(7)*time.Duration(90))
+		times, err = p.inEN("in 712 minutes", user)
+		testTimes = []time.Time{
+			time.Now().Round(time.Second).Add(time.Minute * time.Duration(712)).UTC(),
+		}
+		assert.Nil(t, err)
+		assert.Equal(t, times, testTimes)
 
-	// when = "in 4 months"
-	// times, iErr = th.App.in(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("in 4 months doesn't parse")
-	// }
-	// duration = times[0].Round(time.Second).Sub(time.Now().Round(time.Second))
-	// assert.Equal(t, duration, time.Hour*time.Duration(24)*time.Duration(30)*time.Duration(4))
+		times, err = p.inEN("in 3 hours", user)
+		testTimes = []time.Time{
+			time.Now().Round(time.Second).Add(time.Hour * time.Duration(3)).UTC(),
+		}
+		assert.Nil(t, err)
+		assert.Equal(t, times, testTimes)
 
-	// when = "in one year"
-	// times, iErr = th.App.in(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("in one year doesn't parse")
-	// }
-	// duration = times[0].Round(time.Second).Sub(time.Now().Round(time.Second))
-	// assert.Equal(t, duration, time.Hour*time.Duration(24)*time.Duration(365))
+		times, err = p.inEN("in 24 hours", user)
+		testTimes = []time.Time{
+			time.Now().Round(time.Second).Add(time.Hour * time.Duration(24)).UTC(),
+		}
+		assert.Nil(t, err)
+		assert.Equal(t, times, testTimes)
+
+		times, err = p.inEN("in 2 days", user)
+		testTimes = []time.Time{
+			time.Now().Round(time.Second).Add(time.Hour * time.Duration(24) * time.Duration(2)).UTC(),
+		}
+		assert.Nil(t, err)
+		assert.Equal(t, times, testTimes)
+
+		times, err = p.inEN("in 90 weeks", user)
+		testTimes = []time.Time{
+			time.Now().Round(time.Second).Add(time.Hour * time.Duration(24) * time.Duration(7) * time.Duration(90)).UTC(),
+		}
+		assert.Nil(t, err)
+		assert.Equal(t, times, testTimes)
+
+		times, err = p.inEN("in 4 months", user)
+		testTimes = []time.Time{
+			time.Now().Round(time.Second).Add(time.Hour * time.Duration(24) * time.Duration(30) * time.Duration(4)).UTC(),
+		}
+		assert.Nil(t, err)
+		assert.Equal(t, times, testTimes)
+
+		times, err = p.inEN("in 1 year", user)
+		testTimes = []time.Time{
+			time.Now().Round(time.Second).Add(time.Hour * time.Duration(24) * time.Duration(365)).UTC(),
+		}
+		assert.Nil(t, err)
+		assert.Equal(t, times, testTimes)
+
+	})
 
 }
 
 func TestAt(t *testing.T) {
-	// th := Setup()
-	// defer th.TearDown()
+	setupAPI := func() *plugintest.API {
+		api := &plugintest.API{}
+		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogInfo", mock.Anything).Maybe()
+		return api
+	}
 
-	// th.Server.InitReminders()
-	// defer th.Server.StopReminders()
-	// user, _ := th.App.GetUserByUsername(model.REMIND_BOTNAME)
-	// //T := utils.GetUserTranslations(user.Locale)
+	t.Run("if atEN locale is used", func(t *testing.T) {
 
-	// when := "at noon"
-	// times, iErr := th.App.at(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("at noon doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Hour(), 12)
+		api := setupAPI()
+		defer api.AssertExpectations(t)
 
-	// when = "at midnight"
-	// times, iErr = th.App.at(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("at midnight doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Hour(), 0)
+		p := &Plugin{}
+		p.API = api
 
-	// when = "at two"
-	// times, iErr = th.App.at(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("at two doesn't parse")
-	// }
-	// assert.True(t, times[0].Hour() == 2 || times[0].Hour() == 14)
+		user := &model.User{
+			Email:    "-@-.-",
+			Nickname: "TestUser",
+			Password: model.NewId(),
+			Username: "testuser",
+			Roles:    model.SYSTEM_USER_ROLE_ID,
+			Locale:   "en",
+		}
+		location := p.location(user)
 
-	// when = "at 7"
-	// times, iErr = th.App.at(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("at 7 doesn't parse")
-	// }
-	// assert.True(t, times[0].Hour() == 7 || times[0].Hour() == 19)
+		times, err := p.atEN("at noon", user)
+		assert.Nil(t, err)
+		assert.Equal(t, times[0].In(location).Hour(), 12)
 
-	// when = "at 12:30pm"
-	// times, iErr = th.App.at(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("at 12:30pm doesn't parse")
-	// }
-	// assert.True(t, times[0].Hour() == 12 && times[0].Minute() == 30)
+		times, err = p.atEN("at midnight", user)
+		assert.Nil(t, err)
+		assert.Equal(t, times[0].In(location).Hour(), 0)
 
-	// when = "at 7:12 pm"
-	// times, iErr = th.App.at(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("at 7:12 pm doesn't parse")
-	// }
-	// assert.True(t, times[0].Hour() == 19 && times[0].Minute() == 12)
+		times, err = p.atEN("at two", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Hour() == 2 || times[0].In(location).Hour() == 14)
 
-	// when = "at 8:05 PM"
-	// times, iErr = th.App.at(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("at 8:05 PM doesn't parse")
-	// }
-	// assert.True(t, times[0].Hour() == 20 && times[0].Minute() == 5)
+		times, err = p.atEN("at 7", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Hour() == 7 || times[0].In(location).Hour() == 19)
 
-	// when = "at 9:52 am"
-	// times, iErr = th.App.at(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("at 9:52 am doesn't parse")
-	// }
-	// assert.True(t, times[0].Hour() == 9 && times[0].Minute() == 52)
+		times, err = p.atEN("at 12:30pm", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Hour() == 12 && times[0].In(location).Minute() == 30)
 
-	// when = "at 9:12"
-	// times, iErr = th.App.at(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("at 9:12 doesn't parse")
-	// }
-	// assert.True(t, (times[0].Hour() == 9 || times[0].Hour() == 21) && times[0].Minute() == 12)
+		times, err = p.atEN("at 7:12pm", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Hour() == 19 && times[0].In(location).Minute() == 12)
 
-	// when = "at 17:15"
-	// times, iErr = th.App.at(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("at 17:15 doesn't parse")
-	// }
-	// assert.True(t, times[0].Hour() == 17 && times[0].Minute() == 15)
+		times, err = p.atEN("at 8:05 PM", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Hour() == 20 && times[0].In(location).Minute() == 5)
 
-	// when = "at 930am"
-	// times, iErr = th.App.at(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("at 930am doesn't parse")
-	// }
-	// assert.True(t, times[0].Hour() == 9 && times[0].Minute() == 30)
+		times, err = p.atEN("at 9:52 am", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Hour() == 9 && times[0].In(location).Minute() == 52)
 
-	// when = "at 1230 am"
-	// times, iErr = th.App.at(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("at 1230 am doesn't parse")
-	// }
-	// assert.True(t, times[0].Hour() == 0 && times[0].Minute() == 30)
+		times, err = p.atEN("at 9:12", user)
+		assert.Nil(t, err)
+		assert.True(t, (times[0].In(location).Hour() == 9 || times[0].In(location).Hour() == 21) && times[0].In(location).Minute() == 12)
 
-	// when = "at 5PM"
-	// times, iErr = th.App.at(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("at 5PM doesn't parse")
-	// }
-	// assert.True(t, times[0].Hour() == 17 && times[0].Minute() == 0)
+		times, err = p.atEN("at 17:15", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Hour() == 17 && times[0].In(location).Minute() == 15)
 
-	// when = "at 4 am"
-	// times, iErr = th.App.at(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("at 4 am doesn't parse")
-	// }
-	// assert.True(t, times[0].Hour() == 4 && times[0].Minute() == 0)
+		times, err = p.atEN("at 930am", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Hour() == 9 && times[0].In(location).Minute() == 30)
 
-	// when = "at 1400"
-	// times, iErr = th.App.at(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("at 1400 doesn't parse")
-	// }
-	// assert.True(t, times[0].Hour() == 14 && times[0].Minute() == 0)
+		times, err = p.atEN("at 1230 am", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Hour() == 0 && times[0].In(location).Minute() == 30)
 
-	// when = "at 11:00 every Thursday"
-	// times, iErr = th.App.at(when, user)
-	// if iErr != nil {
-	// 	t.Fatal("at 11:00 every Thursday doesn't parse")
-	// }
-	// assert.True(t, (times[0].Hour() == 11 || times[0].Hour() == 23) && times[0].Weekday().String() == "Thursday")
+		times, err = p.atEN("at 5PM", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Hour() == 17 && times[0].In(location).Minute() == 0)
 
-	// //TODO fix this test
-	// //when = "at 3pm every day"
-	// //times, iErr = th.App.at(when, user)
-	// //if iErr != nil {
-	// //	t.Fatal("at 3pm every day doesn't parse")
-	// //}
-	// //if times[0].Hour() != 15 {
-	// //	t.Fatal("at 3pm every day isn't correct")
-	// //}
+		times, err = p.atEN("at 4 am", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Hour() == 4 && times[0].In(location).Minute() == 0)
 
+		times, err = p.atEN("at 1400", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Hour() == 14 && times[0].In(location).Minute() == 0)
+
+		times, err = p.atEN("at 11:00 every Thursday", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.True(t, (times[0].In(location).Hour() == 11 || times[0].In(location).Hour() == 23) &&
+				times[0].In(location).Weekday().String() == "Thursday")
+		}
+
+		times, err = p.atEN("at 3pm every day", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.True(t, times[0].In(location).Hour() == 15)
+		}
+	})
 }
 
 func TestOn(t *testing.T) {
-	// th := Setup()
-	// defer th.TearDown()
+	setupAPI := func() *plugintest.API {
+		api := &plugintest.API{}
+		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogInfo", mock.Anything).Maybe()
+		return api
+	}
 
-	// th.Server.InitReminders()
-	// defer th.Server.StopReminders()
-	// user, _ := th.App.GetUserByUsername(model.REMIND_BOTNAME)
-	// //T := utils.GetUserTranslations(user.Locale)
+	t.Run("if onEN locale is used", func(t *testing.T) {
 
-	// when := "on Monday"
-	// times, iErr := th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on Monday doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Monday")
+		api := setupAPI()
+		defer api.AssertExpectations(t)
 
-	// when = "on Tuesday"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on Tuesday doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Tuesday")
+		p := &Plugin{}
+		p.API = api
 
-	// when = "on Wednesday"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on Wednesday doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Wednesday")
+		user := &model.User{
+			Email:    "-@-.-",
+			Nickname: "TestUser",
+			Password: model.NewId(),
+			Username: "testuser",
+			Roles:    model.SYSTEM_USER_ROLE_ID,
+			Locale:   "en",
+		}
+		location := p.location(user)
 
-	// when = "on Thursday"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on Thursday doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Thursday")
+		times, err := p.onEN("on Monday", user)
+		assert.Nil(t, err)
+		assert.Equal(t, times[0].In(location).Weekday().String(), "Monday")
 
-	// when = "on Friday"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on Friday doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Friday")
+		times, err = p.onEN("on tuesday", user)
+		assert.Nil(t, err)
+		assert.Equal(t, times[0].In(location).Weekday().String(), "Tuesday")
 
-	// when = "on Mondays"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on Mondays doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Monday")
+		times, err = p.onEN("on WedNesday", user)
+		assert.Nil(t, err)
+		assert.Equal(t, times[0].In(location).Weekday().String(), "Wednesday")
 
-	// when = "on Tuesdays at 11:15"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on Tuesdays at 11:15 doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Tuesday")
+		times, err = p.onEN("on thursDAY", user)
+		assert.Nil(t, err)
+		assert.Equal(t, times[0].In(location).Weekday().String(), "Thursday")
 
-	// when = "on Wednesdays"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on Wednesdays doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Wednesday")
+		times, err = p.onEN("on FrIdAy", user)
+		assert.Nil(t, err)
+		assert.Equal(t, times[0].In(location).Weekday().String(), "Friday")
 
-	// when = "on Thursdays"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on Thursdays doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Thursday")
+		times, err = p.onEN("on Saturday", user)
+		assert.Nil(t, err)
+		assert.Equal(t, times[0].In(location).Weekday().String(), "Saturday")
 
-	// when = "on Fridays"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on Fridays doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Friday")
+		times, err = p.onEN("on sunday", user)
+		assert.Nil(t, err)
+		assert.Equal(t, times[0].In(location).Weekday().String(), "Sunday")
 
-	// when = "on mon"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on mon doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Monday")
+		times, err = p.onEN("on Mondays", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.Equal(t, times[0].In(location).Weekday().String(), "Monday")
+		}
 
-	// when = "on wED"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on wED doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Wednesday")
+		times, err = p.onEN("on Tuesdays", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.Equal(t, times[0].In(location).Weekday().String(), "Tuesday")
+		}
 
-	// when = "on tuesday at noon"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on tuesday at noon doesn't parse")
-	// }
-	// assert.True(t, times[0].Weekday().String() == "Tuesday" && times[0].Hour() == 12)
+		times, err = p.onEN("on Wednesdays", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.Equal(t, times[0].In(location).Weekday().String(), "Wednesday")
+		}
 
-	// //TODO fix this test
-	// //when = "on sunday at 3:42am"
-	// //times, iErr = th.App.on(when, user)
-	// //if iErr != nil {
-	// //	mlog.Error(iErr.Error())
-	// //	t.Fatal("on sunday at 3:42am doesn't parse")
-	// //}
-	// //assert.True(t, times[0].Weekday().String() == "Sunday" && times[0].Hour() == 3 && times[0].Minute() == 42)
+		times, err = p.onEN("on Thursdays", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.Equal(t, times[0].In(location).Weekday().String(), "Thursday")
+		}
 
-	// when = "on December 15"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on December 15 doesn't parse")
-	// }
-	// assert.True(t, times[0].Month().String() == "December" && times[0].Day() == 15)
+		times, err = p.onEN("on Fridays", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.Equal(t, times[0].In(location).Weekday().String(), "Friday")
+		}
 
-	// when = "on jan 12"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on jan 12 doesn't parse")
-	// }
-	// assert.True(t, times[0].Month().String() == "January" && times[0].Day() == 12)
+		times, err = p.onEN("on Saturdays", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.Equal(t, times[0].In(location).Weekday().String(), "Saturday")
+		}
 
-	// when = "on July 12th"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on July 12th doesn't parse")
-	// }
-	// assert.True(t, times[0].Month().String() == "July" && times[0].Day() == 12)
+		times, err = p.onEN("on Sundays", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.Equal(t, times[0].In(location).Weekday().String(), "Sunday")
+		}
 
-	// when = "on March 22nd"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on March 22nd doesn't parse")
-	// }
-	// assert.True(t, times[0].Month().String() == "March" && times[0].Day() == 22)
+		times, err = p.onEN("on mon", user)
+		assert.Nil(t, err)
+		assert.Equal(t, times[0].In(location).Weekday().String(), "Monday")
 
-	// when = "on March 17 at 5:41pm"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on March 17 at 5:41pm doesn't parse")
-	// }
-	// if times[0].Month().String() != "March" && times[0].Day() != 17 && times[0].Hour() != 17 && times[0].Minute() != 41 {
-	// 	t.Fatal("on March 17 at 5:41pm isn't correct")
-	// }
-	// assert.True(t, times[0].Month().String() == "March" && times[0].Day() == 17 && times[0].Hour() == 17 && times[0].Minute() == 41)
+		times, err = p.onEN("on wED", user)
+		assert.Nil(t, err)
+		assert.Equal(t, times[0].In(location).Weekday().String(), "Wednesday")
 
-	// when = "on September 7th 2020"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on September 7th 2019 doesn't parse")
-	// }
-	// assert.True(t, times[0].Month().String() == "September" && times[0].Day() == 7)
+		times, err = p.onEN("on tuesday at noon", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Weekday().String() == "Tuesday" && times[0].In(location).Hour() == 12)
 
-	// when = "on April 17 2020"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on April 17 2020 doesn't parse")
-	// }
-	// assert.True(t, times[0].Month().String() == "April" && times[0].Day() == 17)
+		times, err = p.onEN("on sunday at 3:42am", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Weekday().String() == "Sunday" && times[0].In(location).Hour() == 3 &&
+			times[0].In(location).Minute() == 42)
 
-	// //TODO fix this test
-	// //when = "on April 9 2020 at 11am"
-	// //times, iErr = th.App.on(when, user)
-	// //if iErr != nil {
-	// //	mlog.Error(iErr.Error())
-	// //	t.Fatal("on April 9 2020 at 11am doesn't parse")
-	// //}
-	// //assert.True(t, times[0].Month().String() == "April" && times[0].Day() == 9 && times[0].Hour() == 11)
+		times, err = p.onEN("on December 15", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Month().String() == "December" && times[0].In(location).Day() == 15)
 
-	// when = "on auguSt tenth 2019"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on auguSt tenth 2019 doesn't parse")
-	// }
-	// assert.True(t, times[0].Month().String() == "August" && times[0].Day() == 10)
+		times, err = p.onEN("on jan 12", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Month().String() == "January" && times[0].In(location).Day() == 12)
 
-	// when = "on 7"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on 7 doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Day(), 7)
+		times, err = p.onEN("on july 12th", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Month().String() == "July" && times[0].In(location).Day() == 12)
 
-	// when = "on 7th"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on 7th doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Day(), 7)
+		times, err = p.onEN("on mArch 22nd", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Month().String() == "March" && times[0].In(location).Day() == 22)
 
-	// when = "on seven"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on seven doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Day(), 7)
+		times, err = p.onEN("on march 17 at 5:41pm", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.True(t, times[0].In(location).Month().String() == "March" && times[0].In(location).Day() == 17 &&
+				times[0].In(location).Hour() == 17 && times[0].In(location).Minute() == 41)
+		}
 
-	// when = "on 1/17/20"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on 1/17/20 doesn't parse")
-	// }
-	// assert.True(t, times[0].Year() == 2020 && times[0].Month() == 1 && times[0].Day() == 17)
+		times, err = p.onEN("on september 7th 2020", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Month().String() == "September" && times[0].In(location).Day() == 7)
 
-	// when = "on 12/17/2020"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on 12/17/2020 doesn't parse")
-	// }
-	// assert.True(t, times[0].Year() == 2020 && times[0].Month() == 12 && times[0].Day() == 17)
+		times, err = p.onEN("on April 17 2020", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Month().String() == "April" && times[0].In(location).Day() == 17)
 
-	// when = "on 17.1.20"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on 17.1.20 doesn't parse")
-	// }
-	// assert.True(t, times[0].Year() == 2020 && times[0].Month() == 1 && times[0].Day() == 17)
+		times, err = p.onEN("on April 9 2020 at 11am", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.True(t, times[0].In(location).Month().String() == "April" && times[0].In(location).Day() == 9 &&
+				times[0].Hour() == 11)
+		}
 
-	// when = "on 17.12.2020"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on 17.12.2020 doesn't parse")
-	// }
-	// assert.True(t, times[0].Year() == 2020 && times[0].Month() == 12 && times[0].Day() == 17)
+		times, err = p.onEN("on auguSt tenth 2019", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Month().String() == "August" && times[0].In(location).Day() == 10)
 
-	// when = "on 12/1"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on 12/1 doesn't parse")
-	// }
-	// assert.True(t, times[0].Month() == 12 && times[0].Day() == 1)
+		times, err = p.onEN("on 7", user)
+		assert.Nil(t, err)
+		assert.Equal(t, times[0].In(location).Day(), 7)
 
-	// when = "on 5-17-20"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on 5-17-20 doesn't parse")
-	// }
-	// assert.True(t, times[0].Month() == 5 && times[0].Day() == 17)
+		times, err = p.onEN("on 7th", user)
+		assert.Nil(t, err)
+		assert.Equal(t, times[0].In(location).Day(), 7)
 
-	// when = "on 12-5-2020"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on 12-5-2020 doesn't parse")
-	// }
-	// assert.True(t, times[0].Month() == 12 && times[0].Day() == 5)
+		times, err = p.onEN("on seven", user)
+		assert.Nil(t, err)
+		assert.Equal(t, times[0].In(location).Day(), 7)
 
-	// when = "on 12-12"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on 12-12 doesn't parse")
-	// }
-	// assert.True(t, times[0].Month() == 12 && times[0].Day() == 12)
+		times, err = p.onEN("on 1/17/20", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Year() == 2020 && times[0].In(location).Month() == 1 &&
+			times[0].In(location).Day() == 17)
 
-	// when = "on 1-1 at midnight"
-	// times, iErr = th.App.on(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("on 1-1 at midnight doesn't parse")
-	// }
-	// assert.True(t, times[0].Month() == 1 && times[0].Day() == 1 && times[0].Hour() == 0)
+		times, err = p.onEN("on 12/17/2020", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Year() == 2020 && times[0].In(location).Month() == 12 &&
+			times[0].In(location).Day() == 17)
 
+		times, err = p.onEN("on 17.1.20", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Year() == 2020 && times[0].In(location).Month() == 1 &&
+			times[0].In(location).Day() == 17)
+
+		times, err = p.onEN("on 17.12.20", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Year() == 2020 && times[0].In(location).Month() == 12 &&
+			times[0].In(location).Day() == 17)
+
+		times, err = p.onEN("on 12/1", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Month() == 12 && times[0].In(location).Day() == 1)
+
+		times, err = p.onEN("on 5-17-20", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Month() == 5 && times[0].In(location).Day() == 17)
+
+		times, err = p.onEN("on 12-5-2020", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Month() == 12 && times[0].In(location).Day() == 5)
+
+		times, err = p.onEN("on 12-12", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Month() == 12 && times[0].In(location).Day() == 12)
+
+		times, err = p.onEN("on 1-1 at midnight", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Month() == 1 && times[0].In(location).Day() == 1 &&
+			times[0].In(location).Hour() == 0)
+
+	})
 }
 
 func TestEvery(t *testing.T) {
-	// th := Setup()
-	// defer th.TearDown()
 
-	// th.Server.InitReminders()
-	// defer th.Server.StopReminders()
-	// user, _ := th.App.GetUserByUsername(model.REMIND_BOTNAME)
-	// //T := utils.GetUserTranslations(user.Locale)
+	setupAPI := func() *plugintest.API {
+		api := &plugintest.API{}
+		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogInfo", mock.Anything).Maybe()
+		return api
+	}
 
-	// when := "every Thursday"
-	// times, iErr := th.App.every(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("every Thursday doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Thursday")
+	t.Run("if everyEN locale is used", func(t *testing.T) {
+		api := setupAPI()
+		defer api.AssertExpectations(t)
 
-	// when = "every day"
-	// times, iErr = th.App.every(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("every day doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), time.Now().AddDate(0, 0, 1).Weekday().String())
+		p := &Plugin{}
+		p.API = api
 
-	// when = "every 12/18/2022"
-	// times, iErr = th.App.every(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("every 12/18 doesn't parse")
-	// }
-	// assert.True(t, times[0].Month() == 12 && times[0].Year() == 2022)
+		user := &model.User{
+			Email:    "-@-.-",
+			Nickname: "TestUser",
+			Password: model.NewId(),
+			Username: "testuser",
+			Roles:    model.SYSTEM_USER_ROLE_ID,
+			Locale:   "en",
+		}
+		location := p.location(user)
 
-	// when = "every January 25"
-	// times, iErr = th.App.every(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("every January 25 doesn't parse")
-	// }
-	// assert.True(t, times[0].Month() == 1 && times[0].Day() == 25)
+		times, err := p.everyEN("every Thursday", user)
+		assert.Nil(t, err)
+		assert.Equal(t, times[0].In(location).Weekday().String(), "Thursday")
 
-	// when = "every other Wednesday"
-	// times, iErr = th.App.every(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("every other Wednesday doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Wednesday")
+		times, err = p.everyEN("every day", user)
+		assert.Nil(t, err)
+		assert.Equal(t, times[0].In(location).Weekday().String(), time.Now().In(location).AddDate(0, 0, 1).Weekday().String())
 
-	// when = "every day at 11:32am"
-	// times, iErr = th.App.every(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("every day at 11:32am doesn't parse")
-	// }
-	// assert.True(t, times[0].Hour() == 11 && times[0].Minute() == 32)
+		times, err = p.everyEN("every 12/18/2022", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Month() == 12 && times[0].In(location).Year() == 2022)
 
-	// //TODO fix this test
-	// //when = "every 5/5 at 7"
-	// //times, iErr = th.App.every(when, user)
-	// //if iErr != nil {
-	// //	mlog.Error(iErr.Error())
-	// //	t.Fatal("every 5/5 at 7 doesn't parse")
-	// //}
-	// //assert.True(t, times[0].Month() == 5 && times[0].Day() == 5 && (times[0].Hour() == 7 || times[0].Hour() == 19))
+		times, err = p.everyEN("every january 25", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Month() == 1 && times[0].In(location).Day() == 25)
 
-	// when = "every 7/20 at 1100"
-	// times, iErr = th.App.every(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("every 7/20 at 1100 doesn't parse")
-	// }
-	// assert.True(t, times[0].Month() == 7 && times[0].Day() == 20 && (times[0].Hour() == 11 || times[0].Hour() == 23))
+		times, err = p.everyEN("every other wednesday", user)
+		assert.Nil(t, err)
+		assert.Equal(t, times[0].In(location).Weekday().String(), "Wednesday")
 
-	// when = "every Monday at 7:32am"
-	// times, iErr = th.App.every(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("every Monday at 7:32am doesn't parse")
-	// }
-	// assert.True(t, times[0].Weekday().String() == "Monday" && (times[0].Hour() == 7 || times[0].Hour() == 32))
+		times, err = p.everyEN("every day at 11:32am", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Hour() == 11 && times[0].In(location).Minute() == 32)
 
-	// when = "every monday and wednesday"
-	// times, iErr = th.App.every(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("every monday and wednesday doesn't parse")
-	// }
-	// assert.True(t, times[0].Weekday().String() == "Monday" && times[1].Weekday().String() == "Wednesday")
+		times, err = p.everyEN("every 5/5 at 7", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Month() == 5 && times[0].In(location).Day() == 5 &&
+			(times[0].In(location).Hour() == 7 || times[0].In(location).Hour() == 19))
 
-	// when = "every wednesday, thursday"
-	// times, iErr = th.App.every(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("every  wednesday, thursday doesn't parse")
-	// }
-	// assert.True(t, times[0].Weekday().String() == "Wednesday" && times[1].Weekday().String() == "Thursday")
+		times, err = p.everyEN("every 7/20 at 1100", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Month() == 7 && times[0].In(location).Day() == 20 &&
+			(times[0].In(location).Hour() == 11 || times[0].In(location).Hour() == 23))
 
-	// when = "every other friday and saturday"
-	// times, iErr = th.App.every(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("every  wednesday, thursday doesn't parse")
-	// }
-	// assert.True(t, times[0].Weekday().String() == "Friday" && times[1].Weekday().String() == "Saturday")
+		times, err = p.everyEN("every Monday at 7:32am", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Weekday().String() == "Monday" && (times[0].In(location).Hour() == 7 ||
+			times[0].In(location).Hour() == 32))
 
-	// when = "every monday and wednesday at 1:39am"
-	// times, iErr = th.App.every(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("every monday and wednesday at 1:39am doesn't parse")
-	// }
-	// assert.True(t, times[0].Weekday().String() == "Monday" && times[1].Weekday().String() == "Wednesday" && times[0].Hour() == 1 && times[0].Minute() == 39)
+		times, err = p.everyEN("every monday and wednesday", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.True(t, times[0].In(location).Weekday().String() == "Monday" && times[1].In(location).Weekday().String() == "Wednesday")
+		}
 
-	// when = "every monday, tuesday and sunday at 11:00am"
-	// times, iErr = th.App.every(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("every monday, tuesday and sunday at 11:00 doesn't parse")
-	// }
-	// assert.True(t, times[0].Weekday().String() == "Monday" && times[1].Weekday().String() == "Tuesday" && times[2].Weekday().String() == "Sunday" && times[0].Hour() == 11)
+		times, err = p.everyEN("every wednesday, thursday", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.True(t, times[0].In(location).Weekday().String() == "Monday" && times[1].In(location).Weekday().String() == "Thursday")
+		}
 
-	// //TODO fix this test
-	// //when = "every monday, tuesday at 2pm"
-	// //times, iErr = th.App.every(when, user)
-	// //if iErr != nil {
-	// //	mlog.Error(iErr.Error())
-	// //	t.Fatal("every monday, tuesday at 2pm doesn't parse")
-	// //}
-	// //assert.True(t, times[0].Weekday().String() == "Monday" && times[1].Weekday().String() == "Tuesday" && times[0].Hour() == 14)
+		times, err = p.everyEN("every other friday and saturday", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.True(t, times[0].In(location).Weekday().String() == "Friday" && times[1].In(location).Weekday().String() == "Saturday")
+		}
 
-	// when = "every 1/30 and 9/30 at noon"
-	// times, iErr = th.App.every(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("every 1/30 and 9/30 at noon doesn't parse")
-	// }
-	// assert.True(t, times[0].Month() == 1 && times[0].Day() == 30 && times[1].Month() == 9 && times[1].Day() == 30 && times[0].Hour() == 12)
+		times, err = p.everyEN("every monday and wednesday at 1:39am", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.True(t, times[0].In(location).Weekday().String() == "Monday" &&
+				times[1].In(location).Weekday().String() == "Wednesday" && times[0].In(location).Hour() == 1 && times[0].Minute() == 39)
+		}
 
+		times, err = p.everyEN("every monday, tuesday and sunday at 11:00am", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.True(t, times[0].In(location).Weekday().String() == "Monday" &&
+				times[1].In(location).Weekday().String() == "Tuesday" && times[2].In(location).Weekday().String() == "Sunday" &&
+				times[0].In(location).Hour() == 11)
+		}
+
+		times, err = p.everyEN("every monday, tuesday at 2pm", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.True(t, times[0].In(location).Weekday().String() == "Monday" &&
+				times[1].In(location).Weekday().String() == "Tuesday" && times[0].In(location).Hour() == 14)
+		}
+
+		times, err = p.everyEN("every 1/30 and 9/30 at noon", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.True(t, times[0].In(location).Month() == 1 && times[0].In(location).Day() == 30 &&
+				times[1].In(location).Month() == 9 && times[1].In(location).Day() == 30 && times[0].In(location).Hour() == 12)
+		}
+	})
 }
 
 func TestFreeForm(t *testing.T) {
-	// th := Setup()
-	// defer th.TearDown()
 
-	// th.Server.InitReminders()
-	// defer th.Server.StopReminders()
-	// user, _ := th.App.GetUserByUsername(model.REMIND_BOTNAME)
-	// //T := utils.GetUserTranslations(user.Locale)
+	setupAPI := func() *plugintest.API {
+		api := &plugintest.API{}
+		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogInfo", mock.Anything).Maybe()
+		return api
+	}
 
-	// when := "monday"
-	// times, iErr := th.App.freeForm(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("monday doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Monday")
+	t.Run("if freeformEN locale is used", func(t *testing.T) {
+		api := setupAPI()
+		defer api.AssertExpectations(t)
 
-	// when = "tuesday at 9:34pm"
-	// times, iErr = th.App.freeForm(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("tuesday at 9:34pm doesn't parse")
-	// }
-	// assert.True(t, times[0].Weekday().String() == "Tuesday" && times[0].Hour() == 21 && times[0].Minute() == 34)
+		p := &Plugin{}
+		p.API = api
 
-	// when = "wednesday"
-	// times, iErr = th.App.freeForm(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("wednesday doesn't parse")
-	// }
-	// if times[0].Weekday().String() != "Wednesday" {
-	// 	t.Fatal("wednesday isn't correct")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Wednesday")
+		user := &model.User{
+			Email:    "-@-.-",
+			Nickname: "TestUser",
+			Password: model.NewId(),
+			Username: "testuser",
+			Roles:    model.SYSTEM_USER_ROLE_ID,
+			Locale:   "en",
+		}
+		location := p.location(user)
 
-	// when = "thursday at noon"
-	// times, iErr = th.App.freeForm(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("thursday at noon doesn't parse")
-	// }
-	// assert.True(t, times[0].Weekday().String() == "Thursday" && times[0].Hour() == 12)
+		times, err := p.freeFormEN("monday", user)
+		assert.Nil(t, err)
+		assert.Equal(t, times[0].In(location).Weekday().String(), "Monday")
 
-	// when = "friday"
-	// times, iErr = th.App.freeForm(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("friday doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Friday")
+		times, err = p.freeFormEN("tuesday at 9:34pm", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Weekday().String() == "Tuesday" && times[0].In(location).Hour() == 21 &&
+			times[0].In(location).Minute() == 34)
 
-	// when = "saturday"
-	// times, iErr = th.App.freeForm(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("saturday doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Saturday")
+		times, err = p.freeFormEN("wednesday", user)
+		assert.Nil(t, err)
+		assert.Equal(t, times[0].In(location).Weekday().String(), "Wednesday")
 
-	// when = "sunday at 4:20pm"
-	// times, iErr = th.App.freeForm(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("sunday at 4:20pm doesn't parse")
-	// }
-	// assert.True(t, times[0].Weekday().String() == "Sunday" && times[0].Hour() == 16 && times[0].Minute() == 20)
+		times, err = p.freeFormEN("thursday at noon", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Weekday().String() == "Thursday" && times[0].In(location).Hour() == 12)
 
-	// when = "today at 3pm"
-	// times, iErr = th.App.freeForm(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("today at 3pm doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Hour(), 15)
+		times, err = p.freeFormEN("friday", user)
+		assert.Nil(t, err)
+		assert.Equal(t, times[0].In(location).Weekday().String(), "Friday")
 
-	// when = "tomorrow"
-	// times, iErr = th.App.freeForm(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("tomorrow doesn't parse")
-	// }
-	// assert.True(t, times[0].Weekday().String() == time.Now().AddDate(0, 0, 1).Weekday().String())
+		times, err = p.freeFormEN("saturday", user)
+		assert.Nil(t, err)
+		assert.Equal(t, times[0].In(location).Weekday().String(), "Saturday")
 
-	// //TODO fix this test
-	// //when = "tomorrow at 4pm"
-	// //times, iErr = th.App.freeForm(when, user)
-	// //if iErr != nil {
-	// //	mlog.Error(iErr.Error())
-	// //	t.Fatal("tomorrow at 4pm doesn't parse")
-	// //}
-	// //assert.True(t, times[0].Weekday().String() == time.Now().AddDate(0, 0, 1).Weekday().String() && times[0].Hour() == 16)
+		times, err = p.freeFormEN("sunday at 4:20pm", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Weekday().String() == "Sunday" && times[0].In(location).Hour() == 16 &&
+			times[0].In(location).Minute() == 20)
 
-	// when = "everyday"
-	// times, iErr = th.App.freeForm(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("everyday doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), time.Now().AddDate(0, 0, 1).Weekday().String())
+		times, err = p.freeFormEN("today at 3pm", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.Equal(t, times[0].In(location).Hour(), 15)
+		}
 
-	// //TODO fix this test
-	// //when = "everyday at 3:23am"
-	// //times, iErr = th.App.freeForm(when, user)
-	// //if iErr != nil {
-	// //	mlog.Error(iErr.Error())
-	// //	t.Fatal("everyday at 3:23am doesn't parse")
-	// //}
-	// //assert.True(t, times[0].Weekday().String() == time.Now().AddDate(0, 0, 1).Weekday().String() && times[0].Hour() == 3 && times[0].Minute() == 23 )
+		times, err = p.freeFormEN("tomorrow", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Weekday().String() == time.Now().In(location).AddDate(0, 0, 1).Weekday().String())
 
-	// when = "mondays"
-	// times, iErr = th.App.freeForm(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("mondays doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Monday")
+		times, err = p.freeFormEN("tomorrow at 4pm", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.True(t, times[0].In(location).Weekday().String() == time.Now().In(location).AddDate(0, 0, 1).Weekday().String() &&
+				times[0].In(location).Hour() == 16)
+		}
 
-	// when = "tuesdays"
-	// times, iErr = th.App.freeForm(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("tuesdays doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Tuesday")
+		times, err = p.freeFormEN("everyday", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.Equal(t, times[0].In(location).Weekday().String(), time.Now().In(location).AddDate(0, 0, 1).Weekday().String())
+		}
 
-	// when = "wednesdays"
-	// times, iErr = th.App.freeForm(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("wednesdays doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Wednesday")
+		times, err = p.freeFormEN("everyday at 3:23am", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.True(t, times[0].In(location).Weekday().String() == time.Now().In(location).AddDate(0, 0, 1).Weekday().String() &&
+				times[0].In(location).Hour() == 3 && times[0].In(location).Minute() == 23)
+		}
 
-	// when = "thursdays"
-	// times, iErr = th.App.freeForm(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("thursdays doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Thursday")
+		times, err = p.freeFormEN("mondays", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.Equal(t, times[0].In(location).Weekday().String(), "Monday")
+		}
 
-	// when = "fridays"
-	// times, iErr = th.App.freeForm(when, user)
-	// if iErr != nil {
-	// 	mlog.Error(iErr.Error())
-	// 	t.Fatal("fridays doesn't parse")
-	// }
-	// assert.Equal(t, times[0].Weekday().String(), "Friday")
+		times, err = p.freeFormEN("tuesdays", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.Equal(t, times[0].In(location).Weekday().String(), "Tuesday")
+		}
 
+		times, err = p.freeFormEN("wednesdays", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.Equal(t, times[0].In(location).Weekday().String(), "Wednesday")
+		}
+
+		times, err = p.freeFormEN("Thursdays", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.Equal(t, times[0].In(location).Weekday().String(), "Thursday")
+		}
+
+		times, err = p.freeFormEN("Fridays", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.Equal(t, times[0].In(location).Weekday().String(), "Friday")
+		}
+
+		times, err = p.freeFormEN("Saturdays", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.Equal(t, times[0].In(location).Weekday().String(), "Saturday")
+		}
+
+		times, err = p.freeFormEN("Sundays", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.Equal(t, times[0].In(location).Weekday().String(), "Sunday")
+		}
+
+	})
 }

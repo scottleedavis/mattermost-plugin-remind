@@ -27,8 +27,6 @@ type Occurrence struct {
 
 func (p *Plugin) ClearScheduledOccurrence(reminder Reminder, occurrence Occurrence) {
 
-	p.API.LogInfo("============================ begin of ClearScheduledOccurrence")
-
 	bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", occurrence.Occurrence)))
 	if err != nil {
 		p.API.LogError("failed KVGet %s", err)
@@ -56,8 +54,6 @@ func (p *Plugin) ClearScheduledOccurrence(reminder Reminder, occurrence Occurren
 	}
 
 	p.API.KVSet(string(fmt.Sprintf("%v", occurrence.Occurrence)), ro)
-
-	p.API.LogInfo("============================ end of ClearScheduledOccurrence")
 
 }
 
