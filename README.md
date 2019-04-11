@@ -9,7 +9,6 @@
 See the full list of [Usage Examples](https://github.com/scottleedavis/mattermost-plugin-remind/wiki/Usage) in the [wiki](https://github.com/scottleedavis/mattermost-plugin-remind/wiki) 
 * `/remind help`
 * `/remind list`
-* `/remind clear`
 * `/remind version`
 * `/remind [who] [what] [when]`
   * `/remind [who] [what] in [# (seconds|minutes|hours|days|weeks|months|years)]`
@@ -24,35 +23,6 @@ See the full list of [Usage Examples](https://github.com/scottleedavis/mattermos
 * [Go](https://golang.org/)
 * [Dep](https://github.com/golang/dep)
 
-### setup
-Mattermost config.json changes
-
-Setup siteUrl (set to your url)
-```
-...
-"SiteURL": "http://127.0.0.1",
-...
-```
-
-Enable timezones (each user set timezone)
-```
-...
-   "DisplaySettings": {
-        "CustomUrlSchemes": [],
-        "ExperimentalTimezone": true
-    },
-...
-```
-
-Enable plugin uploads
-```
-...
-"PluginsSetting": {
-  ...
-  "EnableUploads": true,
-  ...
-}
-```
 
 ### Building 
 ```
@@ -62,7 +32,7 @@ make
 This will produce a single plugin file (with support for multiple architectures) for upload to your Mattermost server:
 
 ```
-dist/io.github.mattermost-plugin-remind.tar.gz
+dist/com.github.scottleedavis.mattermost-plugin-remind.tar.gz
 ```
 
 There is a build target to automate deploying and enabling the plugin to your server, but it requires configuration and [http](https://httpie.org/) to be installed:
