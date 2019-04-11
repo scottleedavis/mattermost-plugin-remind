@@ -36,10 +36,6 @@
     "translation": "**Channel reminders**"
   },
   {
-    "id": "list.footer",
-    "translation": "[View completed reminders]() · [Close list]()"
-  },
-  {
     "id": "list.element.upcoming",
     "translation": "\"{{.Message}}\" {{.Occurrence}}"
   },
