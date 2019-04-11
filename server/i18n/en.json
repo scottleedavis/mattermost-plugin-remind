@@ -1,7 +1,7 @@
 [
   {
     "id": "exception.response",
-    "translation": "Sorry, I didn’t quite get that. I’m easily confused. Perhaps try the words in a different order? This usually works: `/remind [@someone or ~channel] [what] [when]`.\n"
+    "translation": "Sorry, I didn’t understand. Try this: `/remind [@someone or ~channel] [what] [when]` or use `/remind help`.\n"
   },
   {
   	"id": "help",
@@ -9,11 +9,11 @@
   },
   {
     "id": "no.reminders",
-    "translation": "I cannot find any reminders for you.  Type `/remind` to set one."
+    "translation": "No reminders.  Type `/remind` to set one."
   },
   {
     "id": "list.reminders",
-    "translation": "A list of your reminders is in a DM with @{{.RemindUser}}."
+    "translation": "A list of your reminders is in your Direct Message with @{{.RemindUser}}."
   },
   {
     "id": "list.inchannel",
@@ -65,11 +65,11 @@
   },
   {
     "id": "help.response",
-    "translation": ":wave: Need some help with `/remind`?\nUse `/remind` to set a reminder for yourself, someone else, or for a channel. Some examples include:\n* `/remind me to drink water at 3pm every day`\n* `/remind me on June 1st to wish Linda happy birthday`\n* `/remind ~team-alpha to update the project status every Monday at 9am`\n* `/remind @jessica about the interview in 3 hours`\n* `/remind @peter tomorrow \"Please review the office seating plan\"`\nOr, use `/remind list` to see the list of all your reminders.\n"
+    "translation": "Use `/remind` to set reminders for yourself, someone else, or for an entire channel. Some examples include:\n* `/remind me to eat lunch at 1pm every day`\n* `/remind me to pick up the kids on June 1st `\n* `/remind ~marketing-team to give a status update everyday at 8am`\n* `/remind @jessica about the client meeting in 30 minutes`\n* `/remind @peter \"Please review the design draft\" tomorrow`\nOr, use `/remind list` to see the list of all your reminders.\n"
   },
   {
   	"id": "schedule.response",
-  	"translation": ":thumbsup: I will remind {{.Target}}{{.UseTo}} \"{{.Message}}\" {{.When}}"
+  	"translation": "I will remind {{.Target}}{{.UseTo}} \"{{.Message}}\" {{.When}}"
   },
   {
   	"id": "reminder.message",
@@ -77,31 +77,31 @@
   },
   {
     "id": "action.complete",
-    "translation": "Ok! I’ve marked the reminder \"{{.Message}}\" as complete."
+    "translation": "I've marked \"{{.Message}}\" as complete."
   },
   {
     "id": "action.delete",
-    "translation": "Ok! I’ve deleted the reminder \"{{.Message}}\"."
+    "translation": "I’ve deleted the reminder \"{{.Message}}\"."
   },
   {
     "id": "action.snooze.20min",
-    "translation": "Ok! I’ll remind you \"{{.Message}}\" in 20 minutes"
+    "translation": "Snoozed. I’ll remind you \"{{.Message}}\" in 20 minutes"
   },
   {
     "id": "action.snooze.1hr",
-    "translation": "Ok! I’ll remind you \"{{.Message}}\" in 1 hour"
+    "translation": "Snoozed. I’ll remind you \"{{.Message}}\" in 1 hour"
   },
   {
     "id": "action.snooze.3hr",
-    "translation": "Ok! I’ll remind you \"{{.Message}}\" in 3 hours"
+    "translation": "Snoozed. I’ll remind you \"{{.Message}}\" in 3 hours"
   },
   {
     "id": "action.snooze.tomorrow",
-    "translation": "Ok! I’ll remind you \"{{.Message}}\" at 9am tommorrow"
+    "translation": "Snoozed. I’ll remind you \"{{.Message}}\" at 9am tommorrow"
   },
   {
     "id": "action.snooze.nextweek",
-    "translation": "Ok! I’ll remind you \"{{.Message}}\" at 9am Monday"
+    "translation": "Snoozed. I’ll remind you \"{{.Message}}\" at 9am Monday"
   },
   {
     "id": "button.next.reminders",
@@ -145,7 +145,7 @@
   },
   {
     "id": "snooze.20min",
-    "translation": "Ok! I’ll remind you \"{{.Message}}\" in 20 minutes"
+    "translation": "Snoozed. I’ll remind you \"{{.Message}}\" in 20 minutes"
   },
   {
     "id": "button.snooze.1hr",
@@ -153,7 +153,7 @@
   },
   {
     "id": "snooze.1hr",
-    "translation": "Ok! I’ll remind you \"{{.Message}}\" in 1 hour"
+    "translation": "Snoozed. I’ll remind you \"{{.Message}}\" in 1 hour"
   },
   {
     "id": "button.snooze.3hr",
@@ -169,7 +169,7 @@
   },
   {
     "id": "snooze.tomorrow",
-    "translation": "Ok! I’ll remind you \"{{.Message}}\" at 9am tommorrow"
+    "translation": "Snoozed. I’ll remind you \"{{.Message}}\" at 9am tommorrow"
   },
   {
     "id": "button.snooze.nextweek",
@@ -177,7 +177,7 @@
   },
   {
     "id": "snooze.nextweek",
-    "translation": "Ok! I’ll remind you \"{{.Message}}\" at 9am Monday"
+    "translation": "Snoozed. I’ll remind you \"{{.Message}}\" at 9am Monday"
   },
   {
     "id": "clear",
