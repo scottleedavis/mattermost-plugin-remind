@@ -37,7 +37,7 @@ func (p *Plugin) OnActivate() error {
 		return errors.Wrap(err, "failed to query teams OnActivate")
 	}
 
-	p.activateBotUser()
+	p.ensureBotExists()
 
 	for _, team := range teams {
 		if err := p.registerCommand(team.Id); err != nil {
@@ -67,10 +67,6 @@ func (p *Plugin) OnDeactivate() error {
 
 	p.Stop()
 
-	// if dErr := p.deactivateBotUser(); dErr != nil {
-	// return dErr
-	// }
-
 	for _, team := range teams {
 		if cErr := p.API.UnregisterCommand(team.Id, CommandTrigger); cErr != nil {
 			return errors.Wrap(cErr, "failed to unregister command")
@@ -80,110 +76,36 @@ func (p *Plugin) OnDeactivate() error {
 	return nil
 }
 
-// func (p *Plugin) activateBotUser() (*model.Bot, error) {
-func (p *Plugin) activateBotUser() (*model.User, error) {
+func (p *Plugin) ensureBotExists() (string, *model.AppError) {
+	p.API.LogInfo("Ensuring Remindbot exists")
 
-	/*
-		//TEST
-		if bot2, err2 := p.API.GetBot(CommandTrigger+"_bot", true); err2 != nil {
-			p.API.LogError("===========> BOT DOES NOT EXIST: " + err2.Error())
+	bot, createErr := p.API.CreateBot(&model.Bot{
+		Username:    "remindbot",
+		DisplayName: "Remindbot",
+		Description: "Sets and triggers reminders",
+	})
+	if createErr != nil {
+		p.API.LogDebug("Failed to create Remindbot. Attempting to find existing one.", "err", createErr)
 
-			b := model.Bot{
-				// UserId: manifest.Id,
-				UserId:      CommandTrigger + "_bot",
-				Username:    CommandTrigger + "_bot",
-				OwnerId:     manifest.Id,
-				DisplayName: "Remind",
-				Description: "Sets and triggers reminders",
-			}
-
-			newBot, bErr := p.API.CreateBot(&b)
-			if bErr != nil {
-				p.API.LogError(fmt.Sprintf("failed to create %s bot: %v", CommandTrigger, bErr))
-				return nil, bErr
-			} else {
-				/// TODO BOT CREATED IS HAPPENING.  debug how it is created/save
-				p.API.LogInfo("BOT CREATED ========================================> " + fmt.Sprintf("%v", newBot))
-				//TEST
-				skawtusUser, _ := p.API.GetUserByUsername("skawtus")
-				channel, cErr := p.API.GetDirectChannel(newBot.UserId, skawtusUser.Id)
-				if cErr != nil {
-					p.API.LogError("failed to create channel " + cErr.Error())
-				}
-
-				botPost := model.Post{
-					ChannelId:     channel.Id,
-					PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
-					UserId:        newBot.UserId,
-					Message:       "ahahahaha",
-				}
-				p.API.CreatePost(&botPost)
-				//end test
-			}
-
-		} else {
-
-			p.API.LogError("===========> BOT EXISTS: " + fmt.Sprintf("%v", bot2))
-			//TEST
-			skawtusUser, _ := p.API.GetUserByUsername("skawtus")
-			channel, cErr := p.API.GetDirectChannel(bot2.UserId, skawtusUser.Id)
-			if cErr != nil {
-				p.API.LogError("failed to create channel " + cErr.Error())
-			}
-
-			botPost := model.Post{
-				ChannelId:     channel.Id,
-				PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
-				UserId:        bot2.UserId,
-				Message:       "ahahahaha",
-			}
-			p.API.CreatePost(&botPost)
-			//end test
-		}
-		//END TEST
-	*/
-
-	bot, err := p.API.GetUserByUsername(CommandTrigger)
-	if err != nil {
-		p.API.LogError(fmt.Sprintf("failed to get user %s: %v", CommandTrigger, err))
-
-		user := model.User{
-			Email:    "-@-.-",
-			Nickname: "Remind",
-			Password: model.NewId(),
-			Username: CommandTrigger,
-			Roles:    model.SYSTEM_USER_ROLE_ID,
+		// Unable to create the bot, so it should already exist
+		user, err := p.API.GetUserByUsername("remindbot")
+		if err != nil || user == nil {
+			p.API.LogError("Failed to find Remind user", "err", err)
+			return "", err
 		}
 
-		cuser, cerr := p.API.CreateUser(&user)
-		if cerr != nil {
-			p.API.LogError("failed to create user: " + fmt.Sprintf("%v", cerr))
-			return nil, cerr
+		bot, err = p.API.GetBot(user.Id, true)
+		if err != nil {
+			p.API.LogError("Failed to find Remindbot", "err", err)
+			return "", err
 		}
 
-		p.remindUserId = cuser.Id
-
-		return cuser, nil
+		p.API.LogDebug("Found Remindbot")
+	} else {
+		p.API.LogInfo("Remindbot created")
 	}
 
-	p.remindUserId = bot.Id
+	p.remindUserId = bot.UserId
 
-	return bot, nil
-
-}
-
-func (p *Plugin) deactivateBotUser() error {
-
-	// botUser, err := p.API.GetBot(p.remindUserId, true)
-	botUser, err := p.API.GetUser(p.remindUserId)
-	if err != nil {
-		return err
-	}
-	// dErr := p.API.PermanentDeleteBot(botUser.UserId)
-	dErr := p.API.DeleteUser(botUser.Id)
-	if dErr != nil {
-		p.API.LogError("Failed to delete " + CommandTrigger + " bot " + fmt.Sprintf("%v", dErr))
-		return dErr
-	}
-	return nil
+	return bot.UserId, nil
 }

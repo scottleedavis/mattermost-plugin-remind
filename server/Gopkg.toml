@@ -3,9 +3,9 @@
   go-tests = true
   unused-packages = true
 
-#[[constraint]]
-#  name = "github.com/mattermost/mattermost-server"
-#  version = "master"
+[[constraint]]
+  name = "github.com/mattermost/mattermost-server"
+  branch = "release-5.10"
 
 [[constraint]]
   name = "github.com/stretchr/testify"
