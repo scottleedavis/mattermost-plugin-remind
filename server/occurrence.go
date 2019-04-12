@@ -424,6 +424,9 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 	if strings.Contains(when, T("every")) {
 
 		dateTimeSplit := strings.Split(when, " "+T("every")+" ")
+
+		p.API.LogInfo(T("every") + " " + dateTimeSplit[1] + " " + dateTimeSplit[0])
+
 		return p.every(T("every")+" "+dateTimeSplit[1]+" "+dateTimeSplit[0], user)
 
 	} else if len(whenSplit) >= 3 &&
@@ -629,14 +632,24 @@ func (p *Plugin) onEN(when string, user *model.User) (times []time.Time, err err
 		chronoTime = dateTimeSplit[1]
 	}
 
+	//on march 17 at 5:41pm
+	p.API.LogInfo("chronoDate " + chronoDate)
+
 	dateUnit, ndErr := p.normalizeDate(chronoDate, user)
 	if ndErr != nil {
 		return []time.Time{}, ndErr
 	}
+
+	p.API.LogInfo("dateUnit " + dateUnit)
+
+	p.API.LogInfo("chronoTime " + chronoTime)
+
 	timeUnit, ntErr := p.normalizeTime(chronoTime, user)
 	if ntErr != nil {
 		return []time.Time{}, ntErr
 	}
+
+	p.API.LogInfo("timeUnit " + timeUnit)
 
 	switch dateUnit {
 	case T("sunday"),
@@ -698,21 +711,25 @@ func (p *Plugin) onEN(when string, user *model.User) (times []time.Time, err err
 	}
 
 	dateSplit := p.regSplit(dateUnit, "T|Z")
+	p.API.LogInfo("parsing " + dateSplit[0] + "T" + timeUnit + "Z")
 
-	if len(dateSplit) < 3 {
-		timeSplit := strings.Split(dateSplit[1], "-")
-		t, tErr := time.ParseInLocation(time.RFC3339, dateSplit[0]+"T"+timeUnit+"-"+timeSplit[1], location)
-		if tErr != nil {
-			return []time.Time{}, tErr
-		}
-		return []time.Time{t.UTC()}, nil
-	} else {
-		t, tErr := time.ParseInLocation(time.RFC3339, dateSplit[0]+"T"+timeUnit+"Z"+dateSplit[2], location)
-		if tErr != nil {
-			return []time.Time{}, tErr
-		}
-		return []time.Time{t.UTC()}, nil
-	}
+	dateSplit = p.regSplit(dateSplit[0], "-")
+	timeSplit := p.regSplit(timeUnit, ":")
+	year, _ := strconv.Atoi(dateSplit[0])
+	month, _ := strconv.Atoi(dateSplit[1])
+	day, _ := strconv.Atoi(dateSplit[2])
+	hour, _ := strconv.Atoi(timeSplit[0])
+	minute, _ := strconv.Atoi(timeSplit[1])
+	second, _ := strconv.Atoi(timeSplit[2])
+	t := time.Date(
+		year,
+		time.Month(month),
+		day,
+		hour,
+		minute,
+		second, 0, location)
+
+	return []time.Time{t.UTC()}, nil
 
 }
 
@@ -848,7 +865,7 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 				if tErr != nil {
 					return []time.Time{}, tErr
 				}
-				times = append(times, t)
+				times = append(times, t.UTC())
 			} else {
 				t, tErr := time.ParseInLocation(time.RFC3339, dateSplit[0]+"T"+timeUnit+"Z"+dateSplit[2], location)
 				if tErr != nil {

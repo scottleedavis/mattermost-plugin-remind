@@ -3,6 +3,7 @@ package main
 import (
 	"testing"
 	"time"
+	// "fmt"
 
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/plugin/plugintest"
@@ -345,7 +346,7 @@ func TestOn(t *testing.T) {
 		assert.Nil(t, err)
 		if err == nil {
 			assert.True(t, times[0].In(location).Month().String() == "April" && times[0].In(location).Day() == 9 &&
-				times[0].Hour() == 11)
+				times[0].In(location).Hour() == 11)
 		}
 
 		times, err = p.onEN("on auguSt tenth 2019", user)
