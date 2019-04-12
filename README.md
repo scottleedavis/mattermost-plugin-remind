@@ -1,5 +1,7 @@
 # mattermost-plugin-remind
 
+[![CircleCI](https://circleci.com/gh/scottleedavis/mattermost-plugin-remind/tree/master.svg?style=svg)](https://circleci.com/gh/scottleedavis/mattermost-plugin-remind/tree/master)
+
 ### a plugin slashcommand bot that schedules reminders for Mattermost
 
 <img src="buttons.png" height="500">

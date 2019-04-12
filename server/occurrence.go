@@ -868,20 +868,48 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 
 			dateSplit := p.regSplit(dateUnit, "T|Z")
 
-			if len(dateSplit) < 3 {
-				timeSplit := strings.Split(dateSplit[1], "-")
-				t, tErr := time.ParseInLocation(time.RFC3339, dateSplit[0]+"T"+timeUnit+"-"+timeSplit[1], location)
-				if tErr != nil {
-					return []time.Time{}, tErr
-				}
-				times = append(times, t.UTC())
-			} else {
-				t, tErr := time.ParseInLocation(time.RFC3339, dateSplit[0]+"T"+timeUnit+"Z"+dateSplit[2], location)
-				if tErr != nil {
-					return []time.Time{}, tErr
-				}
-				times = append(times, t.UTC())
-			}
+			p.API.LogInfo("parsing " + dateSplit[0] + "T" + timeUnit + "Z")
+
+			dateSplit = p.regSplit(dateSplit[0], "-")
+			timeSplit := p.regSplit(timeUnit, ":")
+			year, _ := strconv.Atoi(dateSplit[0])
+			month, _ := strconv.Atoi(dateSplit[1])
+			day, _ := strconv.Atoi(dateSplit[2])
+			hour, _ := strconv.Atoi(timeSplit[0])
+			minute, _ := strconv.Atoi(timeSplit[1])
+			second, _ := strconv.Atoi(timeSplit[2])
+			t := time.Date(
+				year,
+				time.Month(month),
+				day,
+				hour,
+				minute,
+				second, 0, location)
+
+			times = append(times, t.UTC())
+
+			// if len(dateSplit) < 3 {
+
+			// 	p.API.LogInfo("HEHEHEHEHEHEHEHEH")
+
+			// 	timeSplit := strings.Split(dateSplit[1], "-")
+
+
+			// 	t, tErr := time.ParseInLocation(time.RFC3339, dateSplit[0]+"T"+timeUnit+"-"+timeSplit[1], location)
+			// 	if tErr != nil {
+			// 		return []time.Time{}, tErr
+			// 	}
+			// 	times = append(times, t.UTC())
+			// } else {
+
+			// 	p.API.LogInfo("HEHEHEHEHEHEHEHEH")
+
+			// 	t, tErr := time.ParseInLocation(time.RFC3339, dateSplit[0]+"T"+timeUnit+"Z"+dateSplit[2], location)
+			// 	if tErr != nil {
+			// 		return []time.Time{}, tErr
+			// 	}
+			// 	times = append(times, t.UTC())
+			// }
 
 		}
 
