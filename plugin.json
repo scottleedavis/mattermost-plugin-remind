@@ -1,7 +1,7 @@
 {
     "id": "com.github.scottleedavis.mattermost-plugin-remind",
-    "name": "Remind Bot Plugin",
-    "description": "Set Reminders",
+    "name": "Remind Bot Mattermost Plugin",
+    "description": "Sets Reminders",
     "version": "0.1.0",
     "server": {
         "executables": {

@@ -8,6 +8,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ### Added post hackathon
 - Initial release during hackathon
 
-## 0.1.0 - 2019-04-10
-### Updated to include logic build for server app
-- Initial port from server based bot with i18n, `/remind list` with buttons.  S
+## 0.1.0 - 2019-04-11
+### Updated to include logic build from server app
+- Initial port from server based bot with i18n
+- `/remind list` with buttons.
+- unit tests for occurrence.go
+- circleci setup
+- codecov setup
