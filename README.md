@@ -8,6 +8,8 @@
 
 <img src="buttons.png" height="500">
 
+_requires Mattermost 5.10 or greater_
+
 ### usage
 
 See the full list of [Usage Examples](https://github.com/scottleedavis/mattermost-plugin-remind/wiki/Usage) in the [wiki](https://github.com/scottleedavis/mattermost-plugin-remind/wiki) 
