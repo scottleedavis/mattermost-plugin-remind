@@ -12,6 +12,7 @@ const RemindersPerPage = 4
 
 func (p *Plugin) ListReminders(user *model.User, channelId string) string {
 
+	T, _ := p.translation(user)
 	offset := 0
 	reminders := p.GetReminders(user.Username)
 	if len(reminders) == 0 {
@@ -44,7 +45,13 @@ func (p *Plugin) ListReminders(user *model.User, channelId string) string {
 		offset,
 		endOffset)
 
-	attachments = p.listControl(activeReminderCount, completedReminderCount, offset, endOffset, attachments)
+	attachments = p.listControl(
+		user,
+		activeReminderCount,
+		completedReminderCount,
+		offset,
+		endOffset,
+		attachments)
 
 	channel, cErr := p.API.GetDirectChannel(p.remindUserId, user.Id)
 	if cErr != nil {
@@ -79,6 +86,7 @@ func (p *Plugin) UpdateListReminders(userId string, postId string, offset int) {
 	if uErr != nil {
 		p.API.LogError(uErr.Error())
 	}
+
 	reminders := p.GetReminders(user.Username)
 	completedReminderCount := 0
 	for _, reminder := range reminders {
@@ -110,11 +118,16 @@ func (p *Plugin) UpdateListReminders(userId string, postId string, offset int) {
 		offset,
 		endOffset)
 
-	// completedCount, attachments := p.completedReminders(reminders, attachments)
-	attachments = p.listControl(activeReminderCount, completedReminderCount, offset, endOffset, attachments)
+	attachments = p.listControl(
+		user,
+		activeReminderCount,
+		completedReminderCount,
+		offset,
+		endOffset,
+		attachments)
 
 	if post, pErr := p.API.GetPost(postId); pErr != nil {
-		p.API.LogError("unable to get list reminders post " + pErr.Error())
+		p.API.LogError(pErr.Error())
 	} else {
 		post.Props = model.StringInterface{
 			"attachments": attachments,
@@ -221,12 +234,14 @@ func (p *Plugin) pagedOccurrences(
 }
 
 func (p *Plugin) listControl(
+	user *model.User,
 	activeReminderCount int,
 	completedReminderCount int,
 	offset int,
 	endOffset int,
 	attachments []*model.SlackAttachment) []*model.SlackAttachment {
 
+	T, _ := p.translation(user)
 	siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
 	reminderCount := map[string]interface{}{
 		"ReminderCount": RemindersPerPage,

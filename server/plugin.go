@@ -11,9 +11,9 @@ import (
 type Plugin struct {
 	plugin.MattermostPlugin
 
-	// configurationLock sync.RWMutex
+	configurationLock sync.RWMutex
 
-	// configuration *configuration
+	configuration *configuration
 
 	ServerConfig *model.Config
 

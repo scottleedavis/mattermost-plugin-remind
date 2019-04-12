@@ -36,7 +36,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 
 	user, uErr := p.API.GetUser(args.UserId)
 	if uErr != nil {
-		&model.CommandResponse, nil
+		return &model.CommandResponse{}, nil
 	}
 	T, _ := p.translation(user)
 

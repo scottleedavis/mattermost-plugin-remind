@@ -62,6 +62,11 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 func (p *Plugin) handleComplete(w http.ResponseWriter, r *http.Request, action *Action) {
 
 	reminder := p.GetReminder(action.UserID, action.Context.ReminderID)
+	user, uErr := p.API.GetUser(action.UserID)
+	if uErr != nil {
+		p.API.LogError(uErr.Error())
+	}
+	T, _ := p.translation(user)
 
 	for _, occurrence := range reminder.Occurrences {
 		p.ClearScheduledOccurrence(reminder, occurrence)
@@ -107,6 +112,13 @@ func (p *Plugin) handleComplete(w http.ResponseWriter, r *http.Request, action *
 func (p *Plugin) handleDelete(w http.ResponseWriter, r *http.Request, action *Action) {
 
 	reminder := p.GetReminder(action.UserID, action.Context.ReminderID)
+	user, uErr := p.API.GetUser(action.UserID)
+	if uErr != nil {
+		p.API.LogError(uErr.Error())
+		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
+		return
+	}
+	T, _ := p.translation(user)
 
 	for _, occurrence := range reminder.Occurrences {
 		p.ClearScheduledOccurrence(reminder, occurrence)
@@ -116,7 +128,7 @@ func (p *Plugin) handleDelete(w http.ResponseWriter, r *http.Request, action *Ac
 	p.DeleteReminder(action.UserID, reminder)
 
 	if post, pErr := p.API.GetPost(action.PostID); pErr != nil {
-		p.API.LogError("unable to get post " + pErr.Error())
+		p.API.LogError(pErr.Error())
 		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
 	} else {
 		p.API.LogInfo(fmt.Sprintf("%v", post.Props))
@@ -134,6 +146,13 @@ func (p *Plugin) handleDelete(w http.ResponseWriter, r *http.Request, action *Ac
 func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, action *Action) {
 
 	reminder := p.GetReminder(action.UserID, action.Context.ReminderID)
+	user, uErr := p.API.GetUser(action.UserID)
+	if uErr != nil {
+		p.API.LogError(uErr.Error())
+		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
+		return
+	}
+	T, _ := p.translation(user)
 
 	for _, occurrence := range reminder.Occurrences {
 		if occurrence.Id == action.Context.OccurrenceID {
@@ -290,7 +309,7 @@ func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request, action
 	}
 
 	if _, pErr := p.API.GetPost(action.PostID); pErr != nil {
-		p.API.LogError("unable to get post " + pErr.Error())
+		p.API.LogError(pErr.Error())
 		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
 	} else {
 		switch action.Context.SelectedOption {

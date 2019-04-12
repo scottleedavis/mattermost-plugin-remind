@@ -15,7 +15,7 @@ import (
 	"github.com/nicksnyder/go-i18n/i18n"
 )
 
-var T i18n.TranslateFunc
+var TEE i18n.TranslateFunc
 var TDefault i18n.TranslateFunc
 var locales map[string]string = make(map[string]string)
 var settings model.LocalizationSettings
@@ -25,7 +25,7 @@ var settings model.LocalizationSettings
 func TranslationsPreInit() error {
 	// Set T even if we fail to load the translations. Lots of shutdown handling code will
 	// segfault trying to handle the error, and the untranslated IDs are strictly better.
-	T = TfuncWithFallback("en")
+	TEE = TfuncWithFallback("en")
 	TDefault = TfuncWithFallback("en")
 	return InitTranslationsWithDir()
 }

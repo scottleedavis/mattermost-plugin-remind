@@ -171,7 +171,8 @@ func (p *Plugin) isRepeating(request *ReminderRequest) bool {
 
 	user, uErr := p.API.GetUserByUsername(request.Username)
 	if uErr != nil {
-		return uErr
+		p.API.LogError(uErr.Error())
+		return false
 	}
 	T, _ := p.translation(user)
 
@@ -997,7 +998,8 @@ func (p *Plugin) formatWhen(username string, when string, occurrence string, sno
 func (p *Plugin) formatWhenEN(username string, when string, occurrence string, snoozed bool) string {
 
 	user, uErr := p.API.GetUserByUsername(username)
-	if uerr != nil {
+	if uErr != nil {
+		p.API.LogError(uErr.Error())
 		return ""
 	}
 	T, _ := p.translation(user)
