@@ -1,6 +1,8 @@
 # mattermost-plugin-remind
 
-[![CircleCI](https://circleci.com/gh/scottleedavis/mattermost-plugin-remind/tree/master.svg?style=svg)](https://circleci.com/gh/scottleedavis/mattermost-plugin-remind/tree/master)
+[![CircleCI](https://circleci.com/gh/scottleedavis/mattermost-plugin-remind/tree/master.svg?style=svg)](https://circleci.com/gh/scottleedavis/mattermost-plugin-remind/tree/master)  [![codecov](https://codecov.io/gh/scottleedavis/mattermost-plugin-remind/branch/master/graph/badge.svg)](https://codecov.io/gh/scottleedavis/mattermost-plugin-remind)
+
+
 
 ### a plugin slashcommand bot that schedules reminders for Mattermost
 
