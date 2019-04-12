@@ -200,9 +200,8 @@ func (p *Plugin) upsertOccurrence(occurrence *Occurrence) []Occurrence {
 	}
 
 	occurrences = append(occurrences, *occurrence)
-	ro, __ := json.Marshal(occurrences)
-
-	if __ != nil {
+	ro, roErr := json.Marshal(occurrences)
+	if roErr != nil {
 		p.API.LogError("failed to marshal reminderOccurrences %s", occurrence.Id)
 		return occurrences
 	}

@@ -35,7 +35,7 @@ func (p *Plugin) ParseRequest(request *ReminderRequest) error {
 			message := request.Payload[firstIndex : lastIndex+1]
 
 			when := strings.Replace(request.Payload, message, "", -1)
-			when = strings.Replace(when, commandSplit[0], "", -1)
+			when = strings.Replace(when, commandSplit[0], "", 1)
 			when = strings.Trim(when, " ")
 
 			message = strings.Replace(message, "\"", "", -1)
@@ -50,7 +50,7 @@ func (p *Plugin) ParseRequest(request *ReminderRequest) error {
 		}
 
 		message := strings.Replace(request.Payload, request.Reminder.When, "", -1)
-		message = strings.Replace(message, commandSplit[0], "", -1)
+		message = strings.Replace(message, commandSplit[0], "", 1)
 		message = strings.Trim(message, " \"")
 
 		request.Reminder.Message = message
