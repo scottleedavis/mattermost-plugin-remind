@@ -320,25 +320,11 @@ func (p *Plugin) normalizeTime(text string, user *model.User) (string, error) {
 		T("22"),
 		T("23"):
 
-		num, nErr := strconv.Atoi(text)
-		if nErr != nil {
-			return "", nErr
+		if len(text) == 1 {
+			text = "0" + text
 		}
 
-		numTime := time.Now().In(location).Round(time.Hour).Add(time.Hour * time.Duration(num))
-		dateTimeSplit := p.regSplit(p.chooseClosest(user, &numTime, false).Format(time.RFC3339), "T|Z")
-
-		switch len(dateTimeSplit) {
-		case 2:
-			tzSplit := strings.Split(dateTimeSplit[1], "-")
-			return tzSplit[0], nil
-		case 3:
-			break
-		default:
-			return "", errors.New("unrecognized dateTime format")
-		}
-
-		return dateTimeSplit[1], nil
+		return text + ":00:00", nil
 
 	default:
 		break

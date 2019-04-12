@@ -483,7 +483,7 @@ func TestEvery(t *testing.T) {
 		times, err = p.everyEN("every wednesday, thursday", user)
 		assert.Nil(t, err)
 		if err == nil {
-			assert.True(t, times[0].In(location).Weekday().String() == "Monday" && times[1].In(location).Weekday().String() == "Thursday")
+			assert.True(t, times[0].In(location).Weekday().String() == "Wednesday" && times[1].In(location).Weekday().String() == "Thursday")
 		}
 
 		times, err = p.everyEN("every other friday and saturday", user)

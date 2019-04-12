@@ -772,18 +772,27 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 		chronoTime = strings.Trim(dateTimeSplit[1], " ")
 	}
 
-	days := p.regSplit(chronoDate, "("+T("app.reminder.and")+")|(,)")
+	days := p.regSplit(chronoDate, "("+T("and")+")|(,)")
 
 	for _, chrono := range days {
+
+		p.API.LogInfo("chrono " + chrono)
 
 		dateUnit, ndErr := p.normalizeDate(strings.Trim(chrono, " "), user)
 		if ndErr != nil {
 			return []time.Time{}, ndErr
 		}
+
+		p.API.LogInfo("dateUnit " + dateUnit)
+
+		p.API.LogInfo("chronoTime " + chronoTime)
+
 		timeUnit, ntErr := p.normalizeTime(chronoTime, user)
 		if ntErr != nil {
 			return []time.Time{}, ntErr
 		}
+
+		p.API.LogInfo("timeUnit " + timeUnit)
 
 		switch dateUnit {
 		case T("day"):
