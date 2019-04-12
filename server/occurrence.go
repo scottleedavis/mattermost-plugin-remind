@@ -888,29 +888,6 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 
 			times = append(times, t.UTC())
 
-			// if len(dateSplit) < 3 {
-
-			// 	p.API.LogInfo("HEHEHEHEHEHEHEHEH")
-
-			// 	timeSplit := strings.Split(dateSplit[1], "-")
-
-
-			// 	t, tErr := time.ParseInLocation(time.RFC3339, dateSplit[0]+"T"+timeUnit+"-"+timeSplit[1], location)
-			// 	if tErr != nil {
-			// 		return []time.Time{}, tErr
-			// 	}
-			// 	times = append(times, t.UTC())
-			// } else {
-
-			// 	p.API.LogInfo("HEHEHEHEHEHEHEHEH")
-
-			// 	t, tErr := time.ParseInLocation(time.RFC3339, dateSplit[0]+"T"+timeUnit+"Z"+dateSplit[2], location)
-			// 	if tErr != nil {
-			// 		return []time.Time{}, tErr
-			// 	}
-			// 	times = append(times, t.UTC())
-			// }
-
 		}
 
 	}
