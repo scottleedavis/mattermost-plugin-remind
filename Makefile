@@ -11,8 +11,7 @@ include build/setup.mk
 BUNDLE_NAME ?= $(PLUGIN_ID)-$(PLUGIN_VERSION).tar.gz
 
 # all, the default target, tests, builds and bundles the plugin.
-# all: check-style test dist
-all: check-style dist
+all: check-style test dist
 
 # apply propagates the plugin id into the server/ and webapp/ folders as required.
 .PHONY: apply
