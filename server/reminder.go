@@ -115,7 +115,7 @@ func (p *Plugin) TriggerReminders() {
 												"occurrence_id": occurrence.Id,
 												"action":        "complete",
 											},
-											URL: fmt.Sprintf("%s/plugins/%s/api/v1/complete", siteURL, manifest.Id),
+											URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
 										},
 										Type: model.POST_ACTION_TYPE_BUTTON,
 										Name: T("button.complete"),
@@ -127,7 +127,7 @@ func (p *Plugin) TriggerReminders() {
 												"occurrence_id": occurrence.Id,
 												"action":        "delete",
 											},
-											URL: fmt.Sprintf("%s/plugins/%s/api/v1/delete", siteURL, manifest.Id),
+											URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
 										},
 										Name: T("button.delete"),
 										Type: "action",
@@ -139,7 +139,7 @@ func (p *Plugin) TriggerReminders() {
 												"occurrence_id": occurrence.Id,
 												"action":        "snooze",
 											},
-											URL: fmt.Sprintf("%s/plugins/%s/api/v1/snooze", siteURL, manifest.Id),
+											URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
 										},
 										Name: T("button.snooze"),
 										Type: "select",
@@ -325,7 +325,6 @@ func (p *Plugin) UpsertReminder(request *ReminderRequest) error {
 
 	var reminders []Reminder
 	err := json.Unmarshal(bytes, &reminders)
-
 	if err != nil {
 		p.API.LogDebug("new reminder " + user.Username)
 	} else {
@@ -334,7 +333,6 @@ func (p *Plugin) UpsertReminder(request *ReminderRequest) error {
 
 	reminders = append(reminders, request.Reminder)
 	ro, rErr := json.Marshal(reminders)
-
 	if rErr != nil {
 		p.API.LogError("failed to marshal reminders %s", user.Username)
 		return rErr

@@ -15,6 +15,7 @@ func (p *Plugin) registerCommand(teamId string) error {
 	if err := p.API.RegisterCommand(&model.Command{
 		TeamId:           teamId,
 		Trigger:          CommandTrigger,
+		Username:         "remindbot",
 		AutoComplete:     true,
 		AutoCompleteHint: "[@someone or ~channel] [what] [when]",
 		AutoCompleteDesc: "Set a reminder",
@@ -33,7 +34,10 @@ func (p *Plugin) unregisterCommand(teamId string) error {
 
 func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*model.CommandResponse, *model.AppError) {
 
-	user, _ := p.API.GetUser(args.UserId)
+	user, uErr := p.API.GetUser(args.UserId)
+	if uErr != nil {
+		&model.CommandResponse, nil
+	}
 	T, _ := p.translation(user)
 
 	if strings.HasSuffix(args.Command, T("help")) {
@@ -56,7 +60,8 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 
 	}
 
-	if strings.HasSuffix(args.Command, T("clear")) {
+	// 'secret' clear command for testing
+	if strings.HasSuffix(args.Command, "__clear") {
 		return &model.CommandResponse{
 			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
 			Text:         fmt.Sprintf(p.DeleteReminders(user)),

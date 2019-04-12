@@ -3,10 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	// "io/ioutil"
 	"net/http"
-	// "net/http/httputil"
-	// "bytes"
 	"time"
 
 	"github.com/mattermost/mattermost-server/model"
@@ -107,24 +104,6 @@ func (p *Plugin) handleComplete(w http.ResponseWriter, r *http.Request, action *
 
 }
 
-func (p *Plugin) handleCompleteList(w http.ResponseWriter, r *http.Request, action *Action) {
-
-	reminder := p.GetReminder(action.UserID, action.Context.ReminderID)
-
-	for _, occurrence := range reminder.Occurrences {
-		p.ClearScheduledOccurrence(reminder, occurrence)
-	}
-
-	reminder.Completed = time.Now().UTC()
-	p.UpdateReminder(action.UserID, reminder)
-	p.UpdateListReminders(action.UserID, action.PostID, 1)
-	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
-}
-
-func (p *Plugin) handleViewCompleteList(w http.ResponseWriter, r *http.Request, action *Action) {
-	p.ListCompletedReminders(action.UserID, action.PostID)
-}
-
 func (p *Plugin) handleDelete(w http.ResponseWriter, r *http.Request, action *Action) {
 
 	reminder := p.GetReminder(action.UserID, action.Context.ReminderID)
@@ -150,26 +129,6 @@ func (p *Plugin) handleDelete(w http.ResponseWriter, r *http.Request, action *Ac
 		writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 	}
 
-}
-
-func (p *Plugin) handleDeleteList(w http.ResponseWriter, r *http.Request, action *Action) {
-
-	reminder := p.GetReminder(action.UserID, action.Context.ReminderID)
-
-	for _, occurrence := range reminder.Occurrences {
-		p.ClearScheduledOccurrence(reminder, occurrence)
-	}
-
-	p.DeleteReminder(action.UserID, reminder)
-	p.UpdateListReminders(action.UserID, action.PostID, 1)
-	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
-}
-
-func (p *Plugin) handleDeleteCompleteList(w http.ResponseWriter, r *http.Request, action *Action) {
-
-	p.DeleteCompletedReminders(action.UserID)
-	p.UpdateListReminders(action.UserID, action.PostID, 1)
-	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
 func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, action *Action) {
@@ -277,6 +236,49 @@ func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, action *Ac
 	}
 }
 
+func (p *Plugin) handleNextReminders(w http.ResponseWriter, r *http.Request, action *Action) {
+	p.UpdateListReminders(action.UserID, action.PostID, action.Context.Offset)
+	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
+}
+
+func (p *Plugin) handleCompleteList(w http.ResponseWriter, r *http.Request, action *Action) {
+
+	reminder := p.GetReminder(action.UserID, action.Context.ReminderID)
+
+	for _, occurrence := range reminder.Occurrences {
+		p.ClearScheduledOccurrence(reminder, occurrence)
+	}
+
+	reminder.Completed = time.Now().UTC()
+	p.UpdateReminder(action.UserID, reminder)
+	p.UpdateListReminders(action.UserID, action.PostID, 0)
+	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
+}
+
+func (p *Plugin) handleViewCompleteList(w http.ResponseWriter, r *http.Request, action *Action) {
+	p.ListCompletedReminders(action.UserID, action.PostID)
+}
+
+func (p *Plugin) handleDeleteList(w http.ResponseWriter, r *http.Request, action *Action) {
+
+	reminder := p.GetReminder(action.UserID, action.Context.ReminderID)
+
+	for _, occurrence := range reminder.Occurrences {
+		p.ClearScheduledOccurrence(reminder, occurrence)
+	}
+
+	p.DeleteReminder(action.UserID, reminder)
+	p.UpdateListReminders(action.UserID, action.PostID, 0)
+	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
+}
+
+func (p *Plugin) handleDeleteCompleteList(w http.ResponseWriter, r *http.Request, action *Action) {
+
+	p.DeleteCompletedReminders(action.UserID)
+	p.UpdateListReminders(action.UserID, action.PostID, 0)
+	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
+}
+
 func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request, action *Action) {
 
 	reminder := p.GetReminder(action.UserID, action.Context.ReminderID)
@@ -366,19 +368,13 @@ func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request, action
 			}
 		}
 
-		p.UpdateListReminders(action.UserID, action.PostID, 1)
+		p.UpdateListReminders(action.UserID, action.PostID, 0)
 		writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 	}
 }
 
 func (p *Plugin) handleCloseList(w http.ResponseWriter, r *http.Request, action *Action) {
 	p.API.DeletePost(action.PostID)
-}
-
-func (p *Plugin) handleNextReminders(w http.ResponseWriter, r *http.Request, action *Action) {
-	p.API.LogInfo("+++++++++ Starting with Offset: " + fmt.Sprintf("%v", action.Context.Offset))
-	p.UpdateListReminders(action.UserID, action.PostID, action.Context.Offset)
-	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
 func writePostActionIntegrationResponseOk(w http.ResponseWriter, response *model.PostActionIntegrationResponse) {

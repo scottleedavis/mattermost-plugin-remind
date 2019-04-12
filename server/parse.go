@@ -13,7 +13,10 @@ import (
 
 func (p *Plugin) ParseRequest(request *ReminderRequest) error {
 
-	user, _ := p.API.GetUserByUsername(request.Username)
+	user, uErr := p.API.GetUserByUsername(request.Username)
+	if uErr != nil {
+		return uErr
+	}
 	T, _ := p.translation(user)
 
 	commandSplit := strings.Split(request.Payload, " ")
@@ -61,7 +64,10 @@ func (p *Plugin) ParseRequest(request *ReminderRequest) error {
 
 func (p *Plugin) findWhen(request *ReminderRequest) error {
 
-	user, _ := p.API.GetUserByUsername(request.Username)
+	user, uErr := p.API.GetUserByUsername(request.Username)
+	if uErr != nil {
+		return uErr
+	}
 	_, locale := p.translation(user)
 
 	switch locale {
@@ -75,7 +81,10 @@ func (p *Plugin) findWhen(request *ReminderRequest) error {
 
 func (p *Plugin) findWhenEN(request *ReminderRequest) error {
 
-	user, _ := p.API.GetUserByUsername(request.Username)
+	user, uErr := p.API.GetUserByUsername(request.Username)
+	if uErr != nil {
+		return uErr
+	}
 	T, _ := p.translation(user)
 
 	inIndex := strings.Index(request.Payload, " "+T("in")+" ")

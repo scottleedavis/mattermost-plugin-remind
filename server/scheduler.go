@@ -9,7 +9,11 @@ import (
 
 func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
 
-	user, _ := p.API.GetUserByUsername(request.Username)
+	user, uErr := p.API.GetUserByUsername(request.Username)
+	if uErr != nil {
+		p.API.LogError(uErr.Error())
+		return T("exception.response"), nil
+	}
 	T, _ := p.translation(user)
 	location := p.location(user)
 

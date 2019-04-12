@@ -59,7 +59,10 @@ func (p *Plugin) ClearScheduledOccurrence(reminder Reminder, occurrence Occurren
 
 func (p *Plugin) CreateOccurrences(request *ReminderRequest) error {
 
-	user, _ := p.API.GetUserByUsername(request.Username)
+	user, uErr := p.API.GetUserByUsername(request.Username)
+	if uErr != nil {
+		return uErr
+	}
 	_, locale := p.translation(user)
 
 	switch locale {
@@ -73,7 +76,10 @@ func (p *Plugin) CreateOccurrences(request *ReminderRequest) error {
 
 func (p *Plugin) createOccurrencesEN(request *ReminderRequest) error {
 
-	user, _ := p.API.GetUserByUsername(request.Username)
+	user, uErr := p.API.GetUserByUsername(request.Username)
+	if uErr != nil {
+		return uErr
+	}
 	T, _ := p.translation(user)
 
 	if strings.HasPrefix(request.Reminder.When, T("in")) {
@@ -118,7 +124,10 @@ func (p *Plugin) createOccurrencesEN(request *ReminderRequest) error {
 
 func (p *Plugin) addOccurrences(request *ReminderRequest, occurrences []time.Time) error {
 
-	user, _ := p.API.GetUserByUsername(request.Username)
+	user, uErr := p.API.GetUserByUsername(request.Username)
+	if uErr != nil {
+		return uErr
+	}
 	T, _ := p.translation(user)
 
 	for _, o := range occurrences {
@@ -160,7 +169,10 @@ func (p *Plugin) addOccurrences(request *ReminderRequest, occurrences []time.Tim
 
 func (p *Plugin) isRepeating(request *ReminderRequest) bool {
 
-	user, _ := p.API.GetUserByUsername(request.Username)
+	user, uErr := p.API.GetUserByUsername(request.Username)
+	if uErr != nil {
+		return uErr
+	}
 	T, _ := p.translation(user)
 
 	return strings.Contains(request.Reminder.When, T("every")) ||
@@ -221,9 +233,8 @@ func (p *Plugin) upsertSnoozedOccurrence(occurrence *Occurrence) []Occurrence {
 	}
 
 	occurrences = append(occurrences, *occurrence)
-	ro, __ := json.Marshal(occurrences)
-
-	if __ != nil {
+	ro, roErr := json.Marshal(occurrences)
+	if roErr != nil {
 		p.API.LogError("failed to marshal reminderOccurrences %s", occurrence.Id)
 		return occurrences
 	}
@@ -424,9 +435,6 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 	if strings.Contains(when, T("every")) {
 
 		dateTimeSplit := strings.Split(when, " "+T("every")+" ")
-
-		p.API.LogInfo(T("every") + " " + dateTimeSplit[1] + " " + dateTimeSplit[0])
-
 		return p.every(T("every")+" "+dateTimeSplit[1]+" "+dateTimeSplit[0], user)
 
 	} else if len(whenSplit) >= 3 &&
@@ -632,24 +640,15 @@ func (p *Plugin) onEN(when string, user *model.User) (times []time.Time, err err
 		chronoTime = dateTimeSplit[1]
 	}
 
-	//on march 17 at 5:41pm
-	p.API.LogInfo("chronoDate " + chronoDate)
-
 	dateUnit, ndErr := p.normalizeDate(chronoDate, user)
 	if ndErr != nil {
 		return []time.Time{}, ndErr
 	}
 
-	p.API.LogInfo("dateUnit " + dateUnit)
-
-	p.API.LogInfo("chronoTime " + chronoTime)
-
 	timeUnit, ntErr := p.normalizeTime(chronoTime, user)
 	if ntErr != nil {
 		return []time.Time{}, ntErr
 	}
-
-	p.API.LogInfo("timeUnit " + timeUnit)
 
 	switch dateUnit {
 	case T("sunday"),
@@ -776,23 +775,15 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 
 	for _, chrono := range days {
 
-		p.API.LogInfo("chrono " + chrono)
-
 		dateUnit, ndErr := p.normalizeDate(strings.Trim(chrono, " "), user)
 		if ndErr != nil {
 			return []time.Time{}, ndErr
 		}
 
-		p.API.LogInfo("dateUnit " + dateUnit)
-
-		p.API.LogInfo("chronoTime " + chronoTime)
-
 		timeUnit, ntErr := p.normalizeTime(chronoTime, user)
 		if ntErr != nil {
 			return []time.Time{}, ntErr
 		}
-
-		p.API.LogInfo("timeUnit " + timeUnit)
 
 		switch dateUnit {
 		case T("day"):
@@ -989,7 +980,10 @@ func (p *Plugin) freeFormEN(when string, user *model.User) (times []time.Time, e
 
 func (p *Plugin) formatWhen(username string, when string, occurrence string, snoozed bool) string {
 
-	user, _ := p.API.GetUserByUsername(username)
+	user, uErr := p.API.GetUserByUsername(username)
+	if uErr != nil {
+		return ""
+	}
 	_, locale := p.translation(user)
 
 	switch locale {
@@ -1002,7 +996,10 @@ func (p *Plugin) formatWhen(username string, when string, occurrence string, sno
 
 func (p *Plugin) formatWhenEN(username string, when string, occurrence string, snoozed bool) string {
 
-	user, _ := p.API.GetUserByUsername(username)
+	user, uErr := p.API.GetUserByUsername(username)
+	if uerr != nil {
+		return ""
+	}
 	T, _ := p.translation(user)
 
 	if strings.HasPrefix(when, T("in")) {

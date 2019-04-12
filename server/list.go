@@ -44,7 +44,6 @@ func (p *Plugin) ListReminders(user *model.User, channelId string) string {
 		offset,
 		endOffset)
 
-	// completedCount, attachments := p.completedReminders(reminders, attachments)
 	attachments = p.listControl(activeReminderCount, completedReminderCount, offset, endOffset, attachments)
 
 	channel, cErr := p.API.GetDirectChannel(p.remindUserId, user.Id)
@@ -76,7 +75,10 @@ func (p *Plugin) ListReminders(user *model.User, channelId string) string {
 
 func (p *Plugin) UpdateListReminders(userId string, postId string, offset int) {
 
-	user, _ := p.API.GetUser(userId)
+	user, uErr := p.API.GetUser(userId)
+	if uErr != nil {
+		p.API.LogError(uErr.Error())
+	}
 	reminders := p.GetReminders(user.Username)
 	completedReminderCount := 0
 	for _, reminder := range reminders {
@@ -217,52 +219,6 @@ func (p *Plugin) pagedOccurrences(
 	return attachments
 
 }
-
-// func (p *Plugin) completedReminders(reminders []Reminder, attachments []*model.SlackAttachment) (
-// 	completedCount int,
-// 	outputAttachments []*model.SlackAttachment) {
-
-// 	if completedCount > 0 {
-// 		siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
-// 		attachments = append(attachments, &model.SlackAttachment{
-// 			Actions: []*model.PostAction{
-// 				{
-// 					Integration: &model.PostActionIntegration{
-// 						Context: model.StringInterface{
-// 							"action": "view/complete/list",
-// 						},
-// 						URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
-// 					},
-// 					Type: model.POST_ACTION_TYPE_BUTTON,
-// 					Name: T("button.view.complete"),
-// 				},
-// 				{
-// 					Integration: &model.PostActionIntegration{
-// 						Context: model.StringInterface{
-// 							"action": "delete/complete/list",
-// 						},
-// 						URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
-// 					},
-// 					Name: T("button.delete.complete"),
-// 					Type: "action",
-// 				},
-// 				{
-// 					Integration: &model.PostActionIntegration{
-// 						Context: model.StringInterface{
-// 							"action": "close/list",
-// 						},
-// 						URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
-// 					},
-// 					Name: T("button.close.list"),
-// 					Type: "action",
-// 				},
-// 			},
-// 		})
-// 	}
-
-// 	outputAttachments = attachments
-// 	return completedCount, outputAttachments
-// }
 
 func (p *Plugin) listControl(
 	activeReminderCount int,

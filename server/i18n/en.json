@@ -180,10 +180,6 @@
     "translation": "Snoozed. I’ll remind you \"{{.Message}}\" at 9am Monday"
   },
   {
-    "id": "clear",
-    "translation": "clear"
-  },
-  {
   	"id": "clear.response",
   	"translation": "Reminders cleared.\n"
   },
