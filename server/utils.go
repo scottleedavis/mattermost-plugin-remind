@@ -5,7 +5,7 @@ import (
 
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/nicksnyder/go-i18n/i18n"
-	"github.com/scottleedavis/go-timezone"
+	"github.com/tkuchiki/go-timezone"
 )
 
 func (p *Plugin) translation(user *model.User) (i18n.TranslateFunc, string) {
