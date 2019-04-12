@@ -171,9 +171,10 @@ func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, action *Ac
 
 		switch action.Context.SelectedOption {
 		case "20min":
-			for _, occurrence := range reminder.Occurrences {
+			for i, occurrence := range reminder.Occurrences {
 				if occurrence.Id == action.Context.OccurrenceID {
 					occurrence.Snoozed = time.Now().UTC().Round(time.Second).Add(time.Minute * time.Duration(20))
+					reminder.Occurrences[i] = occurrence
 					p.UpdateReminder(action.UserID, reminder)
 					p.upsertSnoozedOccurrence(&occurrence)
 					post.Message = T("action.snooze.20min", snoozeParameters)
@@ -181,9 +182,10 @@ func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, action *Ac
 				}
 			}
 		case "1hr":
-			for _, occurrence := range reminder.Occurrences {
+			for i, occurrence := range reminder.Occurrences {
 				if occurrence.Id == action.Context.OccurrenceID {
 					occurrence.Snoozed = time.Now().UTC().Round(time.Second).Add(time.Hour * time.Duration(1))
+					reminder.Occurrences[i] = occurrence
 					p.UpdateReminder(action.UserID, reminder)
 					p.upsertSnoozedOccurrence(&occurrence)
 					post.Message = T("action.snooze.1hr", snoozeParameters)
@@ -191,9 +193,10 @@ func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, action *Ac
 				}
 			}
 		case "3hrs":
-			for _, occurrence := range reminder.Occurrences {
+			for i, occurrence := range reminder.Occurrences {
 				if occurrence.Id == action.Context.OccurrenceID {
 					occurrence.Snoozed = time.Now().UTC().Round(time.Second).Add(time.Hour * time.Duration(3))
+					reminder.Occurrences[i] = occurrence
 					p.UpdateReminder(action.UserID, reminder)
 					p.upsertSnoozedOccurrence(&occurrence)
 					post.Message = T("action.snooze.3hr", snoozeParameters)
@@ -201,7 +204,7 @@ func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, action *Ac
 				}
 			}
 		case "tomorrow":
-			for _, occurrence := range reminder.Occurrences {
+			for i, occurrence := range reminder.Occurrences {
 				if occurrence.Id == action.Context.OccurrenceID {
 
 					if user, uErr := p.API.GetUser(action.UserID); uErr != nil {
@@ -211,6 +214,7 @@ func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, action *Ac
 						location := p.location(user)
 						tt := time.Now().In(location).Add(time.Hour * time.Duration(24))
 						occurrence.Snoozed = time.Date(tt.Year(), tt.Month(), tt.Day(), 9, 0, 0, 0, location).UTC()
+						reminder.Occurrences[i] = occurrence
 						p.UpdateReminder(action.UserID, reminder)
 						p.upsertSnoozedOccurrence(&occurrence)
 						post.Message = T("action.snooze.tomorrow", snoozeParameters)
@@ -219,7 +223,7 @@ func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, action *Ac
 				}
 			}
 		case "nextweek":
-			for _, occurrence := range reminder.Occurrences {
+			for i, occurrence := range reminder.Occurrences {
 				if occurrence.Id == action.Context.OccurrenceID {
 
 					if user, uErr := p.API.GetUser(action.UserID); uErr != nil {
@@ -240,6 +244,7 @@ func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, action *Ac
 
 						tt := time.Now().In(location).Add(time.Hour * time.Duration(24))
 						occurrence.Snoozed = time.Date(tt.Year(), tt.Month(), tt.Day(), 9, 0, 0, 0, location).AddDate(0, 0, day).UTC()
+						reminder.Occurrences[i] = occurrence
 						p.UpdateReminder(action.UserID, reminder)
 						p.upsertSnoozedOccurrence(&occurrence)
 						post.Message = T("action.snooze.nextweek", snoozeParameters)
@@ -314,34 +319,37 @@ func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request, action
 	} else {
 		switch action.Context.SelectedOption {
 		case "20min":
-			for _, occurrence := range reminder.Occurrences {
+			for i, occurrence := range reminder.Occurrences {
 				if occurrence.Id == action.Context.OccurrenceID {
 					occurrence.Snoozed = time.Now().UTC().Round(time.Second).Add(time.Minute * time.Duration(20))
+					reminder.Occurrences[i] = occurrence
 					p.UpdateReminder(action.UserID, reminder)
 					p.upsertSnoozedOccurrence(&occurrence)
 					break
 				}
 			}
 		case "1hr":
-			for _, occurrence := range reminder.Occurrences {
+			for i, occurrence := range reminder.Occurrences {
 				if occurrence.Id == action.Context.OccurrenceID {
 					occurrence.Snoozed = time.Now().UTC().Round(time.Second).Add(time.Hour * time.Duration(1))
+					reminder.Occurrences[i] = occurrence
 					p.UpdateReminder(action.UserID, reminder)
 					p.upsertSnoozedOccurrence(&occurrence)
 					break
 				}
 			}
 		case "3hrs":
-			for _, occurrence := range reminder.Occurrences {
+			for i, occurrence := range reminder.Occurrences {
 				if occurrence.Id == action.Context.OccurrenceID {
 					occurrence.Snoozed = time.Now().UTC().Round(time.Second).Add(time.Hour * time.Duration(3))
+					reminder.Occurrences[i] = occurrence
 					p.UpdateReminder(action.UserID, reminder)
 					p.upsertSnoozedOccurrence(&occurrence)
 					break
 				}
 			}
 		case "tomorrow":
-			for _, occurrence := range reminder.Occurrences {
+			for i, occurrence := range reminder.Occurrences {
 				if occurrence.Id == action.Context.OccurrenceID {
 
 					if user, uErr := p.API.GetUser(action.UserID); uErr != nil {
@@ -351,6 +359,7 @@ func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request, action
 						location := p.location(user)
 						tt := time.Now().In(location).Add(time.Hour * time.Duration(24))
 						occurrence.Snoozed = time.Date(tt.Year(), tt.Month(), tt.Day(), 9, 0, 0, 0, location).UTC()
+						reminder.Occurrences[i] = occurrence
 						p.UpdateReminder(action.UserID, reminder)
 						p.upsertSnoozedOccurrence(&occurrence)
 						break
@@ -358,7 +367,7 @@ func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request, action
 				}
 			}
 		case "nextweek":
-			for _, occurrence := range reminder.Occurrences {
+			for i, occurrence := range reminder.Occurrences {
 				if occurrence.Id == action.Context.OccurrenceID {
 
 					if user, uErr := p.API.GetUser(action.UserID); uErr != nil {
@@ -379,6 +388,7 @@ func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request, action
 
 						tt := time.Now().In(location).Add(time.Hour * time.Duration(24))
 						occurrence.Snoozed = time.Date(tt.Year(), tt.Month(), tt.Day(), 9, 0, 0, 0, location).AddDate(0, 0, day).UTC()
+						reminder.Occurrences[i] = occurrence
 						p.UpdateReminder(action.UserID, reminder)
 						p.upsertSnoozedOccurrence(&occurrence)
 						break

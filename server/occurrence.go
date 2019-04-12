@@ -36,8 +36,6 @@ func (p *Plugin) ClearScheduledOccurrence(reminder Reminder, occurrence Occurren
 	var occurrences []Occurrence
 	if roErr := json.Unmarshal(bytes, &occurrences); roErr != nil {
 		return
-	} else {
-		p.API.LogDebug("existing " + fmt.Sprintf("%v", occurrences))
 	}
 
 	var occurrencesDelta []Occurrence
@@ -199,8 +197,6 @@ func (p *Plugin) upsertOccurrence(occurrence *Occurrence) []Occurrence {
 	roErr := json.Unmarshal(bytes, &occurrences)
 	if roErr != nil {
 		p.API.LogDebug("new occurrence " + string(fmt.Sprintf("%v", occurrence.Occurrence)))
-	} else {
-		p.API.LogDebug("existing " + fmt.Sprintf("%v", occurrences))
 	}
 
 	occurrences = append(occurrences, *occurrence)
@@ -229,8 +225,6 @@ func (p *Plugin) upsertSnoozedOccurrence(occurrence *Occurrence) []Occurrence {
 	roErr := json.Unmarshal(bytes, &occurrences)
 	if roErr != nil {
 		p.API.LogDebug("new snoozed occurrence " + string(fmt.Sprintf("%v", occurrence.Snoozed)))
-	} else {
-		p.API.LogDebug("existing " + fmt.Sprintf("%v", occurrences))
 	}
 
 	occurrences = append(occurrences, *occurrence)
