@@ -10,6 +10,8 @@ import (
 )
 
 const minimumServerVersion = "5.10.0"
+const botName = "remindbot"
+const botDisplayName = "Remindbot"
 
 func (p *Plugin) checkServerVersion() error {
 	serverVersion, err := semver.Parse(p.API.GetServerVersion())
@@ -80,29 +82,29 @@ func (p *Plugin) ensureBotExists() (string, *model.AppError) {
 	p.API.LogInfo("Ensuring Remindbot exists")
 
 	bot, createErr := p.API.CreateBot(&model.Bot{
-		Username:    "remindbot",
-		DisplayName: "Remindbot",
+		Username:    botName,
+		DisplayName: botDisplayName,
 		Description: "Sets and triggers reminders",
 	})
 	if createErr != nil {
-		p.API.LogDebug("Failed to create Remindbot. Attempting to find existing one.", "err", createErr)
+		p.API.LogDebug("Failed to create "+botDisplayName+". Attempting to find existing one.", "err", createErr)
 
 		// Unable to create the bot, so it should already exist
-		user, err := p.API.GetUserByUsername("remindbot")
+		user, err := p.API.GetUserByUsername(botName)
 		if err != nil || user == nil {
-			p.API.LogError("Failed to find Remind user", "err", err)
+			p.API.LogError("Failed to find "+botDisplayName+" user", "err", err)
 			return "", err
 		}
 
 		bot, err = p.API.GetBot(user.Id, true)
 		if err != nil {
-			p.API.LogError("Failed to find Remindbot", "err", err)
+			p.API.LogError("Failed to find "+botDisplayName, "err", err)
 			return "", err
 		}
 
-		p.API.LogDebug("Found Remindbot")
+		p.API.LogDebug("Found " + botDisplayName)
 	} else {
-		p.API.LogInfo("Remindbot created")
+		p.API.LogInfo(botDisplayName + " created")
 	}
 
 	p.remindUserId = bot.UserId

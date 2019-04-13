@@ -15,7 +15,7 @@ func (p *Plugin) registerCommand(teamId string) error {
 	if err := p.API.RegisterCommand(&model.Command{
 		TeamId:           teamId,
 		Trigger:          CommandTrigger,
-		Username:         "remindbot",
+		Username:         botName,
 		AutoComplete:     true,
 		AutoCompleteHint: "[@someone or ~channel] [what] [when]",
 		AutoCompleteDesc: "Set a reminder",
@@ -36,14 +36,16 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 
 	user, uErr := p.API.GetUser(args.UserId)
 	if uErr != nil {
-		return &model.CommandResponse{}, nil
+		return &model.CommandResponse{}, uErr
 	}
-	T, _ := p.translation(user)
+	T, locale := p.translation(user)
+	location := p.location(user)
 
 	if strings.HasSuffix(args.Command, T("help")) {
 		return &model.CommandResponse{
 			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
 			Text:         fmt.Sprintf(T("help.response")),
+			Username:     botName,
 		}, nil
 	}
 
@@ -53,26 +55,12 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 			return &model.CommandResponse{
 				ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
 				Text:         fmt.Sprintf(listMessage),
+				Username:     botName,
 			}, nil
 		} else {
 			return &model.CommandResponse{}, nil
 		}
 
-	}
-
-	// clear all reminders for current user
-	if strings.HasSuffix(args.Command, "__clear") {
-		return &model.CommandResponse{
-			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-			Text:         fmt.Sprintf(p.DeleteReminders(user)),
-		}, nil
-	}
-	//clear display the plugin version
-	if strings.HasSuffix(args.Command, "__version") {
-		return &model.CommandResponse{
-			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-			Text:         fmt.Sprintf(manifest.Version),
-		}, nil
 	}
 
 	payload := strings.Trim(strings.Replace(args.Command, "/"+CommandTrigger, "", -1), " ")
@@ -93,18 +81,49 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 			return &model.CommandResponse{
 				ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
 				Text:         fmt.Sprintf(T("exception.response")),
+				Username:     botName,
 			}, nil
 		}
 
 		return &model.CommandResponse{
 			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
 			Text:         fmt.Sprintf("%s", response),
+			Username:     botName,
+		}, nil
+	}
+
+	// debug / troubleshooting commands
+
+	// clear all reminders for current user
+	if strings.HasSuffix(args.Command, "__clear") {
+		return &model.CommandResponse{
+			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
+			Text:         fmt.Sprintf(p.DeleteReminders(user)),
+			Username:     botName,
+		}, nil
+	}
+	// display the plugin version
+	if strings.HasSuffix(args.Command, "__version") {
+		return &model.CommandResponse{
+			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
+			Text:         fmt.Sprintf(manifest.Version),
+			Username:     botName,
+		}, nil
+	}
+
+	// display the locale & location of user
+	if strings.HasSuffix(args.Command, "__user") {
+		return &model.CommandResponse{
+			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
+			Text:         fmt.Sprintf(locale + " " + location.String()),
+			Username:     botName,
 		}, nil
 	}
 
 	return &model.CommandResponse{
 		ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
 		Text:         fmt.Sprintf(T("exception.response")),
+		Username:     botName,
 	}, nil
 
 }
