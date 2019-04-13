@@ -1,16 +1,17 @@
-# mattermost-plugin-remind
+# mattermost-plugin-remind [![CircleCI](https://circleci.com/gh/scottleedavis/mattermost-plugin-remind/tree/master.svg?style=svg)](https://circleci.com/gh/scottleedavis/mattermost-plugin-remind/tree/master)  [![codecov](https://codecov.io/gh/scottleedavis/mattermost-plugin-remind/branch/master/graph/badge.svg)](https://codecov.io/gh/scottleedavis/mattermost-plugin-remind)
 
-[![CircleCI](https://circleci.com/gh/scottleedavis/mattermost-plugin-remind/tree/master.svg?style=svg)](https://circleci.com/gh/scottleedavis/mattermost-plugin-remind/tree/master)  [![codecov](https://codecov.io/gh/scottleedavis/mattermost-plugin-remind/branch/master/graph/badge.svg)](https://codecov.io/gh/scottleedavis/mattermost-plugin-remind)
-
-
-
-### a bot that schedules reminders for Mattermost
+_**a bot that schedules reminders for Mattermost**_
 
 <img src="buttons.png" height="500">
 
+### Installation
+
 _requires Mattermost 5.10 or greater_
 
-### usage
+1) Go to the [releases page](https://github.com/scottleedavis/mattermost-plugin-remind/releases) of this GitHub repository and download the latest release for your Mattermost server.
+2) Upload this file in the Mattermost System Console > Plugins > Management page to install the plugin. To learn more about how to upload a plugin, see the documentation.
+    
+### Usage
 
 See the full list of [Usage Examples](https://github.com/scottleedavis/mattermost-plugin-remind/wiki/Usage) in the [wiki](https://github.com/scottleedavis/mattermost-plugin-remind/wiki) 
 * `/remind help`
@@ -22,14 +23,12 @@ See the full list of [Usage Examples](https://github.com/scottleedavis/mattermos
   * `/remind [who] [what] every (other) [Monday-Sunday|Month&Day|MM/DD] (at) [time]`
 * `/remind [who] [when] [what]`
 
+### Building 
 
-#### requirements
-* [Mattermost](https://mattermost.com/)
-* [Go](https://golang.org/)
+#### Requirements
+* [Go 1.12](https://golang.org/)
 * [Dep](https://github.com/golang/dep)
 
-
-### Building 
 ```
 make
 ```
