@@ -767,8 +767,6 @@ func (p *Plugin) onEN(when string, user *model.User) (times []time.Time, err err
 	}
 
 	dateSplit := p.regSplit(dateUnit, "T|Z")
-	p.API.LogInfo("parsing " + dateSplit[0] + "T" + timeUnit + "Z")
-
 	dateSplit = p.regSplit(dateSplit[0], "-")
 	timeSplit := p.regSplit(timeUnit, ":")
 	year, _ := strconv.Atoi(dateSplit[0])
@@ -919,9 +917,6 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 		default:
 
 			dateSplit := p.regSplit(dateUnit, "T|Z")
-
-			p.API.LogInfo("parsing " + dateSplit[0] + "T" + timeUnit + "Z")
-
 			dateSplit = p.regSplit(dateSplit[0], "-")
 			timeSplit := p.regSplit(timeUnit, ":")
 			year, _ := strconv.Atoi(dateSplit[0])

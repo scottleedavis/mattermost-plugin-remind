@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"path/filepath"
 	"time"
 
 	"github.com/blang/semver"
@@ -79,7 +80,7 @@ func (p *Plugin) OnDeactivate() error {
 }
 
 func (p *Plugin) ensureBotExists() (string, *model.AppError) {
-	p.API.LogInfo("Ensuring Remindbot exists")
+	p.API.LogDebug("Ensuring Remindbot exists")
 
 	bot, createErr := p.API.CreateBot(&model.Bot{
 		Username:    botName,
@@ -104,10 +105,28 @@ func (p *Plugin) ensureBotExists() (string, *model.AppError) {
 
 		p.API.LogDebug("Found " + botDisplayName)
 	} else {
-		p.API.LogInfo(botDisplayName + " created")
+		if err := p.setBotProfileImage(bot.UserId); err != nil {
+			p.API.LogWarn("Failed to set profile image for bot", "err", err)
+		}
+
+		p.API.LogDebug(botDisplayName + " created")
 	}
 
 	p.remindUserId = bot.UserId
 
 	return bot.UserId, nil
+}
+
+func (p *Plugin) setBotProfileImage(botUserId string) *model.AppError {
+	bundlePath, err := p.API.GetBundlePath()
+	if err != nil {
+		return &model.AppError{Message: err.Error()}
+	}
+
+	profileImage, err := p.readFile(filepath.Join(bundlePath, "assets", "icon.png"))
+	if err != nil {
+		return &model.AppError{Message: err.Error()}
+	}
+
+	return p.API.SetProfileImage(botUserId, profileImage)
 }

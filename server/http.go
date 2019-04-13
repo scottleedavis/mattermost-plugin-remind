@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -131,7 +130,6 @@ func (p *Plugin) handleDelete(w http.ResponseWriter, r *http.Request, action *Ac
 		p.API.LogError(pErr.Error())
 		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
 	} else {
-		p.API.LogInfo(fmt.Sprintf("%v", post.Props))
 		var deleteParameters = map[string]interface{}{
 			"Message": message,
 		}
@@ -164,7 +162,6 @@ func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, action *Ac
 		p.API.LogError("unable to get post " + pErr.Error())
 		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
 	} else {
-		p.API.LogInfo(fmt.Sprintf("%v", post.Props))
 		var snoozeParameters = map[string]interface{}{
 			"Message": reminder.Message,
 		}

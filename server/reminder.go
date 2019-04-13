@@ -328,7 +328,7 @@ func (p *Plugin) UpsertReminder(request *ReminderRequest) error {
 
 	duplicateReminder := false
 	for _, r := range reminders {
-		r.Id = request.Reminder.Id 
+		r.Id = request.Reminder.Id
 		if r.Username == request.Reminder.Username &&
 			r.Target == request.Reminder.Target &&
 			r.Message == request.Reminder.Message &&

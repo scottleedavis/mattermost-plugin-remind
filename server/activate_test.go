@@ -82,20 +82,20 @@ func TestEnsureBotExists(t *testing.T) {
 	t.Run("if remindbot doesn't exist", func(t *testing.T) {
 		t.Run("should create the bot and return the ID", func(t *testing.T) {
 			expectedBotId := model.NewId()
-			// profileImageBytes := []byte("profileImage")
+			profileImageBytes := []byte("profileImage")
 
 			api := setupAPI()
 			api.On("CreateBot", mock.Anything).Return(&model.Bot{
 				UserId: expectedBotId,
 			}, nil)
-			// api.On("GetBundlePath").Return("", nil)
-			// api.On("SetProfileImage", expectedBotId, profileImageBytes).Return(nil)
+			api.On("GetBundlePath").Return("", nil)
+			api.On("SetProfileImage", expectedBotId, profileImageBytes).Return(nil)
 			defer api.AssertExpectations(t)
 
 			p := &Plugin{
-				// readFile: func(path string) ([]byte, error) {
-				// 	return profileImageBytes, nil
-				// },
+				readFile: func(path string) ([]byte, error) {
+					return profileImageBytes, nil
+				},
 			}
 			p.API = api
 
@@ -105,98 +105,98 @@ func TestEnsureBotExists(t *testing.T) {
 			assert.Nil(t, err)
 		})
 
-		// t.Run("should log a warning if unable to set the profile picture, but still return the bot", func(t *testing.T) {
-		// 	expectedBotId := model.NewId()
+		t.Run("should log a warning if unable to set the profile picture, but still return the bot", func(t *testing.T) {
+			expectedBotId := model.NewId()
 
-		// 	api := setupAPI()
-		// 	api.On("CreateBot", mock.Anything).Return(&model.Bot{
-		// 		UserId: expectedBotId,
-		// 	}, nil)
-		// 	api.On("GetBundlePath").Return("", &model.AppError{})
-		// 	api.On("LogWarn", mock.Anything, "err", mock.Anything)
-		// 	defer api.AssertExpectations(t)
+			api := setupAPI()
+			api.On("CreateBot", mock.Anything).Return(&model.Bot{
+				UserId: expectedBotId,
+			}, nil)
+			api.On("GetBundlePath").Return("", &model.AppError{})
+			api.On("LogWarn", mock.Anything, "err", mock.Anything)
+			defer api.AssertExpectations(t)
 
-		// 	p := &Plugin{}
-		// 	p.API = api
+			p := &Plugin{}
+			p.API = api
 
-		// 	botId, err := p.ensureBotExists()
+			botId, err := p.ensureBotExists()
 
-		// 	assert.Equal(t, expectedBotId, botId)
-		// 	assert.Nil(t, err)
-		// })
+			assert.Equal(t, expectedBotId, botId)
+			assert.Nil(t, err)
+		})
 	})
 }
 
-// func TestSetBotProfileImage(t *testing.T) {
-// 	t.Run("should set profile image correctly", func(t *testing.T) {
-// 		botUserId := model.NewId()
-// 		profileImageBytes := []byte("profile image")
+func TestSetBotProfileImage(t *testing.T) {
+	t.Run("should set profile image correctly", func(t *testing.T) {
+		botUserId := model.NewId()
+		profileImageBytes := []byte("profile image")
 
-// 		api := &plugintest.API{}
-// 		api.On("GetBundlePath").Return("/foo/bar", nil)
-// 		api.On("SetProfileImage", botUserId, profileImageBytes).Return(nil)
-// 		defer api.AssertExpectations(t)
+		api := &plugintest.API{}
+		api.On("GetBundlePath").Return("/foo/bar", nil)
+		api.On("SetProfileImage", botUserId, profileImageBytes).Return(nil)
+		defer api.AssertExpectations(t)
 
-// 		p := &Plugin{
-// 			readFile: func(path string) ([]byte, error) {
-// 				assert.Equal(t, "/foo/bar/assets/icon-happy-bot-square@1x.png", path)
+		p := &Plugin{
+			readFile: func(path string) ([]byte, error) {
+				assert.Equal(t, "/foo/bar/assets/icon.png", path)
 
-// 				return profileImageBytes, nil
-// 			},
-// 		}
-// 		p.API = api
+				return profileImageBytes, nil
+			},
+		}
+		p.API = api
 
-// 		assert.Nil(t, p.setBotProfileImage(botUserId))
-// 	})
+		assert.Nil(t, p.setBotProfileImage(botUserId))
+	})
 
-// 	t.Run("should return an error when SetProfileImage fails", func(t *testing.T) {
-// 		botUserId := model.NewId()
-// 		profileImageBytes := []byte("profile image")
+	t.Run("should return an error when SetProfileImage fails", func(t *testing.T) {
+		botUserId := model.NewId()
+		profileImageBytes := []byte("profile image")
 
-// 		api := &plugintest.API{}
-// 		api.On("GetBundlePath").Return("/foo/bar", nil)
-// 		api.On("SetProfileImage", botUserId, profileImageBytes).Return(&model.AppError{})
-// 		defer api.AssertExpectations(t)
+		api := &plugintest.API{}
+		api.On("GetBundlePath").Return("/foo/bar", nil)
+		api.On("SetProfileImage", botUserId, profileImageBytes).Return(&model.AppError{})
+		defer api.AssertExpectations(t)
 
-// 		p := &Plugin{
-// 			readFile: func(path string) ([]byte, error) {
-// 				assert.Equal(t, "/foo/bar/assets/icon-happy-bot-square@1x.png", path)
+		p := &Plugin{
+			readFile: func(path string) ([]byte, error) {
+				assert.Equal(t, "/foo/bar/assets/icon.png", path)
 
-// 				return profileImageBytes, nil
-// 			},
-// 		}
-// 		p.API = api
+				return profileImageBytes, nil
+			},
+		}
+		p.API = api
 
-// 		assert.NotNil(t, p.setBotProfileImage(botUserId))
-// 	})
+		assert.NotNil(t, p.setBotProfileImage(botUserId))
+	})
 
-// 	t.Run("should return an error when readFile fails", func(t *testing.T) {
-// 		botUserId := model.NewId()
+	t.Run("should return an error when readFile fails", func(t *testing.T) {
+		botUserId := model.NewId()
 
-// 		api := &plugintest.API{}
-// 		api.On("GetBundlePath").Return("/foo/bar", nil)
-// 		defer api.AssertExpectations(t)
+		api := &plugintest.API{}
+		api.On("GetBundlePath").Return("/foo/bar", nil)
+		defer api.AssertExpectations(t)
 
-// 		p := &Plugin{
-// 			readFile: func(path string) ([]byte, error) {
-// 				return nil, &model.AppError{}
-// 			},
-// 		}
-// 		p.API = api
+		p := &Plugin{
+			readFile: func(path string) ([]byte, error) {
+				return nil, &model.AppError{}
+			},
+		}
+		p.API = api
 
-// 		assert.NotNil(t, p.setBotProfileImage(botUserId))
-// 	})
+		assert.NotNil(t, p.setBotProfileImage(botUserId))
+	})
 
-// 	t.Run("should return an error when GetBundlePath fails", func(t *testing.T) {
-// 		botUserId := model.NewId()
+	t.Run("should return an error when GetBundlePath fails", func(t *testing.T) {
+		botUserId := model.NewId()
 
-// 		api := &plugintest.API{}
-// 		api.On("GetBundlePath").Return("", &model.AppError{})
-// 		defer api.AssertExpectations(t)
+		api := &plugintest.API{}
+		api.On("GetBundlePath").Return("", &model.AppError{})
+		defer api.AssertExpectations(t)
 
-// 		p := &Plugin{}
-// 		p.API = api
+		p := &Plugin{}
+		p.API = api
 
-// 		assert.NotNil(t, p.setBotProfileImage(botUserId))
-// 	})
-// }
+		assert.NotNil(t, p.setBotProfileImage(botUserId))
+	})
+}

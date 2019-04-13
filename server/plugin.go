@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"sync"
 	"time"
 
@@ -26,4 +27,12 @@ type Plugin struct {
 	defaultTime time.Time
 
 	supportedLocales []string
+
+	readFile func(path string) ([]byte, error)
+}
+
+func NewPlugin() *Plugin {
+	return &Plugin{
+		readFile: ioutil.ReadFile,
+	}
 }
