@@ -4,7 +4,7 @@
 
 
 
-### a plugin slashcommand bot that schedules reminders for Mattermost
+### a bot that schedules reminders for Mattermost
 
 <img src="buttons.png" height="500">
 
