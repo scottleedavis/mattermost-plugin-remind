@@ -49,6 +49,11 @@ func (p *Plugin) ParseRequest(request *ReminderRequest) error {
 			return wErr
 		}
 
+		toIndex := strings.Index(request.Reminder.When, T("to"))
+		if toIndex > -1 {
+			request.Reminder.When = request.Reminder.When[0:toIndex]
+		}
+
 		message := strings.Replace(request.Payload, request.Reminder.When, "", -1)
 		message = strings.Replace(message, commandSplit[0], "", 1)
 		message = strings.Trim(message, " \"")
