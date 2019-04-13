@@ -167,9 +167,6 @@ func (p *Plugin) createOccurrencesEN(request *ReminderRequest) error {
 		if occurrences, inErr := p.every(request.Reminder.When, user); inErr != nil {
 			return inErr
 		} else {
-
-			p.API.LogInfo("pre addOccurrences " + fmt.Sprintf("%v", len(occurrences)))
-
 			return p.addOccurrences(request, occurrences)
 		}
 	}
@@ -189,8 +186,6 @@ func (p *Plugin) addOccurrences(request *ReminderRequest, occurrences []time.Tim
 		return uErr
 	}
 	T, _ := p.translation(user)
-
-	p.API.LogInfo("addOccurrences len " + fmt.Sprintf("%v", len(occurrences)))
 
 	for _, o := range occurrences {
 
@@ -217,7 +212,7 @@ func (p *Plugin) addOccurrences(request *ReminderRequest, occurrences []time.Tim
 			}
 		}
 
-		occurrence := &Occurrence{
+		occurrence := Occurrence{
 			Id:         model.NewId(),
 			Username:   request.Username,
 			ReminderId: request.Reminder.Id,
@@ -226,19 +221,8 @@ func (p *Plugin) addOccurrences(request *ReminderRequest, occurrences []time.Tim
 			Snoozed:    p.emptyTime,
 		}
 
-		request.Reminder.Occurrences = p.upsertOccurrence(occurrence)
-
-		// occurrence := Occurrence{
-		// 	Id:         model.NewId(),
-		// 	Username:   request.Username,
-		// 	ReminderId: request.Reminder.Id,
-		// 	Repeat:     repeat,
-		// 	Occurrence: o,
-		// 	Snoozed:    p.emptyTime,
-		// }
-
-		// request.Reminder.Occurrences = append(request.Reminder.Occurrences, occurrence)
-		// p.upsertOccurrence(&occurrence)
+		request.Reminder.Occurrences = append(request.Reminder.Occurrences, occurrence)
+		p.upsertOccurrence(&occurrence)
 	}
 
 	return nil
