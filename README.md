@@ -6,7 +6,7 @@
 
 ### a plugin slashcommand bot that schedules reminders for Mattermost
 
-<img src="buttons.png" height="500">
+<img src="buttons.jpg" height="500">
 
 _requires Mattermost 5.10 or greater_
 
