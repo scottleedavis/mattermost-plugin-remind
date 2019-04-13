@@ -814,8 +814,12 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 		return []time.Time{}, errors.New("not enough arguments")
 	}
 
-	var everyOther bool
+	if strings.ToLower(whenSplit[0]) == T("everyday") {
+		whenSplit[0] = T("day")
+		whenSplit = append([]string{T("every")}, whenSplit...)
+	}
 	chronoUnit := strings.ToLower(strings.Join(whenSplit[1:], " "))
+	var everyOther bool
 	otherSplit := strings.Split(chronoUnit, T("other"))
 	if len(otherSplit) == 2 {
 		chronoUnit = strings.Trim(otherSplit[1], " ")
