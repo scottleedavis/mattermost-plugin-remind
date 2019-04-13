@@ -44,7 +44,7 @@ There is a build target to automate deploying and enabling the plugin to your se
 export MM_SERVICESETTINGS_SITEURL=http://localhost:8065/
 export MM_ADMIN_USERNAME=admin
 export MM_ADMIN_PASSWORD=password
-export HTTP=http
+export CURL=curl
 make deploy
 ```
 In production, deploy and upload your plugin via the [System Console](https://about.mattermost.com/default-plugin-uploads).
