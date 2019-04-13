@@ -4,5 +4,5 @@ import (
 	"testing"
 )
 
-func TestPlaceholder(t *testing.T) {
+func TestReminder(t *testing.T) {
 }
