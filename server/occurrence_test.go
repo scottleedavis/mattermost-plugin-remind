@@ -3,7 +3,6 @@ package main
 import (
 	"testing"
 	"time"
-	// "fmt"
 
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/plugin/plugintest"

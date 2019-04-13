@@ -525,7 +525,7 @@ func (p *Plugin) normalizeDate(text string, user *model.User) (string, error) {
 				}
 			}
 
-			parts = append(parts, fmt.Sprintf("%v", time.Now().Year()))
+			parts = append(parts, fmt.Sprintf("%v", time.Now().In(location).Year()))
 
 			break
 		case 3:
@@ -598,6 +598,25 @@ func (p *Plugin) normalizeDate(text string, user *model.User) (string, error) {
 			break
 		default:
 			return "", errors.New("month not found")
+		}
+
+		mon, mErr := strconv.Atoi(parts[0])
+		day, dErr := strconv.Atoi(parts[1])
+		year, yErr := strconv.Atoi(parts[2])
+
+		if mErr != nil {
+			return "", mErr
+		}
+		if dErr != nil {
+			return "", dErr
+		}
+		if yErr != nil {
+			return "", yErr
+		}
+		timeNow := time.Now().In(location)
+		parseTime := time.Date(year, time.Month(mon), day, 0, 0, 0, 0, location)
+		if timeNow.After(parseTime) {
+			parts[2] = fmt.Sprintf("%v", time.Now().In(location).Year()+1)
 		}
 
 		if len(parts[1]) < 2 {
