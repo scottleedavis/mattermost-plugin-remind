@@ -390,6 +390,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 		"Message":    reminder.Message,
 		"Occurrence": formattedOccurrence,
 		"Snoozed":    formattedSnooze,
+		"Channel":    reminder.Target,
 	}
 	if !t.Equal(p.emptyTime) {
 		switch gType {
@@ -425,7 +426,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
 						},
 						Name: T("button.delete"),
-						Type: "action",
+						Type: model.POST_ACTION_TYPE_BUTTON,
 					},
 				},
 			}
@@ -449,7 +450,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
 						},
 						Name: T("button.delete"),
-						Type: "action",
+						Type: model.POST_ACTION_TYPE_BUTTON,
 					},
 				},
 			}
@@ -485,7 +486,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
 						},
 						Name: T("button.delete"),
-						Type: "action",
+						Type: model.POST_ACTION_TYPE_BUTTON,
 					},
 					{
 						Integration: &model.PostActionIntegration{
@@ -538,12 +539,24 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							Context: model.StringInterface{
 								"reminder_id":   reminder.Id,
 								"occurrence_id": occurrence.Id,
+								"action":        "complete/list",
+							},
+							URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
+						},
+						Type: model.POST_ACTION_TYPE_BUTTON,
+						Name: T("button.complete"),
+					},
+					{
+						Integration: &model.PostActionIntegration{
+							Context: model.StringInterface{
+								"reminder_id":   reminder.Id,
+								"occurrence_id": occurrence.Id,
 								"action":        "delete/list",
 							},
 							URL: fmt.Sprintf("%s/plugins/%s/api/v1/delete", siteURL, manifest.Id),
 						},
 						Name: T("button.delete"),
-						Type: "action",
+						Type: model.POST_ACTION_TYPE_BUTTON,
 					},
 				},
 			}

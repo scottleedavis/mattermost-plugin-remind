@@ -173,14 +173,6 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:82307f4529b4a99657d2891b3b75cd99ebef238f55c1448109abbd6c24705174"
-  name = "github.com/scottleedavis/go-timezone"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "86ab5c422d0b978c24932f0e571b57737ee97ab5"
-  version = "v0.1.2"
-
-[[projects]]
   digest = "1:60a46e2410edbf02b419f833372dd1d24d7aa1b916a990a7370e792fada1eadd"
   name = "github.com/stretchr/objx"
   packages = ["."]
@@ -198,6 +190,14 @@
   pruneopts = "NUT"
   revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
   version = "v1.3.0"
+
+[[projects]]
+  digest = "1:ed7215361377ed1b420c2ca49db43b23f7a45eeea18c203948ccd6651cc56d69"
+  name = "github.com/tkuchiki/go-timezone"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "2ee133baac01c64178904e8fad7379cc840a4a5f"
+  version = "v0.1.3"
 
 [[projects]]
   digest = "1:22f696cee54865fb8e9ff91df7b633f6b8f22037a8015253c6b6a71ca82219c7"
@@ -376,9 +376,9 @@
     "github.com/mattermost/mattermost-server/utils/fileutils",
     "github.com/nicksnyder/go-i18n/i18n",
     "github.com/pkg/errors",
-    "github.com/scottleedavis/go-timezone",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/mock",
+    "github.com/tkuchiki/go-timezone",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

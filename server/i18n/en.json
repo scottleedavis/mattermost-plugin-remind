@@ -33,7 +33,7 @@
   },
   {
     "id": "list.channel",
-    "translation": "**Channel reminders**"
+    "translation": "**Channel reminder:**"
   },
   {
     "id": "list.element.upcoming",
@@ -57,11 +57,11 @@
   },
   {
     "id": "list.element.channel",
-    "translation": "\"{{.Message}}\""
+    "translation": "\"{{.Message}}\" (in {{.Channel}}) {{.Occurrence}}"
   },
   {
     "id": "list.element.inchannel",
-    "translation": "\"{{.Message}}\""
+    "translation": "\"{{.Message}}\" (in {{.Channel}}) {{.Occurrence}}"
   },
   {
     "id": "help.response",
