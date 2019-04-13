@@ -326,7 +326,20 @@ func (p *Plugin) UpsertReminder(request *ReminderRequest) error {
 		p.API.LogDebug("new reminder " + user.Username)
 	}
 
-	reminders = append(reminders, request.Reminder)
+	duplicateReminder := false
+	for _, r := range reminders {
+		r.Id = request.Reminder.Id 
+		if r.Username == request.Reminder.Username &&
+			r.Target == request.Reminder.Target &&
+			r.Message == request.Reminder.Message &&
+			r.When == request.Reminder.When {
+			duplicateReminder = true
+			break
+		}
+	}
+	if !duplicateReminder {
+		reminders = append(reminders, request.Reminder)
+	}
 	ro, rErr := json.Marshal(reminders)
 	if rErr != nil {
 		p.API.LogError("failed to marshal reminders %s", user.Username)
