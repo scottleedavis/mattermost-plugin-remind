@@ -260,10 +260,7 @@ func (p *Plugin) GetReminders(username string) []Reminder {
 
 	if err != nil {
 		p.API.LogError("new reminder " + user.Username)
-	} else {
-		p.API.LogDebug("existing " + fmt.Sprintf("%v", reminders))
 	}
-
 	return reminders
 }
 
@@ -327,8 +324,6 @@ func (p *Plugin) UpsertReminder(request *ReminderRequest) error {
 	err := json.Unmarshal(bytes, &reminders)
 	if err != nil {
 		p.API.LogDebug("new reminder " + user.Username)
-	} else {
-		p.API.LogDebug("existing " + fmt.Sprintf("%v", reminders))
 	}
 
 	reminders = append(reminders, request.Reminder)
@@ -384,6 +379,29 @@ func (p *Plugin) DeleteReminder(userId string, reminder Reminder) error {
 
 func (p *Plugin) DeleteReminders(user *model.User) string {
 	T, _ := p.translation(user)
+
+	bytes, bErr := p.API.KVGet(user.Username)
+	if bErr != nil {
+		p.API.LogError("failed KVGet %s", bErr)
+		return T("exception.response")
+	}
+
+	var reminders []Reminder
+	if err := json.Unmarshal(bytes, &reminders); err != nil {
+		p.API.LogError("failed json unmarshal %s", bErr)
+		return T("exception.reponse")
+	}
+
+	for _, r := range reminders {
+		for _, o := range r.Occurrences {
+			if o.Snoozed != p.emptyTime && r.Completed != p.emptyTime {
+				p.deleteSnoozedOccurrence(o)
+			} else if o.Occurrence != p.emptyTime && r.Completed != p.emptyTime {
+				p.deleteOccurrence(o)
+			}
+		}
+	}
+
 	dErr := p.API.KVDelete(user.Username)
 	if dErr != nil {
 		p.API.LogError("failed KVDelete %s", dErr)

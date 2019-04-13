@@ -447,7 +447,7 @@ func TestEvery(t *testing.T) {
 		assert.Nil(t, err)
 		assert.True(t, times[0].In(location).Month() == 12 && times[0].In(location).Year() == 2022)
 
-		times, err = p.everyEN("every january 25", user)
+		times, err = p.everyEN("every January 25", user)
 		assert.Nil(t, err)
 		assert.True(t, times[0].In(location).Month() == 1 && times[0].In(location).Day() == 25)
 

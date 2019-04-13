@@ -60,11 +60,18 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 
 	}
 
-	// 'secret' clear command for testing
+	// clear all reminders for current user
 	if strings.HasSuffix(args.Command, "__clear") {
 		return &model.CommandResponse{
 			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
 			Text:         fmt.Sprintf(p.DeleteReminders(user)),
+		}, nil
+	}
+	//clear display the plugin version
+	if strings.HasSuffix(args.Command, "__version") {
+		return &model.CommandResponse{
+			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
+			Text:         fmt.Sprintf(manifest.Version),
 		}, nil
 	}
 

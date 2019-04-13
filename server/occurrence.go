@@ -55,6 +55,65 @@ func (p *Plugin) ClearScheduledOccurrence(reminder Reminder, occurrence Occurren
 
 }
 
+func (p *Plugin) deleteSnoozedOccurrence(occurrence Occurrence) {
+
+	bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", occurrence.Snoozed)))
+	if err != nil {
+		p.API.LogError("failed KVGet %s", err)
+		return
+	}
+
+	var occurrences []Occurrence
+	if roErr := json.Unmarshal(bytes, &occurrences); roErr != nil {
+		return
+	}
+
+	var occurrencesDelta []Occurrence
+	for _, o := range occurrences {
+		if o.Id != occurrence.Id {
+			occurrencesDelta = append(occurrencesDelta, occurrence)
+		}
+	}
+
+	ro, oErr := json.Marshal(occurrencesDelta)
+	if oErr != nil {
+		p.API.LogError("failed to marshal reminderOccurrences %s", occurrence.Id)
+		return
+	}
+
+	p.API.KVSet(string(fmt.Sprintf("%v", occurrence.Occurrence)), ro)
+
+}
+
+func (p *Plugin) deleteOccurrence(occurrence Occurrence) {
+	bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", occurrence.Occurrence)))
+	if err != nil {
+		p.API.LogError("failed KVGet %s", err)
+		return
+	}
+
+	var occurrences []Occurrence
+	if roErr := json.Unmarshal(bytes, &occurrences); roErr != nil {
+		return
+	}
+
+	var occurrencesDelta []Occurrence
+	for _, o := range occurrences {
+		if o.Id != occurrence.Id {
+			occurrencesDelta = append(occurrencesDelta, occurrence)
+		}
+	}
+
+	ro, oErr := json.Marshal(occurrencesDelta)
+	if oErr != nil {
+		p.API.LogError("failed to marshal reminderOccurrences %s", occurrence.Id)
+		return
+	}
+
+	p.API.KVSet(string(fmt.Sprintf("%v", occurrence.Occurrence)), ro)
+
+}
+
 func (p *Plugin) CreateOccurrences(request *ReminderRequest) error {
 
 	user, uErr := p.API.GetUserByUsername(request.Username)
@@ -108,6 +167,9 @@ func (p *Plugin) createOccurrencesEN(request *ReminderRequest) error {
 		if occurrences, inErr := p.every(request.Reminder.When, user); inErr != nil {
 			return inErr
 		} else {
+
+			p.API.LogInfo("pre addOccurrences " + fmt.Sprintf("%v", len(occurrences)))
+
 			return p.addOccurrences(request, occurrences)
 		}
 	}
@@ -128,6 +190,8 @@ func (p *Plugin) addOccurrences(request *ReminderRequest, occurrences []time.Tim
 	}
 	T, _ := p.translation(user)
 
+	p.API.LogInfo("addOccurrences len " + fmt.Sprintf("%v", len(occurrences)))
+
 	for _, o := range occurrences {
 
 		repeat := ""
@@ -137,7 +201,10 @@ func (p *Plugin) addOccurrences(request *ReminderRequest, occurrences []time.Tim
 			if strings.HasPrefix(request.Reminder.Target, "@") &&
 				request.Reminder.Target != T("me") {
 
-				rUser, _ := p.API.GetUserByUsername(request.Username)
+				rUser, rErr := p.API.GetUserByUsername(request.Username)
+				if rErr != nil {
+					return rErr
+				}
 
 				if tUser, tErr := p.API.GetUserByUsername(request.Reminder.Target[1:]); tErr != nil {
 					return tErr
@@ -160,6 +227,18 @@ func (p *Plugin) addOccurrences(request *ReminderRequest, occurrences []time.Tim
 		}
 
 		request.Reminder.Occurrences = p.upsertOccurrence(occurrence)
+
+		// occurrence := Occurrence{
+		// 	Id:         model.NewId(),
+		// 	Username:   request.Username,
+		// 	ReminderId: request.Reminder.Id,
+		// 	Repeat:     repeat,
+		// 	Occurrence: o,
+		// 	Snoozed:    p.emptyTime,
+		// }
+
+		// request.Reminder.Occurrences = append(request.Reminder.Occurrences, occurrence)
+		// p.upsertOccurrence(&occurrence)
 	}
 
 	return nil

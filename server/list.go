@@ -142,8 +142,15 @@ func (p *Plugin) categorizeOccurrences(reminders []Reminder) (
 	pastOccurrences []Occurrence,
 	channelOccurrences []Occurrence) {
 
+	p.API.LogInfo("REMINDER COUNT " + fmt.Sprintf("%v", len(reminders)))
 	for _, reminder := range reminders {
+
+		p.API.LogInfo("REMINDER " + fmt.Sprintf("%v", reminder))
+
 		occurrences := reminder.Occurrences
+
+		p.API.LogInfo("OCCURRENCE COUNT " + fmt.Sprintf("%v", len(occurrences)))
+
 		if len(occurrences) > 0 {
 			for _, occurrence := range occurrences {
 				t := occurrence.Occurrence
@@ -151,6 +158,7 @@ func (p *Plugin) categorizeOccurrences(reminders []Reminder) (
 
 				p.API.LogInfo("OCCURRENCE " + fmt.Sprintf("%v", t))
 				p.API.LogInfo("SNOOZED " + fmt.Sprintf("%v", s))
+				p.API.LogInfo("REPEAT " + occurrence.Repeat)
 
 				if !strings.HasPrefix(reminder.Target, "~") &&
 					reminder.Completed == p.emptyTime &&
@@ -165,6 +173,8 @@ func (p *Plugin) categorizeOccurrences(reminders []Reminder) (
 				if !strings.HasPrefix(reminder.Target, "~") &&
 					occurrence.Repeat != "" && t.After(time.Now().UTC()) {
 					recurringOccurrences = append(recurringOccurrences, occurrence)
+
+					p.API.LogInfo("RECURRING " + fmt.Sprintf("%v", t))
 				}
 
 				if !strings.HasPrefix(reminder.Target, "~") &&

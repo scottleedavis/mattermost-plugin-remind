@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -35,10 +36,14 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
 	request.Reminder.Username = request.Username
 	request.Reminder.Completed = p.emptyTime
 
+	p.API.LogInfo("pre CreateOccurrences " + fmt.Sprintf("%v", request))
+
 	if cErr := p.CreateOccurrences(request); cErr != nil {
 		p.API.LogError(cErr.Error())
 		return T("exception.response"), nil
 	}
+
+	p.API.LogInfo("post CreateOccurrences " + fmt.Sprintf("%v", request))
 
 	if rErr := p.UpsertReminder(request); rErr != nil {
 		p.API.LogError(rErr.Error())
