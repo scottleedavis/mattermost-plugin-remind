@@ -323,6 +323,87 @@ func (p *Plugin) inEN(when string, user *model.User) (times []time.Time, err err
 	whenSplit := strings.Split(when, " ")
 	value := whenSplit[1]
 	units := whenSplit[len(whenSplit)-1]
+	if len(whenSplit) == 2 {
+		if strings.HasSuffix(units, T("seconds")) {
+			value = strings.Trim(units, T("seconds"))
+			units = T("seconds")
+		} else if strings.HasSuffix(units, T("second")) {
+			value = strings.Trim(units, T("second"))
+			units = T("second")
+		} else if strings.HasSuffix(units, T("secs")) {
+			value = strings.Trim(units, T("secs"))
+			units = T("secs")
+		} else if strings.HasSuffix(units, T("sec")) {
+			value = strings.Trim(units, T("sec"))
+			units = T("sec")
+		} else if strings.HasSuffix(units, T("s")) {
+			value = strings.Trim(units, T("s"))
+			units = T("s")
+		} else if strings.HasSuffix(units, T("minutes")) {
+			value = strings.Trim(units, T("minutes"))
+			units = T("minutes")
+		} else if strings.HasSuffix(units, T("minute")) {
+			value = strings.Trim(units, T("minute"))
+			units = T("minute")
+		} else if strings.HasSuffix(units, T("min")) {
+			value = strings.Trim(units, T("min"))
+			units = T("min")
+		} else if strings.HasSuffix(units, T("hours")) {
+			value = strings.Trim(units, T("hours"))
+			units = T("hours")
+		} else if strings.HasSuffix(units, T("hour")) {
+			value = strings.Trim(units, T("hour"))
+			units = T("hour")
+		} else if strings.HasSuffix(units, T("hrs")) {
+			value = strings.Trim(units, T("hrs"))
+			units = T("hrs")
+		} else if strings.HasSuffix(units, T("hr")) {
+			value = strings.Trim(units, T("hr"))
+			units = T("hr")
+		} else if strings.HasSuffix(units, T("days")) {
+			value = strings.Trim(units, T("days"))
+			units = T("days")
+		} else if strings.HasSuffix(units, T("day")) {
+			value = strings.Trim(units, T("day"))
+			units = T("day")
+		} else if strings.HasSuffix(units, T("d")) {
+			value = strings.Trim(units, T("d"))
+			units = T("d")
+		} else if strings.HasSuffix(units, T("weeks")) {
+			value = strings.Trim(units, T("weeks"))
+			units = T("weeks")
+		} else if strings.HasSuffix(units, T("week")) {
+			value = strings.Trim(units, T("week"))
+			units = T("week")
+		} else if strings.HasSuffix(units, T("wks")) {
+			value = strings.Trim(units, T("wks"))
+			units = T("wks")
+		} else if strings.HasSuffix(units, T("wk")) {
+			value = strings.Trim(units, T("wk"))
+			units = T("wk")
+		} else if strings.HasSuffix(units, T("months")) {
+			value = strings.Trim(units, T("months"))
+			units = T("months")
+		} else if strings.HasSuffix(units, T("month")) {
+			value = strings.Trim(units, T("month"))
+			units = T("month")
+		} else if strings.HasSuffix(units, T("m")) {
+			value = strings.Trim(units, T("m"))
+			units = T("m")
+		} else if strings.HasSuffix(units, T("years")) {
+			value = strings.Trim(units, T("years"))
+			units = T("years")
+		} else if strings.HasSuffix(units, T("year")) {
+			value = strings.Trim(units, T("year"))
+			units = T("year")
+		} else if strings.HasSuffix(units, T("yr")) {
+			value = strings.Trim(units, T("yr"))
+			units = T("yr")
+		} else if strings.HasSuffix(units, T("y")) {
+			value = strings.Trim(units, T("y"))
+			units = T("y")
+		}
+	}
 
 	p.API.LogInfo(fmt.Sprintf("%v", whenSplit))
 

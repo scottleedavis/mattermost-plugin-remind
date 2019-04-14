@@ -50,6 +50,13 @@ func TestIn(t *testing.T) {
 		assert.Nil(t, err)
 		assert.Equal(t, times, testTimes)
 
+		times, err = p.inEN("in 1hr", user)
+		testTimes = []time.Time{
+			time.Now().Round(time.Second).Add(time.Hour * time.Duration(1)).UTC(),
+		}
+		assert.Nil(t, err)
+		assert.Equal(t, times, testTimes)
+
 		times, err = p.inEN("in 3 hours", user)
 		testTimes = []time.Time{
 			time.Now().Round(time.Second).Add(time.Hour * time.Duration(3)).UTC(),
