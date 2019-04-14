@@ -117,8 +117,7 @@ dist: apply \
       webapp \
       bundle
 
-# deploy installs the plugin to a (development) server, using the API if appropriate environment
-# variables are defined, or copying the files directly to a sibling mattermost-server directory
+## Installs the plugin to a (development) server.
 .PHONY: deploy
 deploy: dist
 ## It uses the API if appropriate environment variables are defined,
