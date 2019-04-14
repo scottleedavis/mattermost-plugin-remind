@@ -319,9 +319,12 @@ func (p *Plugin) inEN(when string, user *model.User) (times []time.Time, err err
 
 	T, _ := p.translation(user)
 
+	when = strings.Trim(when, " ")
 	whenSplit := strings.Split(when, " ")
 	value := whenSplit[1]
 	units := whenSplit[len(whenSplit)-1]
+
+	p.API.LogInfo(fmt.Sprintf("%v", whenSplit))
 
 	switch units {
 	case T("seconds"),

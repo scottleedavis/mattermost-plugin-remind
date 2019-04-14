@@ -54,9 +54,7 @@ func (p *Plugin) ParseRequest(request *ReminderRequest) error {
 			request.Reminder.When = request.Reminder.When[0:toIndex]
 		}
 
-		p.API.LogInfo("request.Payload " + request.Payload)
 		message := strings.Replace(request.Payload, request.Reminder.When, "", -1)
-		p.API.LogInfo("request.Payload2 " + request.Payload)
 		message = strings.Replace(message, commandSplit[0], "", 1)
 		message = strings.Trim(message, " \"")
 
