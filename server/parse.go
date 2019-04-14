@@ -54,7 +54,9 @@ func (p *Plugin) ParseRequest(request *ReminderRequest) error {
 			request.Reminder.When = request.Reminder.When[0:toIndex]
 		}
 
+		p.API.LogInfo("request.Payload " + request.Payload)
 		message := strings.Replace(request.Payload, request.Reminder.When, "", -1)
+		p.API.LogInfo("request.Payload2 " + request.Payload)
 		message = strings.Replace(message, commandSplit[0], "", 1)
 		message = strings.Trim(message, " \"")
 
@@ -201,6 +203,7 @@ func (p *Plugin) findWhenEN(request *ReminderRequest) error {
 		request.Reminder.When = lastWord
 		return nil
 	} else {
+
 		lastWord = textSplit[len(textSplit)-1]
 
 		switch lastWord {
@@ -218,6 +221,12 @@ func (p *Plugin) findWhenEN(request *ReminderRequest) error {
 			request.Reminder.When = lastWord
 		default:
 			break
+		}
+
+		_, tErr := p.normalizeTime(lastWord, user)
+		if tErr == nil {
+			request.Reminder.When = lastWord
+			return nil
 		}
 
 		_, dErr = p.normalizeDate(lastWord, user)

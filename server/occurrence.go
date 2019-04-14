@@ -969,6 +969,11 @@ func (p *Plugin) freeFormEN(when string, user *model.User) (times []time.Time, e
 
 	if len(dateTimeSplit) > 1 {
 		chronoTime = dateTimeSplit[1]
+	} else {
+		_, ntErr := p.normalizeTime(dateTimeSplit[0], user)
+		if ntErr == nil {
+			return p.at(T("at")+" "+dateTimeSplit[0], user)
+		}
 	}
 	dateUnit, ndErr := p.normalizeDate(chronoDate, user)
 	if ndErr != nil {

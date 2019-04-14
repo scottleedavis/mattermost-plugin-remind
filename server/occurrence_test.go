@@ -650,5 +650,11 @@ func TestFreeForm(t *testing.T) {
 			assert.Equal(t, times[0].In(location).Weekday().String(), "Sunday")
 		}
 
+		times, err = p.freeFormEN("5pm", user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.Equal(t, times[0].In(location).Hour(), 17)
+		}
+
 	})
 }
