@@ -42,25 +42,34 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	location := p.location(user)
 
 	if strings.HasSuffix(args.Command, T("help")) {
-		return &model.CommandResponse{
-			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-			Text:         fmt.Sprintf(T("help.response")),
-			Username:     botName,
-		}, nil
+		post := model.Post{
+			ChannelId:     args.ChannelId,
+			PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
+			UserId:        p.remindUserId,
+			Message:       T("help.response"),
+		}
+
+		if _, pErr := p.API.CreatePost(&post); pErr != nil {
+			p.API.LogError(fmt.Sprintf("%v", pErr))
+		}
+		return &model.CommandResponse{}, nil
 	}
 
 	if strings.HasSuffix(args.Command, T("list")) {
 		listMessage := p.ListReminders(user, args.ChannelId)
 		if listMessage != "" {
-			return &model.CommandResponse{
-				ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-				Text:         fmt.Sprintf(listMessage),
-				Username:     botName,
-			}, nil
-		} else {
-			return &model.CommandResponse{}, nil
-		}
+			post := model.Post{
+				ChannelId:     args.ChannelId,
+				PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
+				UserId:        p.remindUserId,
+				Message:       listMessage,
+			}
 
+			if _, pErr := p.API.CreatePost(&post); pErr != nil {
+				p.API.LogError(fmt.Sprintf("%v", pErr))
+			}
+		}
+		return &model.CommandResponse{}, nil
 	}
 
 	payload := strings.Trim(strings.Replace(args.Command, "/"+CommandTrigger, "", -1), " ")
@@ -78,21 +87,33 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		response, err := p.ScheduleReminder(&request)
 
 		if err != nil {
-			return &model.CommandResponse{
-				ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-				Text:         fmt.Sprintf(T("exception.response")),
-				Username:     botName,
-			}, nil
+			post := model.Post{
+				ChannelId:     args.ChannelId,
+				PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
+				UserId:        p.remindUserId,
+				Message:       T("exception.response"),
+			}
+
+			if _, pErr := p.API.CreatePost(&post); pErr != nil {
+				p.API.LogError(fmt.Sprintf("%v", pErr))
+			}
+			return &model.CommandResponse{}, nil
 		}
 
-		return &model.CommandResponse{
-			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-			Text:         fmt.Sprintf("%s", response),
-			Username:     botName,
-		}, nil
+		post := model.Post{
+			ChannelId:     args.ChannelId,
+			PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
+			UserId:        p.remindUserId,
+			Message:       response,
+		}
+
+		if _, pErr := p.API.CreatePost(&post); pErr != nil {
+			p.API.LogError(fmt.Sprintf("%v", pErr))
+		}
+		return &model.CommandResponse{}, nil
 	}
 
-	// debug / troubleshooting commands
+	// debug & troubleshooting commands
 
 	// clear all reminders for current user
 	if strings.HasSuffix(args.Command, "__clear") {
@@ -120,10 +141,15 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		}, nil
 	}
 
-	return &model.CommandResponse{
-		ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-		Text:         fmt.Sprintf(T("exception.response")),
-		Username:     botName,
-	}, nil
+	post := model.Post{
+		ChannelId:     args.ChannelId,
+		PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
+		UserId:        p.remindUserId,
+		Message:       T("exception.response"),
+	}
 
+	if _, pErr := p.API.CreatePost(&post); pErr != nil {
+		p.API.LogError(fmt.Sprintf("%v", pErr))
+	}
+	return &model.CommandResponse{}, nil
 }
