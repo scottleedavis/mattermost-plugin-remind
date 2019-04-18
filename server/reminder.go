@@ -78,7 +78,20 @@ func (p *Plugin) TriggerReminders() {
 
 			if strings.HasPrefix(reminder.Target, "@") || strings.HasPrefix(reminder.Target, T("me")) { //@user
 
-				channel, cErr := p.API.GetDirectChannel(p.remindUserId, user.Id)
+				var targetId string
+				if strings.HasPrefix(reminder.Target, "@") {
+					target := strings.Trim(reminder.Target, "@")
+					targetUser, tErr := p.API.GetUserByUsername(target)
+					if tErr != nil {
+						p.API.LogError("failed to find target user " + reminder.Target)
+						continue
+					}
+					targetId = targetUser.Id
+				} else {
+					targetId = user.Id
+				}
+
+				channel, cErr := p.API.GetDirectChannel(p.remindUserId, targetId)
 				if cErr != nil {
 					p.API.LogError("failed to create channel " + cErr.Error())
 					continue

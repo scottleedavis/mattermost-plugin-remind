@@ -42,32 +42,41 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	location := p.location(user)
 
 	if strings.HasSuffix(args.Command, T("help")) {
-		post := model.Post{
-			ChannelId:     args.ChannelId,
-			PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
-			UserId:        p.remindUserId,
-			Message:       T("help.response"),
-		}
+		// post := model.Post{
+		// 	ChannelId:     args.ChannelId,
+		// 	PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
+		// 	UserId:        p.remindUserId,
+		// 	Message:       T("help.response"),
+		// }
 
-		if _, pErr := p.API.CreatePost(&post); pErr != nil {
-			p.API.LogError(fmt.Sprintf("%v", pErr))
-		}
-		return &model.CommandResponse{}, nil
+		// if _, pErr := p.API.CreatePost(&post); pErr != nil {
+		// 	p.API.LogError(fmt.Sprintf("%v", pErr))
+		// }
+		return &model.CommandResponse{
+			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
+			Text:         fmt.Sprintf(T("help.response")),
+			Username:     botName,
+		}, nil
 	}
 
 	if strings.HasSuffix(args.Command, T("list")) {
 		listMessage := p.ListReminders(user, args.ChannelId)
 		if listMessage != "" {
-			post := model.Post{
-				ChannelId:     args.ChannelId,
-				PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
-				UserId:        p.remindUserId,
-				Message:       listMessage,
-			}
+			// post := model.Post{
+			// 	ChannelId:     args.ChannelId,
+			// 	PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
+			// 	UserId:        p.remindUserId,
+			// 	Message:       listMessage,
+			// }
 
-			if _, pErr := p.API.CreatePost(&post); pErr != nil {
-				p.API.LogError(fmt.Sprintf("%v", pErr))
-			}
+			// if _, pErr := p.API.CreatePost(&post); pErr != nil {
+			// 	p.API.LogError(fmt.Sprintf("%v", pErr))
+			// }
+			return &model.CommandResponse{
+				ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
+				Text:         fmt.Sprintf(listMessage),
+				Username:     botName,
+			}, nil
 		}
 		return &model.CommandResponse{}, nil
 	}
@@ -87,30 +96,38 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		response, err := p.ScheduleReminder(&request)
 
 		if err != nil {
-			post := model.Post{
-				ChannelId:     args.ChannelId,
-				PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
-				UserId:        p.remindUserId,
-				Message:       T("exception.response"),
-			}
+			// post := model.Post{
+			// 	ChannelId:     args.ChannelId,
+			// 	PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
+			// 	UserId:        p.remindUserId,
+			// 	Message:       T("exception.response"),
+			// }
 
-			if _, pErr := p.API.CreatePost(&post); pErr != nil {
-				p.API.LogError(fmt.Sprintf("%v", pErr))
-			}
-			return &model.CommandResponse{}, nil
+			// if _, pErr := p.API.CreatePost(&post); pErr != nil {
+			// 	p.API.LogError(fmt.Sprintf("%v", pErr))
+			// }
+			return &model.CommandResponse{
+				ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
+				Text:         fmt.Sprintf(T("exception.response")),
+				Username:     botName,
+			}, nil
 		}
 
-		post := model.Post{
-			ChannelId:     args.ChannelId,
-			PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
-			UserId:        p.remindUserId,
-			Message:       response,
-		}
+		// post := model.Post{
+		// 	ChannelId:     args.ChannelId,
+		// 	PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
+		// 	UserId:        p.remindUserId,
+		// 	Message:       response,
+		// }
 
-		if _, pErr := p.API.CreatePost(&post); pErr != nil {
-			p.API.LogError(fmt.Sprintf("%v", pErr))
-		}
-		return &model.CommandResponse{}, nil
+		// if _, pErr := p.API.CreatePost(&post); pErr != nil {
+		// 	p.API.LogError(fmt.Sprintf("%v", pErr))
+		// }
+		return &model.CommandResponse{
+			ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
+			Text:         fmt.Sprintf(response),
+			Username:     botName,
+		}, nil
 	}
 
 	// debug & troubleshooting commands
@@ -141,15 +158,19 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		}, nil
 	}
 
-	post := model.Post{
-		ChannelId:     args.ChannelId,
-		PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
-		UserId:        p.remindUserId,
-		Message:       T("exception.response"),
-	}
+	// post := model.Post{
+	// 	ChannelId:     args.ChannelId,
+	// 	PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
+	// 	UserId:        p.remindUserId,
+	// 	Message:       T("exception.response"),
+	// }
 
-	if _, pErr := p.API.CreatePost(&post); pErr != nil {
-		p.API.LogError(fmt.Sprintf("%v", pErr))
-	}
-	return &model.CommandResponse{}, nil
+	// if _, pErr := p.API.CreatePost(&post); pErr != nil {
+	// 	p.API.LogError(fmt.Sprintf("%v", pErr))
+	// }
+	return &model.CommandResponse{
+		ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
+		Text:         fmt.Sprintf(T("exception.response")),
+		Username:     botName,
+	}, nil
 }

@@ -405,8 +405,6 @@ func (p *Plugin) inEN(when string, user *model.User) (times []time.Time, err err
 		}
 	}
 
-	p.API.LogInfo(fmt.Sprintf("%v", whenSplit))
-
 	switch units {
 	case T("seconds"),
 		T("second"),
