@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 - Other minor fixes
 
 ## 0.1.1 - 2019-04-12
-### Updated to include logic build from server app
+### Fixes from unit test errors
 - Numerous bug fixes to parsing
 - Bug fixes to channel reminders in list
 

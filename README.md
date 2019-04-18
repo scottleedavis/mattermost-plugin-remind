@@ -39,7 +39,7 @@ This will produce a single plugin file (with support for multiple architectures)
 dist/com.github.scottleedavis.mattermost-plugin-remind.tar.gz
 ```
 
-There is a build target to automate deploying and enabling the plugin to your server, but it requires configuration and [http](https://httpie.org/) to be installed:
+There is a build target to automate deploying and enabling the plugin to your server, but it requires configuration as below:
 ```
 export MM_SERVICESETTINGS_SITEURL=http://localhost:8065/
 export MM_ADMIN_USERNAME=admin
