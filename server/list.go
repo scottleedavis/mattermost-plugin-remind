@@ -247,13 +247,23 @@ func (p *Plugin) listControl(
 
 	T, _ := p.translation(user)
 	siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
+	if siteURL == "" {
+		p.API.LogError("SiteURL not set.")
+		return []*model.SlackAttachment{}
+	}
 	reminderCount := map[string]interface{}{
 		"ReminderCount": RemindersPerPage,
 	}
 
+	start := offset + 1
+	stop := endOffset + 1
+	if activeReminderCount == 0 {
+		start = 0
+		stop = 0
+	}
 	remindersPageCount := map[string]interface{}{
-		"Start": offset + 1,
-		"Stop":  endOffset + 1,
+		"Start": start,
+		"Stop":  stop,
 		"Total": activeReminderCount,
 	}
 
@@ -374,6 +384,10 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 	T, _ := p.translation(user)
 
 	siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
+	if siteURL == "" {
+		p.API.LogError("SiteURL not set.")
+		return &model.SlackAttachment{}
+	}
 	reminder := p.findReminder(reminders, occurrence)
 
 	t := occurrence.Occurrence

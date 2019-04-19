@@ -110,6 +110,10 @@ func (p *Plugin) TriggerReminders() {
 				}
 
 				siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
+				if siteURL == "" {
+					p.API.LogError("SiteURL not set.")
+					return
+				}
 
 				interactivePost := model.Post{
 					ChannelId:     channel.Id,
