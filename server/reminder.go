@@ -76,6 +76,11 @@ func (p *Plugin) TriggerReminders() {
 			T, _ := p.translation(user)
 			reminder := p.findReminder(reminders, occurrence)
 
+			if reminder.Target == "" {
+				p.API.LogError("No target found for reminder")
+				continue
+			}
+
 			if strings.HasPrefix(reminder.Target, "@") || strings.HasPrefix(reminder.Target, T("me")) { //@user
 
 				var targetId string
@@ -344,16 +349,17 @@ func (p *Plugin) UpsertReminder(request *ReminderRequest) error {
 	}
 
 	duplicateReminder := false
-	for _, r := range reminders {
-		r.Id = request.Reminder.Id
-		if r.Username == request.Reminder.Username &&
-			r.Target == request.Reminder.Target &&
-			r.Message == request.Reminder.Message &&
-			r.When == request.Reminder.When {
-			duplicateReminder = true
-			break
-		}
-	}
+	// a feature requested by PM.   seems to create undesired results
+	//for _, r := range reminders {
+	//	r.Id = request.Reminder.Id
+	//	if r.Username == request.Reminder.Username &&
+	//		r.Target == request.Reminder.Target &&
+	//		r.Message == request.Reminder.Message &&
+	//		r.When == request.Reminder.When {
+	//		duplicateReminder = true
+	//		break
+	//	}
+	//}
 	if !duplicateReminder {
 		reminders = append(reminders, request.Reminder)
 	}

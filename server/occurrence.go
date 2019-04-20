@@ -18,11 +18,11 @@ type Occurrence struct {
 
 	ReminderId string
 
+	Repeat string
+
 	Occurrence time.Time
 
 	Snoozed time.Time
-
-	Repeat string
 }
 
 func (p *Plugin) ClearScheduledOccurrence(reminder Reminder, occurrence Occurrence) {
@@ -222,7 +222,9 @@ func (p *Plugin) addOccurrences(request *ReminderRequest, occurrences []time.Tim
 		}
 
 		request.Reminder.Occurrences = append(request.Reminder.Occurrences, occurrence)
+
 		p.upsertOccurrence(&occurrence)
+
 	}
 
 	return nil
