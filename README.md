@@ -41,10 +41,9 @@ dist/com.github.scottleedavis.mattermost-plugin-remind.tar.gz
 
 There is a build target to automate deploying and enabling the plugin to your server, but it requires configuration as below:
 ```
-export MM_SERVICESETTINGS_SITEURL=http://localhost:8065/
+export MM_SERVICESETTINGS_SITEURL=http://localhost:8065
 export MM_ADMIN_USERNAME=admin
 export MM_ADMIN_PASSWORD=password
-export CURL=curl
 make deploy
 ```
 In production, deploy and upload your plugin via the [System Console](https://about.mattermost.com/default-plugin-uploads).
