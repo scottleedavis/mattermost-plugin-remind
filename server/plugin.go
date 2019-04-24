@@ -2,7 +2,6 @@ package main
 
 import (
 	"io/ioutil"
-	"sync"
 	"time"
 
 	"github.com/mattermost/mattermost-server/model"
@@ -11,10 +10,6 @@ import (
 
 type Plugin struct {
 	plugin.MattermostPlugin
-
-	configurationLock sync.RWMutex
-
-	configuration *configuration
 
 	ServerConfig *model.Config
 

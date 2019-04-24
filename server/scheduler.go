@@ -1,11 +1,14 @@
 package main
 
 import (
+	"os"
 	"strings"
 	"time"
 
 	"github.com/mattermost/mattermost-server/model"
 )
+
+const TriggerHostName = "__TRIGGERHOST__"
 
 func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
 
@@ -66,13 +69,26 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
 
 func (p *Plugin) Run() {
 
+	hostname, _ := os.Hostname()
+	bytes, bErr := p.API.KVGet(TriggerHostName)
+	if bErr != nil {
+		p.API.LogError("failed KVGet %s", bErr)
+		return
+	}
+	if string(bytes) != "" && string(bytes) != hostname {
+		return
+	}
+	p.API.KVSet(TriggerHostName, []byte(hostname))
+
 	if !p.running {
 		p.running = true
 		p.runner()
 	}
+
 }
 
 func (p *Plugin) Stop() {
+	p.API.KVSet(TriggerHostName, []byte(""))
 	p.running = false
 }
 

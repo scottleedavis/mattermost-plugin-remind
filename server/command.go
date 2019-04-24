@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"strings"
 
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/plugin"
+	"github.com/pkg/errors"
 )
 
 const CommandTrigger = "remind"
@@ -38,6 +38,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	if uErr != nil {
 		return &model.CommandResponse{}, uErr
 	}
+
 	T, locale := p.translation(user)
 	location := p.location(user)
 
@@ -173,4 +174,5 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		Text:         fmt.Sprintf(T("exception.response")),
 		Username:     botName,
 	}, nil
+
 }
