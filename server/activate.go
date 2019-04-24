@@ -2,12 +2,11 @@ package main
 
 import (
 	"fmt"
-	"path/filepath"
-	"time"
-
 	"github.com/blang/semver"
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/pkg/errors"
+	"path/filepath"
+	"time"
 )
 
 const minimumServerVersion = "5.10.0"
@@ -32,8 +31,6 @@ func (p *Plugin) OnActivate() error {
 	if err := p.checkServerVersion(); err != nil {
 		return err
 	}
-
-	// configuration := p.getConfiguration()
 
 	teams, err := p.API.GetTeams()
 	if err != nil {

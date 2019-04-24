@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"strings"
 
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/plugin"
+	"github.com/pkg/errors"
 )
 
 const CommandTrigger = "remind"
@@ -34,10 +34,24 @@ func (p *Plugin) unregisterCommand(teamId string) error {
 
 func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*model.CommandResponse, *model.AppError) {
 
+	//p.API.LogInfo("ONACTIVATE")
+	//u, err := p.API.GetUser("teqzizoq1bgs3cdm4hrbnmf4yc")
+	//if err != nil {
+	//	p.API.LogError("NO FOUND USER")
+	//}
+	//p.API.LogInfo(u.Username)
+	//
+	//return &model.CommandResponse{
+	//	ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
+	//	Text:         fmt.Sprintf("%v", args.UserId),
+	//	Username:     botName,
+	//}, nil
+
 	user, uErr := p.API.GetUser(args.UserId)
 	if uErr != nil {
 		return &model.CommandResponse{}, uErr
 	}
+
 	T, locale := p.translation(user)
 	location := p.location(user)
 
@@ -173,4 +187,5 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		Text:         fmt.Sprintf(T("exception.response")),
 		Username:     botName,
 	}, nil
+
 }
