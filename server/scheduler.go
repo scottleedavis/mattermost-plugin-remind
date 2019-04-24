@@ -1,11 +1,19 @@
 package main
 
 import (
+	"encoding/json"
+	"os"
 	"strings"
 	"time"
 
 	"github.com/mattermost/mattermost-server/model"
 )
+
+type ClusterState struct {
+	Active bool
+
+	TriggerHost string
+}
 
 func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
 
@@ -66,13 +74,77 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
 
 func (p *Plugin) Run() {
 
+	hostname, err := os.Hostname()
+	if err != nil {
+		p.API.LogError(err.Error())
+		return
+	}
+
+	bytes, bErr := p.API.KVGet(*p.ServerConfig.ClusterSettings.ClusterName + "__")
+	if bErr != nil {
+		p.API.LogError("failed KVGet %s", bErr)
+		return
+	}
+	var clusterState ClusterState
+	rsErr := json.Unmarshal(bytes, &clusterState)
+	if rsErr != nil {
+		p.API.LogError("failed json Unmarshal %s", rsErr)
+		return
+	}
+
+	if clusterState.Active && clusterState.TriggerHost != hostname {
+		return
+	}
+
+	clusterState.TriggerHost = hostname
+	clusterState.Active = true
+
+	ro, rErr := json.Marshal(clusterState)
+
+	if rErr != nil {
+		p.API.LogError("failed to marshal %s", clusterState.TriggerHost)
+		return
+	}
+
+	p.API.KVSet(*p.ServerConfig.ClusterSettings.ClusterName+"__", ro)
+
 	if !p.running {
 		p.running = true
 		p.runner()
 	}
+
 }
 
 func (p *Plugin) Stop() {
+
+	bytes, bErr := p.API.KVGet(*p.ServerConfig.ClusterSettings.ClusterName + "__")
+	if bErr != nil {
+		p.API.LogError("failed KVGet %s", bErr)
+		return
+	}
+	var clusterState ClusterState
+	rsErr := json.Unmarshal(bytes, &clusterState)
+	if rsErr != nil {
+		p.API.LogError("failed json Unmarshal %s", rsErr)
+		return
+	}
+
+	if clusterState.Active {
+
+		clusterState.TriggerHost = ""
+		clusterState.Active = false
+
+		ro, rErr := json.Marshal(clusterState)
+
+		if rErr != nil {
+			p.API.LogError("failed to marshal %s", clusterState.TriggerHost)
+			return
+		}
+
+		p.API.KVSet(*p.ServerConfig.ClusterSettings.ClusterName+"__", ro)
+
+	}
+
 	p.running = false
 }
 
