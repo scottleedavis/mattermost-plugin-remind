@@ -80,8 +80,6 @@ func (p *Plugin) Run() {
 	}
 	p.API.KVSet(TriggerHostName, []byte(hostname))
 
-	p.API.LogInfo(string(bytes))
-
 	if !p.running {
 		p.running = true
 		p.runner()
