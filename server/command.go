@@ -34,19 +34,6 @@ func (p *Plugin) unregisterCommand(teamId string) error {
 
 func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*model.CommandResponse, *model.AppError) {
 
-	//p.API.LogInfo("ONACTIVATE")
-	//u, err := p.API.GetUser("teqzizoq1bgs3cdm4hrbnmf4yc")
-	//if err != nil {
-	//	p.API.LogError("NO FOUND USER")
-	//}
-	//p.API.LogInfo(u.Username)
-	//
-	//return &model.CommandResponse{
-	//	ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-	//	Text:         fmt.Sprintf("%v", args.UserId),
-	//	Username:     botName,
-	//}, nil
-
 	user, uErr := p.API.GetUser(args.UserId)
 	if uErr != nil {
 		return &model.CommandResponse{}, uErr
