@@ -21,7 +21,6 @@ See the full list of [Usage Examples](https://github.com/scottleedavis/mattermos
   * `/remind [who] [what] at [(noon|midnight|one..twelve|00:00am/pm|0000)] (every) [day|date]`
   * `/remind [who] [what] (on) [(monday-sunday|month&day|m/d/y|d.m.y)] (at) [time]`
   * `/remind [who] [what] every (other) [monday-sunday|month&day|m/d|d.m] (at) [time]`
-* `/remind [who] [when] [what]`
 
 ### Building 
 
