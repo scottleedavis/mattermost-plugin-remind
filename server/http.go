@@ -31,6 +31,8 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 	json.NewDecoder(r.Body).Decode(&action)
 
 	switch action.Context.Action {
+	case "view/ephemeral":
+		p.handleViewEphemeral(w, r, action)
 	case "complete":
 		p.handleComplete(w, r, action)
 	case "complete/list":
@@ -39,6 +41,8 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 		p.handleViewCompleteList(w, r, action)
 	case "delete":
 		p.handleDelete(w, r, action)
+	case "delete/ephemeral":
+		p.handleDeleteEphemeral(w, r, action)
 	case "delete/list":
 		p.handleDeleteList(w, r, action)
 	case "delete/complete/list":
@@ -55,6 +59,19 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 		response := &model.PostActionIntegrationResponse{}
 		writePostActionIntegrationResponseError(w, response)
 	}
+}
+
+func (p *Plugin) handleViewEphemeral(w http.ResponseWriter, r *http.Request, action *Action) {
+
+	user, uErr := p.API.GetUser(action.UserID)
+	if uErr != nil {
+		p.API.LogError(uErr.Error())
+		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
+		return
+	}
+	p.ListReminders(user, "")
+	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
+
 }
 
 func (p *Plugin) handleComplete(w http.ResponseWriter, r *http.Request, action *Action) {
@@ -137,6 +154,37 @@ func (p *Plugin) handleDelete(w http.ResponseWriter, r *http.Request, action *Ac
 		p.API.UpdatePost(post)
 		writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 	}
+
+}
+
+func (p *Plugin) handleDeleteEphemeral(w http.ResponseWriter, r *http.Request, action *Action) {
+
+	reminder := p.GetReminder(action.UserID, action.Context.ReminderID)
+	user, uErr := p.API.GetUser(action.UserID)
+	if uErr != nil {
+		p.API.LogError(uErr.Error())
+		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
+		return
+	}
+	T, _ := p.translation(user)
+
+	for _, occurrence := range reminder.Occurrences {
+		p.ClearScheduledOccurrence(reminder, occurrence)
+	}
+
+	message := reminder.Message
+	p.DeleteReminder(action.UserID, reminder)
+
+	var deleteParameters = map[string]interface{}{
+		"Message": message,
+	}
+	post := &model.Post{
+		Id:      action.PostID,
+		UserId:  p.remindUserId,
+		Message: T("action.delete", deleteParameters),
+	}
+	p.API.UpdateEphemeralPost(action.UserID, post)
+	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 
 }
 

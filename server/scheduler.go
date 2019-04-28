@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -10,19 +11,19 @@ import (
 
 const TriggerHostName = "__TRIGGERHOST__"
 
-func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
+func (p *Plugin) ScheduleReminder(request *ReminderRequest, channelId string) (*model.Post, error) {
 
 	user, uErr := p.API.GetUserByUsername(request.Username)
 	if uErr != nil {
 		p.API.LogError(uErr.Error())
-		return "", uErr
+		return nil, uErr
 	}
 	T, _ := p.translation(user)
 	location := p.location(user)
 
 	if pErr := p.ParseRequest(request); pErr != nil {
 		p.API.LogError(pErr.Error())
-		return T("exception.response"), nil
+		return nil, pErr
 	}
 
 	useTo := strings.HasPrefix(request.Reminder.Message, T("to"))
@@ -40,12 +41,12 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
 
 	if cErr := p.CreateOccurrences(request); cErr != nil {
 		p.API.LogError(cErr.Error())
-		return T("exception.response"), nil
+		return nil, cErr
 	}
 
 	if rErr := p.UpsertReminder(request); rErr != nil {
 		p.API.LogError(rErr.Error())
-		return T("exception.response"), nil
+		return nil, rErr
 	}
 
 	if request.Reminder.Target == T("me") {
@@ -63,8 +64,49 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
 			false,
 		),
 	}
+	
+	siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
 
-	return T("schedule.response", responseParameters), nil
+	return &model.Post{
+		ChannelId: channelId,
+		UserId:    p.remindUserId,
+		Props: model.StringInterface{
+			"attachments": []*model.SlackAttachment{
+				{
+					Text: T("schedule.response", responseParameters),
+					Actions: []*model.PostAction{
+						{
+							Id: model.NewId(),
+							Integration: &model.PostActionIntegration{
+								Context: model.StringInterface{
+									"reminder_id":   request.Reminder.Id,
+									"occurrence_id": request.Reminder.Occurrences[0].Id,
+									"action":        "delete/ephemeral",
+								},
+								URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
+							},
+							Type: model.POST_ACTION_TYPE_BUTTON,
+							Name: T("button.delete"),
+						},
+						{
+							Id: model.NewId(),
+							Integration: &model.PostActionIntegration{
+								Context: model.StringInterface{
+									"reminder_id":   request.Reminder.Id,
+									"occurrence_id": request.Reminder.Occurrences[0].Id,
+									"action":        "view/ephemeral",
+								},
+								URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
+							},
+							Type: model.POST_ACTION_TYPE_BUTTON,
+							Name: T("button.view.reminders"),
+						},
+					},
+				},
+			},
+		},
+	}, nil
+
 }
 
 func (p *Plugin) Run() {

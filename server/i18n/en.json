@@ -116,6 +116,10 @@
     "translation": "Reminders {{.Start}} to {{.Stop}} (of {{.Total}})"
   },
   {
+    "id": "button.view.reminders",
+    "translation": "View Reminders"
+  },
+  {
     "id": "button.complete",
     "translation": "Mark as Complete"
   },

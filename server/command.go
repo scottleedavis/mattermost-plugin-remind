@@ -77,7 +77,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 			Payload:  payload,
 			Reminder: Reminder{},
 		}
-		response, err := p.ScheduleReminder(&request)
+		reminder, err := p.ScheduleReminder(&request, args.ChannelId)
 
 		if err != nil {
 			post := model.Post{
@@ -89,12 +89,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 			return &model.CommandResponse{}, nil
 		}
 
-		post := model.Post{
-			ChannelId: args.ChannelId,
-			UserId:    p.remindUserId,
-			Message:   response,
-		}
-		p.API.SendEphemeralPost(user.Id, &post)
+		p.API.SendEphemeralPost(user.Id, reminder)
 		return &model.CommandResponse{}, nil
 
 	}
@@ -128,7 +123,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		post := model.Post{
 			ChannelId: args.ChannelId,
 			UserId:    p.remindUserId,
-			Message:   locale + " " + location.String(),
+			Message:   "locale: " + locale + "\nlocation: " + location.String(),
 		}
 		p.API.SendEphemeralPost(user.Id, &post)
 		return &model.CommandResponse{}, nil
