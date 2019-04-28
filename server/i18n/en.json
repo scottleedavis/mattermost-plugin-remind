@@ -16,6 +16,26 @@
     "translation": "A list of your reminders is in your Direct Message with @{{.RemindUser}}."
   },
   {
+    "id": "schedule.message",
+    "translation": "Message"
+  },
+  {
+    "id": "schedule.target",
+    "translation": "Target"
+  },
+  {
+    "id": "schedule.target.help",
+    "translation": "@user or ~channel"
+  },
+  {
+    "id": "schedule.time",
+    "translation": "Time"
+  },
+  {
+    "id": "schedule.reminder",
+    "translation": "Schedule Reminder"
+  },
+  {
     "id": "list.inchannel",
     "translation": "**In this channel:**"
   },
@@ -138,6 +158,10 @@
   {
     "id": "button.close.list",
     "translation": "Close List"
+  },
+  {
+    "id": "button.schedule",
+    "translation": "Schedule Reminder"
   },
   {
     "id": "button.snooze",

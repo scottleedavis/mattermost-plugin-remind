@@ -42,6 +42,11 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	T, locale := p.translation(user)
 	location := p.location(user)
 
+	if strings.Trim(args.Command, " ") == "/"+CommandTrigger {
+		p.InteractiveSchedule(args.TriggerId, user)
+		return &model.CommandResponse{}, nil
+	}
+
 	if strings.HasSuffix(args.Command, T("help")) {
 		post := model.Post{
 			ChannelId: args.ChannelId,

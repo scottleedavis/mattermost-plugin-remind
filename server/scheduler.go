@@ -64,7 +64,7 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest, channelId string) (*
 			false,
 		),
 	}
-	
+
 	siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
 
 	return &model.Post{
@@ -107,6 +107,70 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest, channelId string) (*
 		},
 	}, nil
 
+}
+
+func (p *Plugin) InteractiveSchedule(triggerId string, user *model.User) {
+
+	T, _ := p.translation(user)
+	siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
+
+	dialogRequest := model.OpenDialogRequest{
+		TriggerId: triggerId,
+		URL:       fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
+		Dialog: model.Dialog{
+			Title:       T("schedule.reminder"),
+			CallbackId:  model.NewId(),
+			SubmitLabel: T("button.schedule"),
+			Elements: []model.DialogElement{
+				{
+					DisplayName: T("schedule.message"),
+					Name:        "message",
+					Type:        "text",
+					SubType:     "text",
+				},
+				{
+					DisplayName: T("schedule.target"),
+					Name:        "target",
+					HelpText:    T("schedule.target.help"),
+					Placeholder: "me",
+					Type:        "text",
+					SubType:     "text",
+					Optional:    true,
+				},
+				{
+					DisplayName: T("schedule.time"),
+					Name:        "time",
+					Type:        "select",
+					SubType:     "select",
+					Options: []*model.PostActionOptions{
+						{
+							Text:  T("button.snooze.20min"),
+							Value: "20min",
+						},
+						{
+							Text:  T("button.snooze.1hr"),
+							Value: "1hr",
+						},
+						{
+							Text:  T("button.snooze.3hr"),
+							Value: "3hrs",
+						},
+						{
+							Text:  T("button.snooze.tomorrow"),
+							Value: "tomorrow",
+						},
+						{
+							Text:  T("button.snooze.nextweek"),
+							Value: "nextweek",
+						},
+					},
+				},
+			},
+		},
+	}
+	if pErr := p.API.OpenInteractiveDialog(dialogRequest); pErr != nil {
+		p.API.LogError("Failed opening interactive dialog " + pErr.Error())
+	}
 }
 
 func (p *Plugin) Run() {
