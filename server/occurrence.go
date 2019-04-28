@@ -628,7 +628,6 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 
 		now := time.Now().In(location).Round(time.Hour * time.Duration(24))
 		occurrence := t.AddDate(now.Year(), int(now.Month())-1, now.Day()-1)
-
 		return []time.Time{p.chooseClosest(user, &occurrence, true).UTC()}, nil
 
 	}
