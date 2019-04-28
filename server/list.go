@@ -116,7 +116,7 @@ func (p *Plugin) UpdateListReminders(userId string, postId string, offset int) {
 		attachments)
 
 	post := &model.Post{
-		Id: postId,
+		Id:     postId,
 		UserId: p.remindUserId,
 		Props: model.StringInterface{
 			"attachments": attachments,
@@ -124,16 +124,6 @@ func (p *Plugin) UpdateListReminders(userId string, postId string, offset int) {
 	}
 	p.API.UpdateEphemeralPost(userId, post)
 
-	/*
-		if post, pErr := p.API.GetPost(postId); pErr != nil {
-			p.API.LogError(pErr.Error())
-		} else {
-			post.Props = model.StringInterface{
-				"attachments": attachments,
-			}
-			defer p.API.UpdatePost(post)
-		}
-	*/
 }
 
 func (p *Plugin) categorizeOccurrences(reminders []Reminder) (
