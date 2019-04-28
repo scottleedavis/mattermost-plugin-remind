@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/mattermost/mattermost-server/model"
@@ -10,6 +11,61 @@ import (
 )
 
 func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
+
+	if strings.HasSuffix(r.URL.String(), "dialog") {
+
+		request := model.SubmitDialogRequestFromJson(r.Body)
+
+		user, uErr := p.API.GetUser(request.UserId)
+		if uErr != nil {
+			p.API.LogError(uErr.Error())
+			return
+		}
+
+		T, _ := p.translation(user)
+
+		p.API.LogInfo(fmt.Sprintf("%v", request))
+
+		//message:hey there target:<nil> time:1hr
+		message := request.Submission["message"]
+		target := request.Submission["target"]
+		time := request.Submission["time"]
+
+		if target == nil {
+			target = T("me")
+		}
+
+		p.API.LogInfo(T("in") + " " + T("button.snooze."+time.(string)))
+
+		r := &ReminderRequest{
+			TeamId:   request.TeamId,
+			Username: user.Username,
+			Payload:  message.(string),
+			Reminder: Reminder{
+				Id:        model.NewId(),
+				TeamId:    request.TeamId,
+				Username:  user.Username,
+				Message:   message.(string),
+				Completed: p.emptyTime,
+				Target:    target.(string),
+				When:      T("in") + " " + T("button.snooze."+time.(string)),
+			},
+		}
+
+		if cErr := p.CreateOccurrences(r); cErr != nil {
+			p.API.LogError(cErr.Error())
+			return
+		}
+
+		if rErr := p.UpsertReminder(r); rErr != nil {
+			p.API.LogError(rErr.Error())
+			return
+		}
+
+		p.API.LogInfo(fmt.Sprintf("%v", r))
+
+		return
+	}
 
 	request := model.PostActionIntegrationRequestFromJson(r.Body)
 

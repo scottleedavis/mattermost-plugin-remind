@@ -116,7 +116,7 @@ func (p *Plugin) InteractiveSchedule(triggerId string, user *model.User) {
 
 	dialogRequest := model.OpenDialogRequest{
 		TriggerId: triggerId,
-		URL:       fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
+		URL:       fmt.Sprintf("%s/plugins/%s/dialog", siteURL, manifest.Id),
 		Dialog: model.Dialog{
 			Title:       T("schedule.reminder"),
 			CallbackId:  model.NewId(),
