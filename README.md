@@ -14,8 +14,9 @@ _requires Mattermost 5.10 or greater_
 ### Usage
 
 See the full list of [Usage Examples](https://github.com/scottleedavis/mattermost-plugin-remind/wiki/Usage) in the [wiki](https://github.com/scottleedavis/mattermost-plugin-remind/wiki) 
-* `/remind help`
-* `/remind list`
+* `/remind` - opens up an interactive dialog to schedule a reminder
+* `/remind help` - displays help examples
+* `/remind list` - displays a list of reminders
 * `/remind [who] [what] [when]`
   * `/remind [who] [what] in [# (seconds|minutes|hours|days|weeks|months|years)]`
   * `/remind [who] [what] at [(noon|midnight|one..twelve|00:00am/pm|0000)] (every) [day|date]`
