@@ -74,7 +74,7 @@ func (p *Plugin) ListReminders(user *model.User, channelId string) string {
 		return ""
 	} else {
 		messageParameters := map[string]interface{}{
-			"RemindUser": CommandTrigger,
+			"RemindUser": botName,
 		}
 		return T("list.reminders", messageParameters)
 	}
