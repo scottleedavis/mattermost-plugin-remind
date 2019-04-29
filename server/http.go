@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -24,9 +23,6 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 
 		T, _ := p.translation(user)
 
-		p.API.LogInfo(fmt.Sprintf("%v", request))
-
-		//message:hey there target:<nil> time:1hr
 		message := request.Submission["message"]
 		target := request.Submission["target"]
 		time := request.Submission["time"]
@@ -35,7 +31,13 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 			target = T("me")
 		}
 
-		p.API.LogInfo(T("in") + " " + T("button.snooze."+time.(string)))
+		when := T("in") + " " + T("button.snooze."+time.(string))
+		switch time.(string) {
+		case "tomorrow":
+			when = T("tomorrow")
+		case "nextweek":
+			when = T("monday")
+		}
 
 		r := &ReminderRequest{
 			TeamId:   request.TeamId,
@@ -48,7 +50,7 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 				Message:   message.(string),
 				Completed: p.emptyTime,
 				Target:    target.(string),
-				When:      T("in") + " " + T("button.snooze."+time.(string)),
+				When:      when,
 			},
 		}
 
@@ -62,14 +64,10 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 			return
 		}
 
-		p.API.LogInfo(fmt.Sprintf("%v", r))
-
 		return
 	}
 
 	request := model.PostActionIntegrationRequestFromJson(r.Body)
-
-	p.API.LogInfo(fmt.Sprintf("%v", request))
 
 	switch request.Context["action"] {
 	case "view/ephemeral":

@@ -153,7 +153,7 @@ func (p *Plugin) InteractiveSchedule(triggerId string, user *model.User) {
 						},
 						{
 							Text:  T("button.snooze.3hr"),
-							Value: "3hrs",
+							Value: "3hr",
 						},
 						{
 							Text:  T("button.snooze.tomorrow"),
