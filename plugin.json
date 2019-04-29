@@ -2,7 +2,7 @@
     "id": "com.github.scottleedavis.mattermost-plugin-remind",
     "name": "Remind Bot Mattermost Plugin",
     "description": "Sets Reminders",
-    "version": "0.1.8",
+    "version": "0.1.9",
     "server": {
         "executables": {
             "linux-amd64": "server/dist/plugin-linux-amd64",
