@@ -344,7 +344,7 @@ func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, request *m
 }
 
 func (p *Plugin) handleNextReminders(w http.ResponseWriter, r *http.Request, request *model.PostActionIntegrationRequest) {
-	p.UpdateListReminders(request.UserId, request.PostId, request.Context["offset"].(int))
+	p.UpdateListReminders(request.UserId, request.PostId, int(request.Context["offset"].(float64)))
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
