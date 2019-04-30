@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -22,17 +23,18 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 		}
 
 		T, _ := p.translation(user)
+		location := p.location(user)
 
 		message := request.Submission["message"]
 		target := request.Submission["target"]
-		time := request.Submission["time"]
+		ttime := request.Submission["time"]
 
 		if target == nil {
 			target = T("me")
 		}
 
-		when := T("in") + " " + T("button.snooze."+time.(string))
-		switch time.(string) {
+		when := T("in") + " " + T("button.snooze."+ttime.(string))
+		switch ttime.(string) {
 		case "tomorrow":
 			when = T("tomorrow")
 		case "nextweek":
@@ -63,6 +65,73 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 			p.API.LogError(rErr.Error())
 			return
 		}
+
+		if r.Reminder.Target == T("me") {
+			r.Reminder.Target = T("you")
+		}
+
+		useTo := strings.HasPrefix(r.Reminder.Message, T("to"))
+		var useToString string
+		if useTo {
+			useToString = " " + T("to")
+		} else {
+			useToString = ""
+		}
+
+		var responseParameters = map[string]interface{}{
+			"Target":  r.Reminder.Target,
+			"UseTo":   useToString,
+			"Message": r.Reminder.Message,
+			"When": p.formatWhen(
+				r.Username,
+				r.Reminder.When,
+				r.Reminder.Occurrences[0].Occurrence.In(location).Format(time.RFC3339),
+				false,
+			),
+		}
+
+		siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
+
+		reminder := &model.Post{
+			ChannelId: request.ChannelId,
+			UserId:    p.remindUserId,
+			Props: model.StringInterface{
+				"attachments": []*model.SlackAttachment{
+					{
+						Text: T("schedule.response", responseParameters),
+						Actions: []*model.PostAction{
+							{
+								Id: model.NewId(),
+								Integration: &model.PostActionIntegration{
+									Context: model.StringInterface{
+										"reminder_id":   r.Reminder.Id,
+										"occurrence_id": r.Reminder.Occurrences[0].Id,
+										"action":        "delete/ephemeral",
+									},
+									URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
+								},
+								Type: model.POST_ACTION_TYPE_BUTTON,
+								Name: T("button.delete"),
+							},
+							{
+								Id: model.NewId(),
+								Integration: &model.PostActionIntegration{
+									Context: model.StringInterface{
+										"reminder_id":   r.Reminder.Id,
+										"occurrence_id": r.Reminder.Occurrences[0].Id,
+										"action":        "view/ephemeral",
+									},
+									URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
+								},
+								Type: model.POST_ACTION_TYPE_BUTTON,
+								Name: T("button.view.reminders"),
+							},
+						},
+					},
+				},
+			},
+		}
+		p.API.SendEphemeralPost(user.Id, reminder)
 
 		return
 	}
