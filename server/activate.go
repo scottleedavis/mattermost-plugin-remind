@@ -37,6 +37,8 @@ func (p *Plugin) OnActivate() error {
 		return errors.Wrap(err, "failed to query teams OnActivate")
 	}
 
+	p.router = p.InitAPI()
+
 	p.ensureBotExists()
 
 	for _, team := range teams {

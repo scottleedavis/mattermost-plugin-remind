@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/gorilla/mux"
 	"net/http"
 	"strings"
 	"time"
@@ -10,166 +11,161 @@ import (
 	"github.com/mattermost/mattermost-server/plugin"
 )
 
+func (p *Plugin) InitAPI() *mux.Router {
+	r := mux.NewRouter()
+	r.HandleFunc("/dialog", p.handleDialog).Methods("POST")
+
+	r.HandleFunc("/view/ephemeral", p.handleViewEphemeral).Methods("POST")
+	r.HandleFunc("/view/complete/list", p.handleViewCompleteList).Methods("POST")
+
+	r.HandleFunc("/complete", p.handleComplete).Methods("POST")
+	r.HandleFunc("/complete/list", p.handleCompleteList).Methods("POST")
+
+	r.HandleFunc("/delete", p.handleDelete).Methods("POST")
+	r.HandleFunc("/delete/ephemeral", p.handleDeleteEphemeral).Methods("POST")
+	r.HandleFunc("/delete/list", p.handleDeleteList).Methods("POST")
+	r.HandleFunc("/delete/complete/list", p.handleDeleteCompleteList).Methods("POST")
+
+	r.HandleFunc("/snooze", p.handleSnooze).Methods("POST")
+	r.HandleFunc("/snooze/list", p.handleSnoozeList).Methods("POST")
+
+	r.HandleFunc("/close/list", p.handleCloseList).Methods("POST")
+
+	r.HandleFunc("/next/reminders", p.handleNextReminders).Methods("POST")
+
+	return r
+}
+
 func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
+	p.router.ServeHTTP(w, r)
+}
 
-	if strings.HasSuffix(r.URL.String(), "dialog") {
+func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {
 
-		request := model.SubmitDialogRequestFromJson(r.Body)
+	request := model.SubmitDialogRequestFromJson(req.Body)
 
-		user, uErr := p.API.GetUser(request.UserId)
-		if uErr != nil {
-			p.API.LogError(uErr.Error())
-			return
-		}
+	user, uErr := p.API.GetUser(request.UserId)
+	if uErr != nil {
+		p.API.LogError(uErr.Error())
+		return
+	}
 
-		T, _ := p.translation(user)
-		location := p.location(user)
+	T, _ := p.translation(user)
+	location := p.location(user)
 
-		message := request.Submission["message"]
-		target := request.Submission["target"]
-		ttime := request.Submission["time"]
+	message := request.Submission["message"]
+	target := request.Submission["target"]
+	ttime := request.Submission["time"]
 
-		if target == nil {
-			target = T("me")
-		}
+	if target == nil {
+		target = T("me")
+	}
 
-		when := T("in") + " " + T("button.snooze."+ttime.(string))
-		switch ttime.(string) {
-		case "tomorrow":
-			when = T("tomorrow")
-		case "nextweek":
-			when = T("monday")
-		}
+	when := T("in") + " " + T("button.snooze."+ttime.(string))
+	switch ttime.(string) {
+	case "tomorrow":
+		when = T("tomorrow")
+	case "nextweek":
+		when = T("monday")
+	}
 
-		r := &ReminderRequest{
-			TeamId:   request.TeamId,
-			Username: user.Username,
-			Payload:  message.(string),
-			Reminder: Reminder{
-				Id:        model.NewId(),
-				TeamId:    request.TeamId,
-				Username:  user.Username,
-				Message:   message.(string),
-				Completed: p.emptyTime,
-				Target:    target.(string),
-				When:      when,
-			},
-		}
+	r := &ReminderRequest{
+		TeamId:   request.TeamId,
+		Username: user.Username,
+		Payload:  message.(string),
+		Reminder: Reminder{
+			Id:        model.NewId(),
+			TeamId:    request.TeamId,
+			Username:  user.Username,
+			Message:   message.(string),
+			Completed: p.emptyTime,
+			Target:    target.(string),
+			When:      when,
+		},
+	}
 
-		if cErr := p.CreateOccurrences(r); cErr != nil {
-			p.API.LogError(cErr.Error())
-			return
-		}
+	if cErr := p.CreateOccurrences(r); cErr != nil {
+		p.API.LogError(cErr.Error())
+		return
+	}
 
-		if rErr := p.UpsertReminder(r); rErr != nil {
-			p.API.LogError(rErr.Error())
-			return
-		}
+	if rErr := p.UpsertReminder(r); rErr != nil {
+		p.API.LogError(rErr.Error())
+		return
+	}
 
-		if r.Reminder.Target == T("me") {
-			r.Reminder.Target = T("you")
-		}
+	if r.Reminder.Target == T("me") {
+		r.Reminder.Target = T("you")
+	}
 
-		useTo := strings.HasPrefix(r.Reminder.Message, T("to"))
-		var useToString string
-		if useTo {
-			useToString = " " + T("to")
-		} else {
-			useToString = ""
-		}
+	useTo := strings.HasPrefix(r.Reminder.Message, T("to"))
+	var useToString string
+	if useTo {
+		useToString = " " + T("to")
+	} else {
+		useToString = ""
+	}
 
-		var responseParameters = map[string]interface{}{
-			"Target":  r.Reminder.Target,
-			"UseTo":   useToString,
-			"Message": r.Reminder.Message,
-			"When": p.formatWhen(
-				r.Username,
-				r.Reminder.When,
-				r.Reminder.Occurrences[0].Occurrence.In(location).Format(time.RFC3339),
-				false,
-			),
-		}
+	var responseParameters = map[string]interface{}{
+		"Target":  r.Reminder.Target,
+		"UseTo":   useToString,
+		"Message": r.Reminder.Message,
+		"When": p.formatWhen(
+			r.Username,
+			r.Reminder.When,
+			r.Reminder.Occurrences[0].Occurrence.In(location).Format(time.RFC3339),
+			false,
+		),
+	}
 
-		siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
+	siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
 
-		reminder := &model.Post{
-			ChannelId: request.ChannelId,
-			UserId:    p.remindUserId,
-			Props: model.StringInterface{
-				"attachments": []*model.SlackAttachment{
-					{
-						Text: T("schedule.response", responseParameters),
-						Actions: []*model.PostAction{
-							{
-								Id: model.NewId(),
-								Integration: &model.PostActionIntegration{
-									Context: model.StringInterface{
-										"reminder_id":   r.Reminder.Id,
-										"occurrence_id": r.Reminder.Occurrences[0].Id,
-										"action":        "delete/ephemeral",
-									},
-									URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
+	reminder := &model.Post{
+		ChannelId: request.ChannelId,
+		UserId:    p.remindUserId,
+		Props: model.StringInterface{
+			"attachments": []*model.SlackAttachment{
+				{
+					Text: T("schedule.response", responseParameters),
+					Actions: []*model.PostAction{
+						{
+							Id: model.NewId(),
+							Integration: &model.PostActionIntegration{
+								Context: model.StringInterface{
+									"reminder_id":   r.Reminder.Id,
+									"occurrence_id": r.Reminder.Occurrences[0].Id,
+									"action":        "delete/ephemeral",
 								},
-								Type: model.POST_ACTION_TYPE_BUTTON,
-								Name: T("button.delete"),
+								URL: fmt.Sprintf("%s/plugins/%s/delete/ephemeral", siteURL, manifest.Id),
 							},
-							{
-								Id: model.NewId(),
-								Integration: &model.PostActionIntegration{
-									Context: model.StringInterface{
-										"reminder_id":   r.Reminder.Id,
-										"occurrence_id": r.Reminder.Occurrences[0].Id,
-										"action":        "view/ephemeral",
-									},
-									URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
+							Type: model.POST_ACTION_TYPE_BUTTON,
+							Name: T("button.delete"),
+						},
+						{
+							Id: model.NewId(),
+							Integration: &model.PostActionIntegration{
+								Context: model.StringInterface{
+									"reminder_id":   r.Reminder.Id,
+									"occurrence_id": r.Reminder.Occurrences[0].Id,
+									"action":        "view/ephemeral",
 								},
-								Type: model.POST_ACTION_TYPE_BUTTON,
-								Name: T("button.view.reminders"),
+								URL: fmt.Sprintf("%s/plugins/%s/delete/ephemeral", siteURL, manifest.Id),
 							},
+							Type: model.POST_ACTION_TYPE_BUTTON,
+							Name: T("button.view.reminders"),
 						},
 					},
 				},
 			},
-		}
-		p.API.SendEphemeralPost(user.Id, reminder)
-
-		return
+		},
 	}
+	p.API.SendEphemeralPost(user.Id, reminder)
 
-	request := model.PostActionIntegrationRequestFromJson(r.Body)
-
-	switch request.Context["action"] {
-	case "view/ephemeral":
-		p.handleViewEphemeral(w, r, request)
-	case "complete":
-		p.handleComplete(w, r, request)
-	case "complete/list":
-		p.handleCompleteList(w, r, request)
-	case "view/complete/list":
-		p.handleViewCompleteList(w, r, request)
-	case "delete":
-		p.handleDelete(w, r, request)
-	case "delete/ephemeral":
-		p.handleDeleteEphemeral(w, r, request)
-	case "delete/list":
-		p.handleDeleteList(w, r, request)
-	case "delete/complete/list":
-		p.handleDeleteCompleteList(w, r, request)
-	case "snooze":
-		p.handleSnooze(w, r, request)
-	case "snooze/list":
-		p.handleSnoozeList(w, r, request)
-	case "close/list":
-		p.handleCloseList(w, r, request)
-	case "next/reminders", "previous/reminders":
-		p.handleNextReminders(w, r, request)
-	default:
-		response := &model.PostActionIntegrationResponse{}
-		writePostActionIntegrationResponseError(w, response)
-	}
 }
 
-func (p *Plugin) handleViewEphemeral(w http.ResponseWriter, r *http.Request, request *model.PostActionIntegrationRequest) {
+func (p *Plugin) handleViewEphemeral(w http.ResponseWriter, r *http.Request) {
+
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
 
 	user, uErr := p.API.GetUser(request.UserId)
 	if uErr != nil {
@@ -182,7 +178,9 @@ func (p *Plugin) handleViewEphemeral(w http.ResponseWriter, r *http.Request, req
 
 }
 
-func (p *Plugin) handleComplete(w http.ResponseWriter, r *http.Request, request *model.PostActionIntegrationRequest) {
+func (p *Plugin) handleComplete(w http.ResponseWriter, r *http.Request) {
+
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
 
 	reminder := p.GetReminder(request.UserId, request.Context["reminder_id"].(string))
 	user, uErr := p.API.GetUser(request.UserId)
@@ -232,7 +230,9 @@ func (p *Plugin) handleComplete(w http.ResponseWriter, r *http.Request, request 
 
 }
 
-func (p *Plugin) handleDelete(w http.ResponseWriter, r *http.Request, request *model.PostActionIntegrationRequest) {
+func (p *Plugin) handleDelete(w http.ResponseWriter, r *http.Request) {
+
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
 
 	reminder := p.GetReminder(request.UserId, request.Context["reminder_id"].(string))
 	user, uErr := p.API.GetUser(request.UserId)
@@ -265,7 +265,9 @@ func (p *Plugin) handleDelete(w http.ResponseWriter, r *http.Request, request *m
 
 }
 
-func (p *Plugin) handleDeleteEphemeral(w http.ResponseWriter, r *http.Request, request *model.PostActionIntegrationRequest) {
+func (p *Plugin) handleDeleteEphemeral(w http.ResponseWriter, r *http.Request) {
+
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
 
 	reminder := p.GetReminder(request.UserId, request.Context["reminder_id"].(string))
 	user, uErr := p.API.GetUser(request.UserId)
@@ -296,7 +298,9 @@ func (p *Plugin) handleDeleteEphemeral(w http.ResponseWriter, r *http.Request, r
 
 }
 
-func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, request *model.PostActionIntegrationRequest) {
+func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request) {
+
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
 
 	reminder := p.GetReminder(request.UserId, request.Context["reminder_id"].(string))
 	user, uErr := p.API.GetUser(request.UserId)
@@ -412,13 +416,14 @@ func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, request *m
 	}
 }
 
-func (p *Plugin) handleNextReminders(w http.ResponseWriter, r *http.Request, request *model.PostActionIntegrationRequest) {
+func (p *Plugin) handleNextReminders(w http.ResponseWriter, r *http.Request) {
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
 	p.UpdateListReminders(request.UserId, request.PostId, int(request.Context["offset"].(float64)))
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
-func (p *Plugin) handleCompleteList(w http.ResponseWriter, r *http.Request, request *model.PostActionIntegrationRequest) {
-
+func (p *Plugin) handleCompleteList(w http.ResponseWriter, r *http.Request) {
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
 	reminder := p.GetReminder(request.UserId, request.Context["reminder_id"].(string))
 
 	for _, occurrence := range reminder.Occurrences {
@@ -431,12 +436,13 @@ func (p *Plugin) handleCompleteList(w http.ResponseWriter, r *http.Request, requ
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
-func (p *Plugin) handleViewCompleteList(w http.ResponseWriter, r *http.Request, request *model.PostActionIntegrationRequest) {
+func (p *Plugin) handleViewCompleteList(w http.ResponseWriter, r *http.Request) {
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
 	p.ListCompletedReminders(request.UserId, request.PostId)
 }
 
-func (p *Plugin) handleDeleteList(w http.ResponseWriter, r *http.Request, request *model.PostActionIntegrationRequest) {
-
+func (p *Plugin) handleDeleteList(w http.ResponseWriter, r *http.Request) {
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
 	reminder := p.GetReminder(request.UserId, request.Context["reminder_id"].(string))
 
 	for _, occurrence := range reminder.Occurrences {
@@ -448,15 +454,15 @@ func (p *Plugin) handleDeleteList(w http.ResponseWriter, r *http.Request, reques
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
-func (p *Plugin) handleDeleteCompleteList(w http.ResponseWriter, r *http.Request, request *model.PostActionIntegrationRequest) {
-
+func (p *Plugin) handleDeleteCompleteList(w http.ResponseWriter, r *http.Request) {
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
 	p.DeleteCompletedReminders(request.UserId)
 	p.UpdateListReminders(request.UserId, request.PostId, 0)
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
-func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request, request *model.PostActionIntegrationRequest) {
-
+func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request) {
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
 	reminder := p.GetReminder(request.UserId, request.Context["reminder_id"].(string))
 
 	for _, occurrence := range reminder.Occurrences {
@@ -554,7 +560,8 @@ func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request, reques
 	}
 }
 
-func (p *Plugin) handleCloseList(w http.ResponseWriter, r *http.Request, request *model.PostActionIntegrationRequest) {
+func (p *Plugin) handleCloseList(w http.ResponseWriter, r *http.Request) {
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
 	p.API.DeletePost(request.PostId)
 }
 
