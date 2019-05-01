@@ -806,8 +806,10 @@ func (p *Plugin) onEN(when string, user *model.User) (times []time.Time, err err
 
 		if weekDayNum < todayWeekDayNum {
 			day = 7 - (todayWeekDayNum - weekDayNum)
-		} else if weekDayNum >= todayWeekDayNum {
+		} else if weekDayNum == todayWeekDayNum {
 			day = 7 + (weekDayNum - todayWeekDayNum)
+		} else {
+			day = (weekDayNum - todayWeekDayNum)
 		}
 
 		timeUnitSplit := strings.Split(timeUnit, ":")
@@ -972,8 +974,10 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 
 			if weekDayNum < todayWeekDayNum {
 				day = 7 - (todayWeekDayNum - weekDayNum)
-			} else if weekDayNum >= todayWeekDayNum {
+			} else if weekDayNum == todayWeekDayNum {
 				day = 7 + (weekDayNum - todayWeekDayNum)
+			} else {
+				day = (weekDayNum - todayWeekDayNum)
 			}
 
 			timeUnitSplit := strings.Split(timeUnit, ":")
