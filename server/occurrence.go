@@ -430,6 +430,7 @@ func (p *Plugin) inEN(when string, user *model.User) (times []time.Time, err err
 
 	case T("minutes"),
 		T("minute"),
+		T("mins"),
 		T("min"):
 
 		i, e := strconv.Atoi(value)
@@ -805,8 +806,10 @@ func (p *Plugin) onEN(when string, user *model.User) (times []time.Time, err err
 
 		if weekDayNum < todayWeekDayNum {
 			day = 7 - (todayWeekDayNum - weekDayNum)
-		} else if weekDayNum >= todayWeekDayNum {
+		} else if weekDayNum == todayWeekDayNum {
 			day = 7 + (weekDayNum - todayWeekDayNum)
+		} else {
+			day = (weekDayNum - todayWeekDayNum)
 		}
 
 		timeUnitSplit := strings.Split(timeUnit, ":")
@@ -971,8 +974,10 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 
 			if weekDayNum < todayWeekDayNum {
 				day = 7 - (todayWeekDayNum - weekDayNum)
-			} else if weekDayNum >= todayWeekDayNum {
+			} else if weekDayNum == todayWeekDayNum {
 				day = 7 + (weekDayNum - todayWeekDayNum)
+			} else {
+				day = (weekDayNum - todayWeekDayNum)
 			}
 
 			timeUnitSplit := strings.Split(timeUnit, ":")
@@ -1046,18 +1051,22 @@ func (p *Plugin) freeFormEN(when string, user *model.User) (times []time.Time, e
 
 	whenTrim := strings.Trim(when, " ")
 	chronoUnit := strings.ToLower(whenTrim)
-	dateTimeSplit := strings.Split(chronoUnit, " "+T("at")+" ")
 	chronoTime := "9:00AM"
-	chronoDate := dateTimeSplit[0]
+	chronoDate := chronoUnit
 
-	if len(dateTimeSplit) > 1 {
-		chronoTime = dateTimeSplit[1]
+	if strings.Contains(chronoUnit, T("at")) {
+		dateTimeSplit := strings.Split(chronoUnit, " "+T("at")+" ")
+		chronoDate = dateTimeSplit[0]
+		if len(dateTimeSplit) > 1 {
+			chronoTime = dateTimeSplit[1]
+		}
 	} else {
-		_, ntErr := p.normalizeTime(dateTimeSplit[0], user)
+		_, ntErr := p.normalizeTime(chronoDate, user)
 		if ntErr == nil {
-			return p.at(T("at")+" "+dateTimeSplit[0], user)
+			return p.at(T("at")+" "+chronoDate, user)
 		}
 	}
+
 	dateUnit, ndErr := p.normalizeDate(chronoDate, user)
 	if ndErr != nil {
 		return []time.Time{}, ndErr
