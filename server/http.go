@@ -149,7 +149,7 @@ func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {
 									"occurrence_id": r.Reminder.Occurrences[0].Id,
 									"action":        "view/ephemeral",
 								},
-								URL: fmt.Sprintf("%s/plugins/%s/delete/ephemeral", siteURL, manifest.Id),
+								URL: fmt.Sprintf("%s/plugins/%s/view/ephemeral", siteURL, manifest.Id),
 							},
 							Type: model.POST_ACTION_TYPE_BUTTON,
 							Name: T("button.view.reminders"),
