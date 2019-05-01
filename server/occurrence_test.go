@@ -611,8 +611,7 @@ func TestFreeForm(t *testing.T) {
 		times, err = p.freeFormEN("everyday at 3:23am", user)
 		assert.Nil(t, err)
 		if err == nil {
-			assert.True(t, times[0].In(location).Weekday().String() == time.Now().In(location).AddDate(0, 0, 1).Weekday().String() &&
-				times[0].In(location).Hour() == 3 && times[0].In(location).Minute() == 23)
+			assert.True(t, times[0].In(location).Hour() == 3 && times[0].In(location).Minute() == 23)
 		}
 
 		times, err = p.freeFormEN("mondays", user)

@@ -800,18 +800,6 @@ func (p *Plugin) onEN(when string, user *model.User) (times []time.Time, err err
 		T("friday"),
 		T("saturday"):
 
-		todayWeekDayNum := int(time.Now().Weekday())
-		weekDayNum := p.weekDayNumber(dateUnit, user)
-		day := 0
-
-		if weekDayNum < todayWeekDayNum {
-			day = 7 - (todayWeekDayNum - weekDayNum)
-		} else if weekDayNum == todayWeekDayNum {
-			day = 7 + (weekDayNum - todayWeekDayNum)
-		} else {
-			day = (weekDayNum - todayWeekDayNum)
-		}
-
 		timeUnitSplit := strings.Split(timeUnit, ":")
 		hr, _ := strconv.Atoi(timeUnitSplit[0])
 		ampm := strings.ToUpper(T("am"))
@@ -828,6 +816,23 @@ func (p *Plugin) onEN(when string, user *model.User) (times []time.Time, err err
 		wallClock, pErr := time.ParseInLocation(time.Kitchen, timeUnit, location)
 		if pErr != nil {
 			return []time.Time{}, pErr
+		}
+
+		todayWeekDayNum := int(time.Now().Weekday())
+		weekDayNum := p.weekDayNumber(dateUnit, user)
+		day := 0
+
+		if weekDayNum < todayWeekDayNum {
+			day = 7 - (todayWeekDayNum - weekDayNum)
+		} else if weekDayNum == todayWeekDayNum {
+			todayTime := time.Now().In(location)
+			if wallClock.Hour() >= todayTime.Hour() && wallClock.Minute() > todayTime.Minute() {
+				day = weekDayNum - todayWeekDayNum
+			} else {
+				day = 7 + (weekDayNum - todayWeekDayNum)
+			}
+		} else {
+			day = weekDayNum - todayWeekDayNum
 		}
 
 		nextDay := time.Now().In(location).AddDate(0, 0, day)
@@ -932,10 +937,8 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 
 		switch dateUnit {
 		case T("day"):
-			d := 1
-			if everyOther {
-				d = 2
-			}
+
+			day := 0
 
 			timeUnitSplit := strings.Split(timeUnit, ":")
 			hr, _ := strconv.Atoi(timeUnitSplit[0])
@@ -955,7 +958,22 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 				return []time.Time{}, pErr
 			}
 
-			nextDay := time.Now().In(location).AddDate(0, 0, d)
+			todayTime := time.Now().In(location)
+			if wallClock.Hour() >= todayTime.Hour() && wallClock.Minute() > todayTime.Minute() {
+				if everyOther {
+					day = 1
+				} else {
+					day = 0
+				}
+			} else {
+				if everyOther {
+					day = 2
+				} else {
+					day = 1
+				}
+			}
+
+			nextDay := time.Now().In(location).AddDate(0, 0, day)
 			occurrence := wallClock.In(location).AddDate(nextDay.Year(), int(nextDay.Month())-1, nextDay.Day()-1)
 			times = append(times, p.chooseClosest(user, &occurrence, false).UTC())
 
@@ -972,14 +990,6 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 			weekDayNum := p.weekDayNumber(dateUnit, user)
 			day := 0
 
-			if weekDayNum < todayWeekDayNum {
-				day = 7 - (todayWeekDayNum - weekDayNum)
-			} else if weekDayNum == todayWeekDayNum {
-				day = 7 + (weekDayNum - todayWeekDayNum)
-			} else {
-				day = (weekDayNum - todayWeekDayNum)
-			}
-
 			timeUnitSplit := strings.Split(timeUnit, ":")
 			hr, _ := strconv.Atoi(timeUnitSplit[0])
 			ampm := strings.ToUpper(T("am"))
@@ -996,6 +1006,19 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 			wallClock, pErr := time.ParseInLocation(time.Kitchen, timeUnit, location)
 			if pErr != nil {
 				return []time.Time{}, pErr
+			}
+
+			if weekDayNum < todayWeekDayNum {
+				day = 7 - (todayWeekDayNum - weekDayNum)
+			} else if weekDayNum == todayWeekDayNum {
+				todayTime := time.Now().In(location)
+				if wallClock.Hour() >= todayTime.Hour() && wallClock.Minute() > todayTime.Minute() {
+					day = weekDayNum - todayWeekDayNum
+				} else {
+					day = 7 + (weekDayNum - todayWeekDayNum)
+				}
+			} else {
+				day = weekDayNum - todayWeekDayNum
 			}
 
 			nextDay := time.Now().In(location).AddDate(0, 0, day)
