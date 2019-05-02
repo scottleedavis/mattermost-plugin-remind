@@ -1,0 +1,13 @@
+{
+  "demo.testintl": "Esta es la cuerda española",
+  "plugin.name": "Complemento de Demostración",
+  "plugin.upload": "Subir usando el plugin demo",
+  "root.clicktoclose": "Haga clic en cualquier lugar para cerrar.",
+  "root.triggered": "Has activado el componente raíz del complemento de demostración.",
+  "sidebar.demo": "Complemento de Demostración:",
+  "sidebar.disabled": "Discapacitado",
+  "sidebar.enabled": "Habilitado",
+  "tooltip.message": "Esta es una información sobre herramientas personalizada del complemento de demostración",
+  "useractions.action": "Acción",
+  "useractions.demo": "Complemento de Demostración: "
+}
