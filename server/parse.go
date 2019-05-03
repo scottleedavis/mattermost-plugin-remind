@@ -58,6 +58,9 @@ func (p *Plugin) ParseRequest(request *ReminderRequest) error {
 		message = strings.Replace(message, commandSplit[0], "", 1)
 		message = strings.Trim(message, " \"")
 
+		if message == "" {
+			return errors.New("no message parsed")
+		}
 		request.Reminder.Message = message
 
 		return nil
