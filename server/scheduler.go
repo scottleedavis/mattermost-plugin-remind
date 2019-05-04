@@ -53,6 +53,10 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest, channelId string) (*
 		request.Reminder.Target = T("you")
 	}
 
+	t := ""
+	if len(request.Reminder.Occurrences) > 0 {
+		t = request.Reminder.Occurrences[0].Occurrence.In(location).Format(time.RFC3339)
+	}
 	var responseParameters = map[string]interface{}{
 		"Target":  request.Reminder.Target,
 		"UseTo":   useToString,
@@ -60,7 +64,7 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest, channelId string) (*
 		"When": p.formatWhen(
 			request.Username,
 			request.Reminder.When,
-			request.Reminder.Occurrences[0].Occurrence.In(location).Format(time.RFC3339),
+			t,
 			false,
 		),
 	}

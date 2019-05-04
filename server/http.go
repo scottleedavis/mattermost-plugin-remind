@@ -60,6 +60,11 @@ func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {
 	if target == nil {
 		target = T("me")
 	}
+	if target != T("me") &&
+		!strings.HasPrefix(target.(string), "@") &&
+		!strings.HasPrefix(target.(string), "~") {
+		target = "@" + target.(string)
+	}
 
 	when := T("in") + " " + T("button.snooze."+ttime.(string))
 	switch ttime.(string) {
@@ -106,6 +111,10 @@ func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {
 		useToString = ""
 	}
 
+	t := ""
+	if len(r.Reminder.Occurrences) > 0 {
+		t = r.Reminder.Occurrences[0].Occurrence.In(location).Format(time.RFC3339)
+	}
 	var responseParameters = map[string]interface{}{
 		"Target":  r.Reminder.Target,
 		"UseTo":   useToString,
@@ -113,7 +122,7 @@ func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {
 		"When": p.formatWhen(
 			r.Username,
 			r.Reminder.When,
-			r.Reminder.Occurrences[0].Occurrence.In(location).Format(time.RFC3339),
+			t,
 			false,
 		),
 	}

@@ -200,8 +200,11 @@ func (p *Plugin) addOccurrences(request *ReminderRequest, occurrences []time.Tim
 				if rErr != nil {
 					return rErr
 				}
-
-				if tUser, tErr := p.API.GetUserByUsername(request.Reminder.Target[1:]); tErr != nil {
+				target := request.Reminder.Target
+				if len(target) > 0 {
+					target = target[1:]
+				}
+				if tUser, tErr := p.API.GetUserByUsername(target); tErr != nil {
 					return tErr
 				} else {
 					if rUser.Id != tUser.Id {
@@ -323,6 +326,9 @@ func (p *Plugin) inEN(when string, user *model.User) (times []time.Time, err err
 
 	when = strings.Trim(when, " ")
 	whenSplit := strings.Split(when, " ")
+	if len(whenSplit) < 2 {
+		return []time.Time{}, errors.New("empty when split")
+	}
 	value := whenSplit[1]
 	units := whenSplit[len(whenSplit)-1]
 	if len(whenSplit) == 2 {
@@ -577,6 +583,9 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 	if strings.Contains(when, T("every")) {
 
 		dateTimeSplit := strings.Split(when, " "+T("every")+" ")
+		if len(dateTimeSplit) < 2 {
+			return []time.Time{}, errors.New("empty date time split")
+		}
 		return p.every(T("every")+" "+dateTimeSplit[1]+" "+dateTimeSplit[0], user)
 
 	} else if len(whenSplit) >= 3 &&
