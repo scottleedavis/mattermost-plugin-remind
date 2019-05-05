@@ -62,7 +62,6 @@ func TestScheduleReminders(t *testing.T) {
 	//
 	//})
 
-
 	///////////////////////////////////////////////////////
 
 	// request := &model.ReminderRequest{}
