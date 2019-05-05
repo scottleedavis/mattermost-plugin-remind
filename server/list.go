@@ -247,8 +247,8 @@ func (p *Plugin) listControl(
 
 	T, _ := p.translation(user)
 
-	if p.siteURL == "" {
-		p.API.LogError("SiteURL not set.")
+	if p.URL == "" {
+		p.API.LogError("URL not set.")
 		return []*model.SlackAttachment{}
 	}
 	reminderCount := map[string]interface{}{
@@ -280,7 +280,7 @@ func (p *Plugin) listControl(
 							"action": "next/reminders",
 							"offset": endOffset + 1,
 						},
-						URL: fmt.Sprintf("%s/plugins/%s/next/reminders", p.siteURL, manifest.Id),
+						URL: fmt.Sprintf("%s/plugins/%s/next/reminders", p.URL, manifest.Id),
 					},
 					Type: model.POST_ACTION_TYPE_BUTTON,
 					Name: T("button.next.reminders", reminderCount),
@@ -295,7 +295,7 @@ func (p *Plugin) listControl(
 							"action": "previous/reminders",
 							"offset": offset - RemindersPerPage,
 						},
-						URL: fmt.Sprintf("%s/plugins/%s/next/reminders", p.siteURL, manifest.Id),
+						URL: fmt.Sprintf("%s/plugins/%s/next/reminders", p.URL, manifest.Id),
 					},
 					Type: model.POST_ACTION_TYPE_BUTTON,
 					Name: T("button.previous.reminders", reminderCount),
@@ -310,7 +310,7 @@ func (p *Plugin) listControl(
 							"action": "previous/reminders",
 							"offset": offset - RemindersPerPage,
 						},
-						URL: fmt.Sprintf("%s/plugins/%s/next/reminders", p.siteURL, manifest.Id),
+						URL: fmt.Sprintf("%s/plugins/%s/next/reminders", p.URL, manifest.Id),
 					},
 					Type: model.POST_ACTION_TYPE_BUTTON,
 					Name: T("button.previous.reminders", reminderCount),
@@ -322,7 +322,7 @@ func (p *Plugin) listControl(
 							"action": "next/reminders",
 							"offset": endOffset + 1,
 						},
-						URL: fmt.Sprintf("%s/plugins/%s/next/reminders", p.siteURL, manifest.Id),
+						URL: fmt.Sprintf("%s/plugins/%s/next/reminders", p.URL, manifest.Id),
 					},
 					Type: model.POST_ACTION_TYPE_BUTTON,
 					Name: T("button.next.reminders", reminderCount),
@@ -340,7 +340,7 @@ func (p *Plugin) listControl(
 					Context: model.StringInterface{
 						"action": "view/complete/list",
 					},
-					URL: fmt.Sprintf("%s/plugins/%s/view/complete/list", p.siteURL, manifest.Id),
+					URL: fmt.Sprintf("%s/plugins/%s/view/complete/list", p.URL, manifest.Id),
 				},
 				Type: model.POST_ACTION_TYPE_BUTTON,
 				Name: T("button.view.complete"),
@@ -352,7 +352,7 @@ func (p *Plugin) listControl(
 					Context: model.StringInterface{
 						"action": "delete/complete/list",
 					},
-					URL: fmt.Sprintf("%s/plugins/%s/delete/complete/list", p.siteURL, manifest.Id),
+					URL: fmt.Sprintf("%s/plugins/%s/delete/complete/list", p.URL, manifest.Id),
 				},
 				Type: model.POST_ACTION_TYPE_BUTTON,
 				Name: T("button.delete.complete"),
@@ -366,7 +366,7 @@ func (p *Plugin) listControl(
 				Context: model.StringInterface{
 					"action": "close/list",
 				},
-				URL: fmt.Sprintf("%s/plugins/%s/close/list", p.siteURL, manifest.Id),
+				URL: fmt.Sprintf("%s/plugins/%s/close/list", p.URL, manifest.Id),
 			},
 			Name: T("button.close.list"),
 			Type: "action",
@@ -383,8 +383,8 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 	location := p.location(user)
 	T, _ := p.translation(user)
 
-	if p.siteURL == "" {
-		p.API.LogError("SiteURL not set.")
+	if p.URL == "" {
+		p.API.LogError("URL not set.")
 		return &model.SlackAttachment{}
 	}
 	reminder := p.findReminder(reminders, occurrence)
@@ -424,7 +424,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 								"occurrence_id": occurrence.Id,
 								"action":        "complete/list",
 							},
-							URL: fmt.Sprintf("%s/plugins/%s/complete/list", p.siteURL, manifest.Id),
+							URL: fmt.Sprintf("%s/plugins/%s/complete/list", p.URL, manifest.Id),
 						},
 						Type: model.POST_ACTION_TYPE_BUTTON,
 						Name: T("button.complete"),
@@ -436,7 +436,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 								"occurrence_id": occurrence.Id,
 								"action":        "delete/list",
 							},
-							URL: fmt.Sprintf("%s/plugins/%s/delete/list", p.siteURL, manifest.Id),
+							URL: fmt.Sprintf("%s/plugins/%s/delete/list", p.URL, manifest.Id),
 						},
 						Name: T("button.delete"),
 						Type: model.POST_ACTION_TYPE_BUTTON,
@@ -460,7 +460,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 								"occurrence_id": occurrence.Id,
 								"action":        "delete/list",
 							},
-							URL: fmt.Sprintf("%s/plugins/%s/delete/list", p.siteURL, manifest.Id),
+							URL: fmt.Sprintf("%s/plugins/%s/delete/list", p.URL, manifest.Id),
 						},
 						Name: T("button.delete"),
 						Type: model.POST_ACTION_TYPE_BUTTON,
@@ -484,7 +484,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 								"occurrence_id": occurrence.Id,
 								"action":        "complete/list",
 							},
-							URL: fmt.Sprintf("%s/plugins/%s/complete/list", p.siteURL, manifest.Id),
+							URL: fmt.Sprintf("%s/plugins/%s/complete/list", p.URL, manifest.Id),
 						},
 						Type: model.POST_ACTION_TYPE_BUTTON,
 						Name: T("button.complete"),
@@ -496,7 +496,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 								"occurrence_id": occurrence.Id,
 								"action":        "delete/list",
 							},
-							URL: fmt.Sprintf("%s/plugins/%s/delete/list", p.siteURL, manifest.Id),
+							URL: fmt.Sprintf("%s/plugins/%s/delete/list", p.URL, manifest.Id),
 						},
 						Name: T("button.delete"),
 						Type: model.POST_ACTION_TYPE_BUTTON,
@@ -508,7 +508,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 								"occurrence_id": occurrence.Id,
 								"action":        "snooze/list",
 							},
-							URL: fmt.Sprintf("%s/plugins/%s/snooze/list", p.siteURL, manifest.Id),
+							URL: fmt.Sprintf("%s/plugins/%s/snooze/list", p.URL, manifest.Id),
 						},
 						Name: T("button.snooze"),
 						Type: "select",
@@ -554,7 +554,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 								"occurrence_id": occurrence.Id,
 								"action":        "complete/list",
 							},
-							URL: fmt.Sprintf("%s/plugins/%s/complete/list", p.siteURL, manifest.Id),
+							URL: fmt.Sprintf("%s/plugins/%s/complete/list", p.URL, manifest.Id),
 						},
 						Type: model.POST_ACTION_TYPE_BUTTON,
 						Name: T("button.complete"),
@@ -566,7 +566,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 								"occurrence_id": occurrence.Id,
 								"action":        "delete/list",
 							},
-							URL: fmt.Sprintf("%s/plugins/%s/delete/list", p.siteURL, manifest.Id),
+							URL: fmt.Sprintf("%s/plugins/%s/delete/list", p.URL, manifest.Id),
 						},
 						Name: T("button.delete"),
 						Type: model.POST_ACTION_TYPE_BUTTON,
