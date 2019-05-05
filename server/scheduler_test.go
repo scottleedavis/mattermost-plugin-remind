@@ -2,20 +2,68 @@ package main
 
 import (
 	"testing"
-	// "github.com/mattermost/mattermost-server/model"
-	// "github.com/mattermost/mattermost-server/plugin/plugintest"
-	// "github.com/stretchr/testify/assert"
-	// "github.com/stretchr/testify/mock"
+	//"encoding/json"
+	//"time"
+	//
+	//"github.com/mattermost/mattermost-server/model"
+	//"github.com/mattermost/mattermost-server/plugin/plugintest"
+	//"github.com/stretchr/testify/assert"
+	//"github.com/stretchr/testify/mock"
 )
 
 func TestScheduleReminders(t *testing.T) {
-	// th := Setup()
-	// defer th.TearDown()
 
-	// th.Server.InitReminders()
-	// defer th.Server.StopReminders()
-	// user, _ := th.App.GetUserByUsername(model.REMIND_BOTNAME)
-	// T := utils.GetUserTranslations(user.Locale)
+	//user := &model.User{
+	//	Email:    "-@-.-",
+	//	Nickname: "TestUser",
+	//	Password: model.NewId(),
+	//	Username: "testuser",
+	//	Roles:    model.SYSTEM_USER_ROLE_ID,
+	//	Locale:   "en",
+	//}
+	//
+	//occurrences := []Occurrence{
+	//	{
+	//		Id: "idididid",
+	//		ReminderId: "ididididid",
+	//		Occurrence:  time.Now(),
+	//	},
+	//}
+	//stringOccurrences, _ := json.Marshal(occurrences)
+	//setupAPI := func() *plugintest.API {
+	//	api := &plugintest.API{}
+	//	api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
+	//	api.On("LogInfo", mock.Anything).Maybe()
+	//	api.On("GetUserByUsername", mock.AnythingOfType("string")).Return(user, nil)
+	//	api.On("KVGet", mock.AnythingOfType("string")).Return(stringOccurrences, nil)
+	//	api.On("KVSet", mock.AnythingOfType("string"), mock.Anything).Maybe()
+	//	return api
+	//}
+	//
+	//t.Run("if scheduled reminder is sane" , func(t *testing.T) {
+	//
+	//	api := setupAPI()
+	//	defer api.AssertExpectations(t)
+	//
+	//	p := &Plugin{}
+	//	p.API = api
+	//
+	//	channel := &model.Channel{
+	//		Id: "idididid",
+	//	}
+	//
+	//	request := &ReminderRequest{
+	//		Username:   user.Username,
+	//		Payload:    "me foo in 1 seconds",
+	//	}
+	//	post, err := p.ScheduleReminder(request, channel.Id)
+	//	assert.Nil(t, err)
+	//	assert.Equal(t, len(post.Attachments()), 2)
+	//
+	//})
+
+
+	///////////////////////////////////////////////////////
 
 	// request := &model.ReminderRequest{}
 	// request.UserId = user.Id
