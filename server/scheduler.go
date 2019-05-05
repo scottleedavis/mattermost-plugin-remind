@@ -69,8 +69,6 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest, channelId string) (*
 		),
 	}
 
-	siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
-
 	return &model.Post{
 		ChannelId: channelId,
 		UserId:    p.remindUserId,
@@ -87,7 +85,7 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest, channelId string) (*
 									"occurrence_id": request.Reminder.Occurrences[0].Id,
 									"action":        "delete/ephemeral",
 								},
-								URL: fmt.Sprintf("%s/plugins/%s/delete/ephemeral", siteURL, manifest.Id),
+								URL: fmt.Sprintf("%s/plugins/%s/delete/ephemeral", p.siteURL, manifest.Id),
 							},
 							Type: model.POST_ACTION_TYPE_BUTTON,
 							Name: T("button.delete"),
@@ -100,7 +98,7 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest, channelId string) (*
 									"occurrence_id": request.Reminder.Occurrences[0].Id,
 									"action":        "view/ephemeral",
 								},
-								URL: fmt.Sprintf("%s/plugins/%s/view/ephemeral", siteURL, manifest.Id),
+								URL: fmt.Sprintf("%s/plugins/%s/view/ephemeral", p.siteURL, manifest.Id),
 							},
 							Type: model.POST_ACTION_TYPE_BUTTON,
 							Name: T("button.view.reminders"),
@@ -116,11 +114,10 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest, channelId string) (*
 func (p *Plugin) InteractiveSchedule(triggerId string, user *model.User) {
 
 	T, _ := p.translation(user)
-	siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
 
 	dialogRequest := model.OpenDialogRequest{
 		TriggerId: triggerId,
-		URL:       fmt.Sprintf("%s/plugins/%s/dialog", siteURL, manifest.Id),
+		URL:       fmt.Sprintf("%s/plugins/%s/dialog", p.siteURL, manifest.Id),
 		Dialog: model.Dialog{
 			Title:       T("schedule.reminder"),
 			CallbackId:  model.NewId(),
