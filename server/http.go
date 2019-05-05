@@ -127,8 +127,6 @@ func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {
 		),
 	}
 
-	siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
-
 	reminder := &model.Post{
 		ChannelId: request.ChannelId,
 		UserId:    p.remindUserId,
@@ -145,7 +143,7 @@ func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {
 									"occurrence_id": r.Reminder.Occurrences[0].Id,
 									"action":        "delete/ephemeral",
 								},
-								URL: fmt.Sprintf("%s/plugins/%s/delete/ephemeral", siteURL, manifest.Id),
+								URL: fmt.Sprintf("%s/plugins/%s/delete/ephemeral", p.siteURL, manifest.Id),
 							},
 							Type: model.POST_ACTION_TYPE_BUTTON,
 							Name: T("button.delete"),
@@ -158,7 +156,7 @@ func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {
 									"occurrence_id": r.Reminder.Occurrences[0].Id,
 									"action":        "view/ephemeral",
 								},
-								URL: fmt.Sprintf("%s/plugins/%s/view/ephemeral", siteURL, manifest.Id),
+								URL: fmt.Sprintf("%s/plugins/%s/view/ephemeral", p.siteURL, manifest.Id),
 							},
 							Type: model.POST_ACTION_TYPE_BUTTON,
 							Name: T("button.view.reminders"),

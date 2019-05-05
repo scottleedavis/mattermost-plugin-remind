@@ -54,6 +54,7 @@ func (p *Plugin) OnActivate() error {
 	p.emptyTime = time.Time{}.AddDate(1, 1, 1)
 	p.supportedLocales = []string{"en"}
 	p.ServerConfig = p.API.GetConfig()
+	p.siteURL = "http://127.0.0.1" + fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.ListenAddress)
 
 	p.Run()
 
