@@ -9,5 +9,6 @@
   "sidebar.enabled": "Enabled",
   "tooltip.message": "This is a custom tooltip from the Demo Plugin",
   "useractions.action": "Action",
-  "useractions.demo": "Demo Plugin: "
+  "useractions.demo": "Demo Plugin: ",
+  "submenu.message": "Remind me about this"
 }

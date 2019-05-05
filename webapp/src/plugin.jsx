@@ -1,6 +1,6 @@
-import React from 'react';
+// import React from 'react';
 
-import {FormattedMessage} from 'react-intl';
+// import {FormattedMessage} from 'react-intl';
 
 import en from 'i18n/en.json';
 
@@ -9,9 +9,11 @@ import es from 'i18n/es.json';
 import {id as pluginId} from './manifest';
 
 import Root from './components/root';
+
 // import BottomTeamSidebar from './components/bottom_team_sidebar';
-import LeftSidebarHeader from './components/left_sidebar_header';
+// import LeftSidebarHeader from './components/left_sidebar_header';
 import SubMenu from './components/sub_menu';
+
 // import LinkTooltip from './components/link_tooltip';
 // import UserAttributes from './components/user_attributes';
 // import UserActions from './components/user_actions';
@@ -22,12 +24,14 @@ import SubMenu from './components/sub_menu';
 //     FileUploadMethodIcon,
 // } from './components/icons';
 import {
-    mainMenuAction,
-    channelHeaderButtonAction,
-    fileUploadMethodAction,
-    postDropdownMenuAction,
-    websocketStatusChange,
-    getStatus,
+
+// mainMenuAction,
+// channelHeaderButtonAction,
+// fileUploadMethodAction,
+// postDropdownMenuAction,
+
+// websocketStatusChange,
+// getStatus,
 } from './actions';
 import reducer from './reducer';
 
@@ -42,8 +46,9 @@ function getTranslations(locale) {
 }
 
 export default class DemoPlugin {
-    initialize(registry, store) {
+    initialize(registry) { //, store) {
         registry.registerRootComponent(Root);
+
         // registry.registerPopoverUserAttributesComponent(UserAttributes);
         // registry.registerPopoverUserActionsComponent(UserActions);
         // registry.registerLeftSidebarHeaderComponent(LeftSidebarHeader);
@@ -74,13 +79,13 @@ export default class DemoPlugin {
 
         registry.registerPostDropdownMenuAction(SubMenu);
 
-        registry.registerPostDropdownMenuAction(
-            <FormattedMessage
-                id='plugin.name'
-                defaultMessage='Demo Plugin'
-            />,
-            () => store.dispatch(postDropdownMenuAction()),
-        );
+        // registry.registerPostDropdownMenuAction(
+        //     <FormattedMessage
+        //         id='plugin.name'
+        //         defaultMessage='Demo Plugin'
+        //     />,
+        //     () => store.dispatch(postDropdownMenuAction()),
+        // );
 
         // registry.registerFileUploadMethod(
         //     <FileUploadMethodIcon/>,
