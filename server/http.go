@@ -446,6 +446,7 @@ func (p *Plugin) handleCompleteList(w http.ResponseWriter, r *http.Request) {
 func (p *Plugin) handleViewCompleteList(w http.ResponseWriter, r *http.Request) {
 	request := model.PostActionIntegrationRequestFromJson(r.Body)
 	p.ListCompletedReminders(request.UserId, request.PostId)
+	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
 func (p *Plugin) handleDeleteList(w http.ResponseWriter, r *http.Request) {
@@ -570,6 +571,7 @@ func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request) {
 func (p *Plugin) handleCloseList(w http.ResponseWriter, r *http.Request) {
 	request := model.PostActionIntegrationRequestFromJson(r.Body)
 	p.API.DeletePost(request.PostId)
+	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
 func writePostActionIntegrationResponseOk(w http.ResponseWriter, response *model.PostActionIntegrationResponse) {
