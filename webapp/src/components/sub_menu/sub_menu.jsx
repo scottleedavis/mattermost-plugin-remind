@@ -1,24 +1,27 @@
 import React from 'react';
+
 // import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 import {FormattedMessage} from 'react-intl';
 
-// LeftSidebarHeader is a pure component, later connected to the Redux store so as to
-// show the plugin's enabled / disabled status.
 export default class SubMenu extends React.PureComponent {
     static propTypes = {
         display: PropTypes.bool,
+        post: PropTypes.object,
+        postId: PropTypes.string,
     };
-
-    // state = {display: this.props.display};
 
     constructor(props) {
         super(props);
+
+        console.log(this.props.post); //eslint-disable-line
+        console.log(this.props.postId); //eslint-disable-line
         this.state = {
             display: this.props.display || false,
         };
-        this.handleMouseEnter = this.handleMouseEnter.bind(this);
-        this.handleMouseLeave = this.handleMouseLeave.bind(this);
+
+        // this.handleMouseEnter = this.handleMouseEnter.bind(this);
+        // this.handleMouseLeave = this.handleMouseLeave.bind(this);
     }
 
     handleMouseEnter() {
@@ -57,11 +60,15 @@ export default class SubMenu extends React.PureComponent {
             right: '200px',
         };
 
+        // console.log(this.props.post); //eslint-disable-line
+        console.log(this.props.postId); //eslint-disable-line
+
         return (
             <div
                 style={style}
-                onMouseEnter={this.handleMouseEnter}
-                onMouseLeave={this.handleMouseLeave}
+
+                // onMouseEnter={this.handleMouseEnter}
+                // onMouseLeave={this.handleMouseLeave}
             >
                 {this.state.display ?
                     <ul

@@ -28,7 +28,7 @@ import {
 // mainMenuAction,
 // channelHeaderButtonAction,
 // fileUploadMethodAction,
-// postDropdownMenuAction,
+//     postDropdownMenuAction,
 
 // websocketStatusChange,
 // getStatus,
@@ -45,7 +45,7 @@ function getTranslations(locale) {
     return {};
 }
 
-export default class DemoPlugin {
+export default class RemindPlugin {
     initialize(registry) { //, store) {
         registry.registerRootComponent(Root);
 
@@ -77,7 +77,10 @@ export default class DemoPlugin {
         //     <MainMenuMobileIcon/>,
         // );
 
-        registry.registerPostDropdownMenuAction(SubMenu);
+        registry.registerPostDropdownMenuAction(
+            SubMenu,
+            () => console.log('action'), //eslint-disable-line
+        );
 
         // registry.registerPostDropdownMenuAction(
         //     <FormattedMessage
