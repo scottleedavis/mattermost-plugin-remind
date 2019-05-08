@@ -10,7 +10,9 @@ _requires Mattermost 5.10 or greater_
 
 1) Go to the [releases page](https://github.com/scottleedavis/mattermost-plugin-remind/releases) of this GitHub repository and download the latest release for your Mattermost server.
 2) Upload this file in the Mattermost System Console > Plugins > Management page to install the plugin. To learn more about how to upload a plugin, see the documentation.
-    
+3) For a better cross timezone experience, enable Experimental timezone support.  `System Console -> Experimental Features -> Timezone  = true`
+
+
 ### Usage
 
 See the full list of [Usage Examples](https://github.com/scottleedavis/mattermost-plugin-remind/wiki/Usage) in the [wiki](https://github.com/scottleedavis/mattermost-plugin-remind/wiki) 
@@ -23,9 +25,6 @@ See the full list of [Usage Examples](https://github.com/scottleedavis/mattermos
   * `/remind [who] [what] (on) [(monday-sunday|month&day|m/d/y|d.m.y)] (at) [time]`
   * `/remind [who] [what] every (other) [monday-sunday|month&day|m/d|d.m] (at) [time]`
 * `/remind [who] [when] [what]`
-
-For a better cross timezone experience, enable Experimental timezone support.
-`System Console -> Experimental Features -> Timezone  = true`
 
 ### Building 
 
