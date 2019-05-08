@@ -24,10 +24,10 @@ function getTranslations(locale) {
 }
 
 export default class RemindPlugin {
-    initialize(registry) {
+    initialize(registry, store) {
         registry.registerPostDropdownMenuAction(
             <RemindMenuItem/>,
-            (postId) => postDropdownMenuAction(postId),
+            (postId) => store.dispatch(postDropdownMenuAction(postId)),
         );
 
         // registry.registerReducer(reducer);

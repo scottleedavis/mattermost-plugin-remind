@@ -2,15 +2,14 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
-	"fmt"
 
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/plugin/plugintest"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/assert"
-
+	"github.com/stretchr/testify/mock"
 )
 
 func TestTriggerReminders(t *testing.T) {
@@ -23,24 +22,24 @@ func TestTriggerReminders(t *testing.T) {
 		Roles:    model.SYSTEM_USER_ROLE_ID,
 		Locale:   "en",
 	}
-	testTime :=  time.Now().UTC().Round(time.Second)
+	testTime := time.Now().UTC().Round(time.Second)
 
 	occurrences := []Occurrence{
 		{
-			Id: model.NewId(),
+			Id:         model.NewId(),
 			ReminderId: model.NewId(),
-			Occurrence:  testTime,
+			Occurrence: testTime,
 		},
 	}
 
 	reminders := []Reminder{
 		{
-			Id:        model.NewId(),
-			TeamId:    model.NewId(),
-			Username:  user.Username,
-			Message:   "Hello",
-			Target:    "me",
-			When:      "in one minute",
+			Id:          model.NewId(),
+			TeamId:      model.NewId(),
+			Username:    user.Username,
+			Message:     "Hello",
+			Target:      "me",
+			When:        "in one minute",
 			Occurrences: occurrences,
 		},
 	}
@@ -80,7 +79,6 @@ func TestTriggerReminders(t *testing.T) {
 		p := &Plugin{}
 		p.API = api
 
-
 		p.TriggerReminders()
 
 	})
@@ -97,24 +95,24 @@ func TestGetReminder(t *testing.T) {
 		Roles:    model.SYSTEM_USER_ROLE_ID,
 		Locale:   "en",
 	}
-	testTime :=  time.Now().UTC().Round(time.Second)
+	testTime := time.Now().UTC().Round(time.Second)
 
 	occurrences := []Occurrence{
 		{
-			Id: model.NewId(),
+			Id:         model.NewId(),
 			ReminderId: model.NewId(),
-			Occurrence:  testTime,
+			Occurrence: testTime,
 		},
 	}
 
 	reminders := []Reminder{
 		{
-			Id:        model.NewId(),
-			TeamId:    model.NewId(),
-			Username:  user.Username,
-			Message:   "Hello",
-			Target:    "me",
-			When:      "in one minute",
+			Id:          model.NewId(),
+			TeamId:      model.NewId(),
+			Username:    user.Username,
+			Message:     "Hello",
+			Target:      "me",
+			When:        "in one minute",
 			Occurrences: occurrences,
 		},
 	}
@@ -155,24 +153,24 @@ func TestGetReminders(t *testing.T) {
 		Roles:    model.SYSTEM_USER_ROLE_ID,
 		Locale:   "en",
 	}
-	testTime :=  time.Now().UTC().Round(time.Second)
+	testTime := time.Now().UTC().Round(time.Second)
 
 	occurrences := []Occurrence{
 		{
-			Id: model.NewId(),
+			Id:         model.NewId(),
 			ReminderId: model.NewId(),
-			Occurrence:  testTime,
+			Occurrence: testTime,
 		},
 	}
 
 	reminders := []Reminder{
 		{
-			Id:        model.NewId(),
-			TeamId:    model.NewId(),
-			Username:  user.Username,
-			Message:   "Hello",
-			Target:    "me",
-			When:      "in one minute",
+			Id:          model.NewId(),
+			TeamId:      model.NewId(),
+			Username:    user.Username,
+			Message:     "Hello",
+			Target:      "me",
+			When:        "in one minute",
 			Occurrences: occurrences,
 		},
 	}
@@ -199,7 +197,6 @@ func TestGetReminders(t *testing.T) {
 		assert.True(t, len(reminders) == 1)
 
 	})
-
 
 }
 
@@ -336,7 +333,6 @@ func TestUpsertReminder(t *testing.T) {
 }
 
 func TestDeleteReminder(t *testing.T) {
-
 
 }
 

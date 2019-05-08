@@ -5,9 +5,8 @@ import (
 
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/plugin/plugintest"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/assert"
-
+	"github.com/stretchr/testify/mock"
 )
 
 func TestParseRequest(t *testing.T) {
@@ -29,7 +28,6 @@ func TestParseRequest(t *testing.T) {
 		api.On("GetUserByUsername", mock.AnythingOfType("string")).Return(user, nil)
 		return api
 	}
-
 
 	t.Run("if no quotes", func(t *testing.T) {
 		api := setupAPI()
@@ -146,7 +144,6 @@ func TestFindWhen(t *testing.T) {
 		err = p.findWhen(request)
 		assert.True(t, err == nil)
 
-
 		request = &ReminderRequest{
 			TeamId:   model.NewId(),
 			Username: user.Username,
@@ -164,7 +161,6 @@ func TestFindWhen(t *testing.T) {
 
 		err = p.findWhen(request)
 		assert.True(t, err == nil)
-
 
 		request = &ReminderRequest{
 			TeamId:   model.NewId(),
@@ -184,7 +180,6 @@ func TestFindWhen(t *testing.T) {
 		err = p.findWhen(request)
 		assert.True(t, err == nil)
 
-
 		request = &ReminderRequest{
 			TeamId:   model.NewId(),
 			Username: user.Username,
@@ -202,7 +197,6 @@ func TestFindWhen(t *testing.T) {
 
 		err = p.findWhen(request)
 		assert.True(t, err == nil)
-
 
 		request = &ReminderRequest{
 			TeamId:   model.NewId(),
@@ -222,7 +216,6 @@ func TestFindWhen(t *testing.T) {
 		err = p.findWhen(request)
 		assert.True(t, err == nil)
 
-
 		request = &ReminderRequest{
 			TeamId:   model.NewId(),
 			Username: user.Username,
@@ -241,7 +234,6 @@ func TestFindWhen(t *testing.T) {
 		err = p.findWhen(request)
 		assert.True(t, err == nil)
 
-
 		request = &ReminderRequest{
 			TeamId:   model.NewId(),
 			Username: user.Username,
@@ -259,7 +251,6 @@ func TestFindWhen(t *testing.T) {
 
 		err = p.findWhen(request)
 		assert.True(t, err == nil)
-
 
 		request = &ReminderRequest{
 			TeamId:   model.NewId(),
@@ -282,4 +273,3 @@ func TestFindWhen(t *testing.T) {
 	})
 
 }
-

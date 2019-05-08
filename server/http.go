@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -11,8 +12,16 @@ import (
 	"github.com/mattermost/mattermost-server/plugin"
 )
 
+type ReminderHTTPRequest struct {
+	PostId string
+
+	UserId string
+}
+
 func (p *Plugin) InitAPI() *mux.Router {
 	r := mux.NewRouter()
+
+	r.HandleFunc("/remind/{id:[a-z0-9]+}", p.handleReminder).Methods("POST")
 	r.HandleFunc("/dialog", p.handleDialog).Methods("POST")
 
 	r.HandleFunc("/view/ephemeral", p.handleViewEphemeral).Methods("POST")
@@ -38,6 +47,98 @@ func (p *Plugin) InitAPI() *mux.Router {
 
 func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
 	p.router.ServeHTTP(w, r)
+}
+
+func (p *Plugin) handleReminder(w http.ResponseWriter, r *http.Request) {
+
+	decoder := json.NewDecoder(r.Body)
+	var request ReminderHTTPRequest
+	err := decoder.Decode(&request)
+	if err != nil {
+		panic(err)
+	}
+
+	if user, uErr := p.API.GetUser(request.UserId); uErr == nil {
+		if post, pErr := p.API.GetPost(request.PostId); pErr == nil {
+			T, _ := p.translation(user)
+
+			dialogRequest := model.OpenDialogRequest{
+				TriggerId: model.NewId(),
+				URL:       fmt.Sprintf("%s/plugins/%s/dialog", p.URL, manifest.Id),
+				Dialog: model.Dialog{
+					Title:       T("schedule.reminder"),
+					CallbackId:  model.NewId(),
+					SubmitLabel: T("button.schedule"),
+					Elements: []model.DialogElement{
+						{
+							DisplayName: T("schedule.message"),
+							Name:        "message",
+							Placeholder: post.Message,
+							Type:        "text",
+							SubType:     "text",
+						},
+						{
+							DisplayName: T("schedule.target"),
+							Name:        "target",
+							HelpText:    T("schedule.target.help"),
+							Placeholder: "me",
+							Type:        "text",
+							SubType:     "text",
+							Optional:    true,
+						},
+						{
+							DisplayName: T("schedule.time"),
+							Name:        "time",
+							Type:        "select",
+							SubType:     "select",
+							Options: []*model.PostActionOptions{
+								{
+									Text:  T("button.snooze.20min"),
+									Value: "20min",
+								},
+								{
+									Text:  T("button.snooze.1hr"),
+									Value: "1hr",
+								},
+								{
+									Text:  T("button.snooze.3hr"),
+									Value: "3hr",
+								},
+								{
+									Text:  T("button.snooze.tomorrow"),
+									Value: "tomorrow",
+								},
+								{
+									Text:  T("button.snooze.nextweek"),
+									Value: "nextweek",
+								},
+							},
+						},
+					},
+				},
+			}
+			if pErr := p.API.OpenInteractiveDialog(dialogRequest); pErr != nil {
+				p.API.LogError("Failed opening interactive dialog " + pErr.Error())
+			}
+		}
+	}
+	/*
+	 opts = {
+	            postId,
+	            userId: getUserId(state),
+	        };
+	*/
+	//request := model.PostActionIntegrationRequestFromJson(r.Body)
+	//
+	//user, uErr := p.API.GetUser(request.UserId)
+	//if uErr != nil {
+	//	p.API.LogError(uErr.Error())
+	//	writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
+	//	return
+	//}
+	//p.ListReminders(user, "")
+	//writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
+
 }
 
 func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"testing"
 	"encoding/json"
+	"testing"
 	"time"
 
 	"github.com/mattermost/mattermost-server/model"
@@ -24,20 +24,20 @@ func TestListReminders(t *testing.T) {
 
 	occurrences := []Occurrence{
 		{
-			Id: model.NewId(),
-			ReminderId: "ididididid",
-			Occurrence:  time.Now(),
+			Id:         model.NewId(),
+			ReminderId: model.NewId(),
+			Occurrence: time.Now(),
 		},
 	}
 
 	reminders := []Reminder{
 		{
-			Id: model.NewId(),
-			Username: user.Username,
-			Message: "Message",
-			When: "in 1 second",
+			Id:          model.NewId(),
+			Username:    user.Username,
+			Message:     "Message",
+			When:        "in 1 second",
 			Occurrences: occurrences,
-			Completed:  time.Time{}.AddDate(1, 1, 1),
+			Completed:   time.Time{}.AddDate(1, 1, 1),
 		},
 	}
 
@@ -89,7 +89,6 @@ func TestListReminders(t *testing.T) {
 
 }
 
-
 func TestUpdateListReminders(t *testing.T) {
 
 	user := &model.User{
@@ -103,20 +102,20 @@ func TestUpdateListReminders(t *testing.T) {
 
 	occurrences := []Occurrence{
 		{
-			Id: model.NewId(),
-			ReminderId: "ididididid",
-			Occurrence:  time.Now(),
+			Id:         model.NewId(),
+			ReminderId: model.NewId(),
+			Occurrence: time.Now(),
 		},
 	}
 
 	reminders := []Reminder{
 		{
-			Id: model.NewId(),
-			Username: user.Username,
-			Message: "Message",
-			When: "in 1 second",
+			Id:          model.NewId(),
+			Username:    user.Username,
+			Message:     "Message",
+			When:        "in 1 second",
 			Occurrences: occurrences,
-			Completed:  time.Time{}.AddDate(1, 1, 1),
+			Completed:   time.Time{}.AddDate(1, 1, 1),
 		},
 	}
 
@@ -130,7 +129,7 @@ func TestUpdateListReminders(t *testing.T) {
 		ChannelId:     channel.Id,
 		PendingPostId: model.NewId(),
 		UserId:        user.Id,
-		Props: model.StringInterface{},
+		Props:         model.StringInterface{},
 	}
 
 	setupAPI := func() *plugintest.API {
@@ -160,7 +159,6 @@ func TestUpdateListReminders(t *testing.T) {
 
 }
 
-
 func TestListCompletedReminders(t *testing.T) {
 
 	user := &model.User{
@@ -174,20 +172,20 @@ func TestListCompletedReminders(t *testing.T) {
 
 	occurrences := []Occurrence{
 		{
-			Id: model.NewId(),
-			ReminderId: "ididididid",
-			Occurrence:  time.Now(),
+			Id:         model.NewId(),
+			ReminderId: model.NewId(),
+			Occurrence: time.Now(),
 		},
 	}
 
 	reminders := []Reminder{
 		{
-			Id: model.NewId(),
-			Username: user.Username,
-			Message: "Message",
-			When: "in 1 second",
+			Id:          model.NewId(),
+			Username:    user.Username,
+			Message:     "Message",
+			When:        "in 1 second",
 			Occurrences: occurrences,
-			Completed:  time.Time{}.AddDate(1, 1, 1),
+			Completed:   time.Time{}.AddDate(1, 1, 1),
 		},
 	}
 
@@ -201,7 +199,7 @@ func TestListCompletedReminders(t *testing.T) {
 		ChannelId:     channel.Id,
 		PendingPostId: model.NewId(),
 		UserId:        user.Id,
-		Props: model.StringInterface{},
+		Props:         model.StringInterface{},
 	}
 
 	setupAPI := func() *plugintest.API {
@@ -230,7 +228,6 @@ func TestListCompletedReminders(t *testing.T) {
 	})
 
 }
-
 
 //func TestDeleteCompletedReminders(t *testing.T) {
 //
