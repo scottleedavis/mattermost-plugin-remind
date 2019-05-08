@@ -10,6 +10,77 @@ import (
 
 )
 
+func TestParseRequest(t *testing.T) {
+
+	user := &model.User{
+		Email:    "-@-.-",
+		Nickname: "TestUser",
+		Password: model.NewId(),
+		Username: "testuser",
+		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Locale:   "en",
+	}
+
+	setupAPI := func() *plugintest.API {
+		api := &plugintest.API{}
+		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogInfo", mock.Anything).Maybe()
+		api.On("GetUserByUsername", mock.AnythingOfType("string")).Return(user, nil)
+		return api
+	}
+
+
+	t.Run("if no quotes", func(t *testing.T) {
+		api := setupAPI()
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.API = api
+
+		request := &ReminderRequest{
+			TeamId:   model.NewId(),
+			Username: user.Username,
+			Payload:  "Hello in one minute",
+			Reminder: Reminder{
+				Id:        model.NewId(),
+				TeamId:    model.NewId(),
+				Username:  user.Username,
+				Message:   "Hello",
+				Completed: p.emptyTime,
+				Target:    "me",
+				When:      "in one minute",
+			},
+		}
+
+		assert.NotNil(t, p.ParseRequest(request))
+	})
+
+	t.Run("if with quotes", func(t *testing.T) {
+		api := setupAPI()
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.API = api
+
+		request := &ReminderRequest{
+			TeamId:   model.NewId(),
+			Username: user.Username,
+			Payload:  "\"Hello\" in one minute",
+			Reminder: Reminder{
+				Id:        model.NewId(),
+				TeamId:    model.NewId(),
+				Username:  user.Username,
+				Message:   "Hello",
+				Completed: p.emptyTime,
+				Target:    "me",
+				When:      "in one minute",
+			},
+		}
+
+		assert.NotNil(t, p.ParseRequest(request))
+	})
+}
 
 func TestFindWhen(t *testing.T) {
 
