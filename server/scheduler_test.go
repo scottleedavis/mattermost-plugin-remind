@@ -65,7 +65,6 @@ func TestScheduleReminders(t *testing.T) {
 
 }
 
-
 func TestInteractiveSchedule(t *testing.T) {
 
 	user := &model.User{
@@ -100,7 +99,7 @@ func TestInteractiveSchedule(t *testing.T) {
 		return api
 	}
 
-	t.Run("if interactive schedule" , func(t *testing.T) {
+	t.Run("if interactive schedule", func(t *testing.T) {
 
 		api := setupAPI()
 		defer api.AssertExpectations(t)
