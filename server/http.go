@@ -1,66 +1,196 @@
 package main
 
 import (
-	"encoding/json"
+	"fmt"
+	"github.com/gorilla/mux"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/plugin"
 )
 
-// ActionContext passed from action buttons
-type ActionContext struct {
-	ReminderID     string `json:"reminder_id"`
-	OccurrenceID   string `json:"occurrence_id"`
-	Action         string `json:"action"`
-	SelectedOption string `json:"selected_option"`
-	Offset         int    `json:"offset"`
-}
+func (p *Plugin) InitAPI() *mux.Router {
+	r := mux.NewRouter()
+	r.HandleFunc("/dialog", p.handleDialog).Methods("POST")
 
-// Action type for decoding action buttons
-type Action struct {
-	UserID  string         `json:"user_id"`
-	PostID  string         `json:"post_id"`
-	Context *ActionContext `json:"context"`
+	r.HandleFunc("/view/ephemeral", p.handleViewEphemeral).Methods("POST")
+	r.HandleFunc("/view/complete/list", p.handleViewCompleteList).Methods("POST")
+
+	r.HandleFunc("/complete", p.handleComplete).Methods("POST")
+	r.HandleFunc("/complete/list", p.handleCompleteList).Methods("POST")
+
+	r.HandleFunc("/delete", p.handleDelete).Methods("POST")
+	r.HandleFunc("/delete/ephemeral", p.handleDeleteEphemeral).Methods("POST")
+	r.HandleFunc("/delete/list", p.handleDeleteList).Methods("POST")
+	r.HandleFunc("/delete/complete/list", p.handleDeleteCompleteList).Methods("POST")
+
+	r.HandleFunc("/snooze", p.handleSnooze).Methods("POST")
+	r.HandleFunc("/snooze/list", p.handleSnoozeList).Methods("POST")
+
+	r.HandleFunc("/close/list", p.handleCloseList).Methods("POST")
+
+	r.HandleFunc("/next/reminders", p.handleNextReminders).Methods("POST")
+
+	return r
 }
 
 func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
-
-	var action *Action
-	json.NewDecoder(r.Body).Decode(&action)
-
-	switch action.Context.Action {
-	case "complete":
-		p.handleComplete(w, r, action)
-	case "complete/list":
-		p.handleCompleteList(w, r, action)
-	case "view/complete/list":
-		p.handleViewCompleteList(w, r, action)
-	case "delete":
-		p.handleDelete(w, r, action)
-	case "delete/list":
-		p.handleDeleteList(w, r, action)
-	case "delete/complete/list":
-		p.handleDeleteCompleteList(w, r, action)
-	case "snooze":
-		p.handleSnooze(w, r, action)
-	case "snooze/list":
-		p.handleSnoozeList(w, r, action)
-	case "close/list":
-		p.handleCloseList(w, r, action)
-	case "next/reminders", "previous/reminders":
-		p.handleNextReminders(w, r, action)
-	default:
-		response := &model.PostActionIntegrationResponse{}
-		writePostActionIntegrationResponseError(w, response)
-	}
+	p.router.ServeHTTP(w, r)
 }
 
-func (p *Plugin) handleComplete(w http.ResponseWriter, r *http.Request, action *Action) {
+func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {
 
-	reminder := p.GetReminder(action.UserID, action.Context.ReminderID)
-	user, uErr := p.API.GetUser(action.UserID)
+	request := model.SubmitDialogRequestFromJson(req.Body)
+
+	user, uErr := p.API.GetUser(request.UserId)
+	if uErr != nil {
+		p.API.LogError(uErr.Error())
+		return
+	}
+
+	T, _ := p.translation(user)
+	location := p.location(user)
+
+	message := request.Submission["message"]
+	target := request.Submission["target"]
+	ttime := request.Submission["time"]
+
+	if target == nil {
+		target = T("me")
+	}
+	if target != T("me") &&
+		!strings.HasPrefix(target.(string), "@") &&
+		!strings.HasPrefix(target.(string), "~") {
+		target = "@" + target.(string)
+	}
+
+	when := T("in") + " " + T("button.snooze."+ttime.(string))
+	switch ttime.(string) {
+	case "tomorrow":
+		when = T("tomorrow")
+	case "nextweek":
+		when = T("monday")
+	}
+
+	r := &ReminderRequest{
+		TeamId:   request.TeamId,
+		Username: user.Username,
+		Payload:  message.(string),
+		Reminder: Reminder{
+			Id:        model.NewId(),
+			TeamId:    request.TeamId,
+			Username:  user.Username,
+			Message:   message.(string),
+			Completed: p.emptyTime,
+			Target:    target.(string),
+			When:      when,
+		},
+	}
+
+	if cErr := p.CreateOccurrences(r); cErr != nil {
+		p.API.LogError(cErr.Error())
+		return
+	}
+
+	if rErr := p.UpsertReminder(r); rErr != nil {
+		p.API.LogError(rErr.Error())
+		return
+	}
+
+	if r.Reminder.Target == T("me") {
+		r.Reminder.Target = T("you")
+	}
+
+	useTo := strings.HasPrefix(r.Reminder.Message, T("to"))
+	var useToString string
+	if useTo {
+		useToString = " " + T("to")
+	} else {
+		useToString = ""
+	}
+
+	t := ""
+	if len(r.Reminder.Occurrences) > 0 {
+		t = r.Reminder.Occurrences[0].Occurrence.In(location).Format(time.RFC3339)
+	}
+	var responseParameters = map[string]interface{}{
+		"Target":  r.Reminder.Target,
+		"UseTo":   useToString,
+		"Message": r.Reminder.Message,
+		"When": p.formatWhen(
+			r.Username,
+			r.Reminder.When,
+			t,
+			false,
+		),
+	}
+
+	reminder := &model.Post{
+		ChannelId: request.ChannelId,
+		UserId:    p.remindUserId,
+		Props: model.StringInterface{
+			"attachments": []*model.SlackAttachment{
+				{
+					Text: T("schedule.response", responseParameters),
+					Actions: []*model.PostAction{
+						{
+							Id: model.NewId(),
+							Integration: &model.PostActionIntegration{
+								Context: model.StringInterface{
+									"reminder_id":   r.Reminder.Id,
+									"occurrence_id": r.Reminder.Occurrences[0].Id,
+									"action":        "delete/ephemeral",
+								},
+								URL: fmt.Sprintf("%s/plugins/%s/delete/ephemeral", p.URL, manifest.Id),
+							},
+							Type: model.POST_ACTION_TYPE_BUTTON,
+							Name: T("button.delete"),
+						},
+						{
+							Id: model.NewId(),
+							Integration: &model.PostActionIntegration{
+								Context: model.StringInterface{
+									"reminder_id":   r.Reminder.Id,
+									"occurrence_id": r.Reminder.Occurrences[0].Id,
+									"action":        "view/ephemeral",
+								},
+								URL: fmt.Sprintf("%s/plugins/%s/view/ephemeral", p.URL, manifest.Id),
+							},
+							Type: model.POST_ACTION_TYPE_BUTTON,
+							Name: T("button.view.reminders"),
+						},
+					},
+				},
+			},
+		},
+	}
+	p.API.SendEphemeralPost(user.Id, reminder)
+
+}
+
+func (p *Plugin) handleViewEphemeral(w http.ResponseWriter, r *http.Request) {
+
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
+
+	user, uErr := p.API.GetUser(request.UserId)
+	if uErr != nil {
+		p.API.LogError(uErr.Error())
+		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
+		return
+	}
+	p.ListReminders(user, "")
+	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
+
+}
+
+func (p *Plugin) handleComplete(w http.ResponseWriter, r *http.Request) {
+
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
+
+	reminder := p.GetReminder(request.UserId, request.Context["reminder_id"].(string))
+	user, uErr := p.API.GetUser(request.UserId)
 	if uErr != nil {
 		p.API.LogError(uErr.Error())
 	}
@@ -71,14 +201,14 @@ func (p *Plugin) handleComplete(w http.ResponseWriter, r *http.Request, action *
 	}
 
 	reminder.Completed = time.Now().UTC()
-	p.UpdateReminder(action.UserID, reminder)
+	p.UpdateReminder(request.UserId, reminder)
 
-	if post, pErr := p.API.GetPost(action.PostID); pErr != nil {
+	if post, pErr := p.API.GetPost(request.PostId); pErr != nil {
 		p.API.LogError("unable to get post " + pErr.Error())
 		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
 	} else {
 
-		user, uError := p.API.GetUser(action.UserID)
+		user, uError := p.API.GetUser(request.UserId)
 		if uError != nil {
 			p.API.LogError(uError.Error())
 			return
@@ -107,10 +237,12 @@ func (p *Plugin) handleComplete(w http.ResponseWriter, r *http.Request, action *
 
 }
 
-func (p *Plugin) handleDelete(w http.ResponseWriter, r *http.Request, action *Action) {
+func (p *Plugin) handleDelete(w http.ResponseWriter, r *http.Request) {
 
-	reminder := p.GetReminder(action.UserID, action.Context.ReminderID)
-	user, uErr := p.API.GetUser(action.UserID)
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
+
+	reminder := p.GetReminder(request.UserId, request.Context["reminder_id"].(string))
+	user, uErr := p.API.GetUser(request.UserId)
 	if uErr != nil {
 		p.API.LogError(uErr.Error())
 		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
@@ -123,9 +255,9 @@ func (p *Plugin) handleDelete(w http.ResponseWriter, r *http.Request, action *Ac
 	}
 
 	message := reminder.Message
-	p.DeleteReminder(action.UserID, reminder)
+	p.DeleteReminder(request.UserId, reminder)
 
-	if post, pErr := p.API.GetPost(action.PostID); pErr != nil {
+	if post, pErr := p.API.GetPost(request.PostId); pErr != nil {
 		p.API.LogError(pErr.Error())
 		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
 	} else {
@@ -140,10 +272,12 @@ func (p *Plugin) handleDelete(w http.ResponseWriter, r *http.Request, action *Ac
 
 }
 
-func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, action *Action) {
+func (p *Plugin) handleDeleteEphemeral(w http.ResponseWriter, r *http.Request) {
 
-	reminder := p.GetReminder(action.UserID, action.Context.ReminderID)
-	user, uErr := p.API.GetUser(action.UserID)
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
+
+	reminder := p.GetReminder(request.UserId, request.Context["reminder_id"].(string))
+	user, uErr := p.API.GetUser(request.UserId)
 	if uErr != nil {
 		p.API.LogError(uErr.Error())
 		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
@@ -152,12 +286,45 @@ func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, action *Ac
 	T, _ := p.translation(user)
 
 	for _, occurrence := range reminder.Occurrences {
-		if occurrence.Id == action.Context.OccurrenceID {
+		p.ClearScheduledOccurrence(reminder, occurrence)
+	}
+
+	message := reminder.Message
+	p.DeleteReminder(request.UserId, reminder)
+
+	var deleteParameters = map[string]interface{}{
+		"Message": message,
+	}
+	post := &model.Post{
+		Id:      request.PostId,
+		UserId:  p.remindUserId,
+		Message: T("action.delete", deleteParameters),
+	}
+	p.API.UpdateEphemeralPost(request.UserId, post)
+	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
+
+}
+
+func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request) {
+
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
+
+	reminder := p.GetReminder(request.UserId, request.Context["reminder_id"].(string))
+	user, uErr := p.API.GetUser(request.UserId)
+	if uErr != nil {
+		p.API.LogError(uErr.Error())
+		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
+		return
+	}
+	T, _ := p.translation(user)
+
+	for _, occurrence := range reminder.Occurrences {
+		if occurrence.Id == request.Context["occurrence_id"].(string) {
 			p.ClearScheduledOccurrence(reminder, occurrence)
 		}
 	}
 
-	if post, pErr := p.API.GetPost(action.PostID); pErr != nil {
+	if post, pErr := p.API.GetPost(request.PostId); pErr != nil {
 		p.API.LogError("unable to get post " + pErr.Error())
 		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
 	} else {
@@ -165,13 +332,13 @@ func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, action *Ac
 			"Message": reminder.Message,
 		}
 
-		switch action.Context.SelectedOption {
+		switch request.Context["selected_option"].(string) {
 		case "20min":
 			for i, occurrence := range reminder.Occurrences {
-				if occurrence.Id == action.Context.OccurrenceID {
+				if occurrence.Id == request.Context["occurrence_id"].(string) {
 					occurrence.Snoozed = time.Now().UTC().Round(time.Second).Add(time.Minute * time.Duration(20))
 					reminder.Occurrences[i] = occurrence
-					p.UpdateReminder(action.UserID, reminder)
+					p.UpdateReminder(request.UserId, reminder)
 					p.upsertSnoozedOccurrence(&occurrence)
 					post.Message = T("action.snooze.20min", snoozeParameters)
 					break
@@ -179,10 +346,10 @@ func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, action *Ac
 			}
 		case "1hr":
 			for i, occurrence := range reminder.Occurrences {
-				if occurrence.Id == action.Context.OccurrenceID {
+				if occurrence.Id == request.Context["occurrence_id"].(string) {
 					occurrence.Snoozed = time.Now().UTC().Round(time.Second).Add(time.Hour * time.Duration(1))
 					reminder.Occurrences[i] = occurrence
-					p.UpdateReminder(action.UserID, reminder)
+					p.UpdateReminder(request.UserId, reminder)
 					p.upsertSnoozedOccurrence(&occurrence)
 					post.Message = T("action.snooze.1hr", snoozeParameters)
 					break
@@ -190,10 +357,10 @@ func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, action *Ac
 			}
 		case "3hrs":
 			for i, occurrence := range reminder.Occurrences {
-				if occurrence.Id == action.Context.OccurrenceID {
+				if occurrence.Id == request.Context["occurrence_id"].(string) {
 					occurrence.Snoozed = time.Now().UTC().Round(time.Second).Add(time.Hour * time.Duration(3))
 					reminder.Occurrences[i] = occurrence
-					p.UpdateReminder(action.UserID, reminder)
+					p.UpdateReminder(request.UserId, reminder)
 					p.upsertSnoozedOccurrence(&occurrence)
 					post.Message = T("action.snooze.3hr", snoozeParameters)
 					break
@@ -201,9 +368,9 @@ func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, action *Ac
 			}
 		case "tomorrow":
 			for i, occurrence := range reminder.Occurrences {
-				if occurrence.Id == action.Context.OccurrenceID {
+				if occurrence.Id == request.Context["occurrence_id"].(string) {
 
-					if user, uErr := p.API.GetUser(action.UserID); uErr != nil {
+					if user, uErr := p.API.GetUser(request.UserId); uErr != nil {
 						p.API.LogError(uErr.Error())
 						return
 					} else {
@@ -211,7 +378,7 @@ func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, action *Ac
 						tt := time.Now().In(location).Add(time.Hour * time.Duration(24))
 						occurrence.Snoozed = time.Date(tt.Year(), tt.Month(), tt.Day(), 9, 0, 0, 0, location).UTC()
 						reminder.Occurrences[i] = occurrence
-						p.UpdateReminder(action.UserID, reminder)
+						p.UpdateReminder(request.UserId, reminder)
 						p.upsertSnoozedOccurrence(&occurrence)
 						post.Message = T("action.snooze.tomorrow", snoozeParameters)
 						break
@@ -220,9 +387,9 @@ func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, action *Ac
 			}
 		case "nextweek":
 			for i, occurrence := range reminder.Occurrences {
-				if occurrence.Id == action.Context.OccurrenceID {
+				if occurrence.Id == request.Context["occurrence_id"].(string) {
 
-					if user, uErr := p.API.GetUser(action.UserID); uErr != nil {
+					if user, uErr := p.API.GetUser(request.UserId); uErr != nil {
 						p.API.LogError(uErr.Error())
 						return
 					} else {
@@ -241,7 +408,7 @@ func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, action *Ac
 						tt := time.Now().In(location).Add(time.Hour * time.Duration(24))
 						occurrence.Snoozed = time.Date(tt.Year(), tt.Month(), tt.Day(), 9, 0, 0, 0, location).AddDate(0, 0, day).UTC()
 						reminder.Occurrences[i] = occurrence
-						p.UpdateReminder(action.UserID, reminder)
+						p.UpdateReminder(request.UserId, reminder)
 						p.upsertSnoozedOccurrence(&occurrence)
 						post.Message = T("action.snooze.nextweek", snoozeParameters)
 						break
@@ -256,99 +423,102 @@ func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request, action *Ac
 	}
 }
 
-func (p *Plugin) handleNextReminders(w http.ResponseWriter, r *http.Request, action *Action) {
-	p.UpdateListReminders(action.UserID, action.PostID, action.Context.Offset)
+func (p *Plugin) handleNextReminders(w http.ResponseWriter, r *http.Request) {
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
+	p.UpdateListReminders(request.UserId, request.PostId, int(request.Context["offset"].(float64)))
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
-func (p *Plugin) handleCompleteList(w http.ResponseWriter, r *http.Request, action *Action) {
-
-	reminder := p.GetReminder(action.UserID, action.Context.ReminderID)
+func (p *Plugin) handleCompleteList(w http.ResponseWriter, r *http.Request) {
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
+	reminder := p.GetReminder(request.UserId, request.Context["reminder_id"].(string))
 
 	for _, occurrence := range reminder.Occurrences {
 		p.ClearScheduledOccurrence(reminder, occurrence)
 	}
 
 	reminder.Completed = time.Now().UTC()
-	p.UpdateReminder(action.UserID, reminder)
-	p.UpdateListReminders(action.UserID, action.PostID, 0)
+	p.UpdateReminder(request.UserId, reminder)
+	p.UpdateListReminders(request.UserId, request.PostId, 0)
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
-func (p *Plugin) handleViewCompleteList(w http.ResponseWriter, r *http.Request, action *Action) {
-	p.ListCompletedReminders(action.UserID, action.PostID)
+func (p *Plugin) handleViewCompleteList(w http.ResponseWriter, r *http.Request) {
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
+	p.ListCompletedReminders(request.UserId, request.PostId)
+	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
-func (p *Plugin) handleDeleteList(w http.ResponseWriter, r *http.Request, action *Action) {
-
-	reminder := p.GetReminder(action.UserID, action.Context.ReminderID)
+func (p *Plugin) handleDeleteList(w http.ResponseWriter, r *http.Request) {
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
+	reminder := p.GetReminder(request.UserId, request.Context["reminder_id"].(string))
 
 	for _, occurrence := range reminder.Occurrences {
 		p.ClearScheduledOccurrence(reminder, occurrence)
 	}
 
-	p.DeleteReminder(action.UserID, reminder)
-	p.UpdateListReminders(action.UserID, action.PostID, 0)
+	p.DeleteReminder(request.UserId, reminder)
+	p.UpdateListReminders(request.UserId, request.PostId, 0)
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
-func (p *Plugin) handleDeleteCompleteList(w http.ResponseWriter, r *http.Request, action *Action) {
-
-	p.DeleteCompletedReminders(action.UserID)
-	p.UpdateListReminders(action.UserID, action.PostID, 0)
+func (p *Plugin) handleDeleteCompleteList(w http.ResponseWriter, r *http.Request) {
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
+	p.DeleteCompletedReminders(request.UserId)
+	p.UpdateListReminders(request.UserId, request.PostId, 0)
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
-func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request, action *Action) {
-
-	reminder := p.GetReminder(action.UserID, action.Context.ReminderID)
+func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request) {
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
+	reminder := p.GetReminder(request.UserId, request.Context["reminder_id"].(string))
 
 	for _, occurrence := range reminder.Occurrences {
-		if occurrence.Id == action.Context.OccurrenceID {
+		if occurrence.Id == request.Context["occurrence_id"].(string) {
 			p.ClearScheduledOccurrence(reminder, occurrence)
 		}
 	}
 
-	if _, pErr := p.API.GetPost(action.PostID); pErr != nil {
+	if _, pErr := p.API.GetPost(request.PostId); pErr != nil {
 		p.API.LogError(pErr.Error())
 		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
 	} else {
-		switch action.Context.SelectedOption {
+		switch request.Context["selected_option"].(string) {
 		case "20min":
 			for i, occurrence := range reminder.Occurrences {
-				if occurrence.Id == action.Context.OccurrenceID {
+				if occurrence.Id == request.Context["occurrence_id"].(string) {
 					occurrence.Snoozed = time.Now().UTC().Round(time.Second).Add(time.Minute * time.Duration(20))
 					reminder.Occurrences[i] = occurrence
-					p.UpdateReminder(action.UserID, reminder)
+					p.UpdateReminder(request.UserId, reminder)
 					p.upsertSnoozedOccurrence(&occurrence)
 					break
 				}
 			}
 		case "1hr":
 			for i, occurrence := range reminder.Occurrences {
-				if occurrence.Id == action.Context.OccurrenceID {
+				if occurrence.Id == request.Context["occurrence_id"].(string) {
 					occurrence.Snoozed = time.Now().UTC().Round(time.Second).Add(time.Hour * time.Duration(1))
 					reminder.Occurrences[i] = occurrence
-					p.UpdateReminder(action.UserID, reminder)
+					p.UpdateReminder(request.UserId, reminder)
 					p.upsertSnoozedOccurrence(&occurrence)
 					break
 				}
 			}
 		case "3hrs":
 			for i, occurrence := range reminder.Occurrences {
-				if occurrence.Id == action.Context.OccurrenceID {
+				if occurrence.Id == request.Context["occurrence_id"].(string) {
 					occurrence.Snoozed = time.Now().UTC().Round(time.Second).Add(time.Hour * time.Duration(3))
 					reminder.Occurrences[i] = occurrence
-					p.UpdateReminder(action.UserID, reminder)
+					p.UpdateReminder(request.UserId, reminder)
 					p.upsertSnoozedOccurrence(&occurrence)
 					break
 				}
 			}
 		case "tomorrow":
 			for i, occurrence := range reminder.Occurrences {
-				if occurrence.Id == action.Context.OccurrenceID {
+				if occurrence.Id == request.Context["occurrence_id"].(string) {
 
-					if user, uErr := p.API.GetUser(action.UserID); uErr != nil {
+					if user, uErr := p.API.GetUser(request.UserId); uErr != nil {
 						p.API.LogError(uErr.Error())
 						return
 					} else {
@@ -356,7 +526,7 @@ func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request, action
 						tt := time.Now().In(location).Add(time.Hour * time.Duration(24))
 						occurrence.Snoozed = time.Date(tt.Year(), tt.Month(), tt.Day(), 9, 0, 0, 0, location).UTC()
 						reminder.Occurrences[i] = occurrence
-						p.UpdateReminder(action.UserID, reminder)
+						p.UpdateReminder(request.UserId, reminder)
 						p.upsertSnoozedOccurrence(&occurrence)
 						break
 					}
@@ -364,9 +534,9 @@ func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request, action
 			}
 		case "nextweek":
 			for i, occurrence := range reminder.Occurrences {
-				if occurrence.Id == action.Context.OccurrenceID {
+				if occurrence.Id == request.Context["occurrence_id"].(string) {
 
-					if user, uErr := p.API.GetUser(action.UserID); uErr != nil {
+					if user, uErr := p.API.GetUser(request.UserId); uErr != nil {
 						p.API.LogError(uErr.Error())
 						return
 					} else {
@@ -385,7 +555,7 @@ func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request, action
 						tt := time.Now().In(location).Add(time.Hour * time.Duration(24))
 						occurrence.Snoozed = time.Date(tt.Year(), tt.Month(), tt.Day(), 9, 0, 0, 0, location).AddDate(0, 0, day).UTC()
 						reminder.Occurrences[i] = occurrence
-						p.UpdateReminder(action.UserID, reminder)
+						p.UpdateReminder(request.UserId, reminder)
 						p.upsertSnoozedOccurrence(&occurrence)
 						break
 					}
@@ -393,13 +563,15 @@ func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request, action
 			}
 		}
 
-		p.UpdateListReminders(action.UserID, action.PostID, 0)
+		p.UpdateListReminders(request.UserId, request.PostId, 0)
 		writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 	}
 }
 
-func (p *Plugin) handleCloseList(w http.ResponseWriter, r *http.Request, action *Action) {
-	p.API.DeletePost(action.PostID)
+func (p *Plugin) handleCloseList(w http.ResponseWriter, r *http.Request) {
+	request := model.PostActionIntegrationRequestFromJson(r.Body)
+	p.API.DeletePost(request.PostId)
+	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
 func writePostActionIntegrationResponseOk(w http.ResponseWriter, response *model.PostActionIntegrationResponse) {

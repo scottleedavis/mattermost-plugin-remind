@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -9,6 +10,42 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
+
+func TestClearScheduledOccurrence(t *testing.T) {
+
+}
+
+func TestCreateOccurrences(t *testing.T) {
+
+	//user := &model.User{
+	//	Email:    "-@-.-",
+	//	Nickname: "TestUser",
+	//	Password: model.NewId(),
+	//	Username: "testuser",
+	//	Roles:    model.SYSTEM_USER_ROLE_ID,
+	//	Locale:   "en",
+	//}
+	//
+	//setupAPI := func() *plugintest.API {
+	//	api := &plugintest.API{}
+	//	api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
+	//	api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
+	//	api.On("LogInfo", mock.Anything).Maybe()
+	//	api.On("GetUserByUsername", mock.AnythingOfType("string")).Return(user, nil)
+	//	return api
+	//}
+	//
+	//t.Run("if creates occurrences", func(t *testing.T) {
+	//
+	//	api := setupAPI()
+	//	defer api.AssertExpectations(t)
+	//
+	//	p := &Plugin{}
+	//	p.API = api
+	//
+	//
+	//})
+}
 
 func TestIn(t *testing.T) {
 
@@ -611,8 +648,7 @@ func TestFreeForm(t *testing.T) {
 		times, err = p.freeFormEN("everyday at 3:23am", user)
 		assert.Nil(t, err)
 		if err == nil {
-			assert.True(t, times[0].In(location).Weekday().String() == time.Now().In(location).AddDate(0, 0, 1).Weekday().String() &&
-				times[0].In(location).Hour() == 3 && times[0].In(location).Minute() == 23)
+			assert.True(t, times[0].In(location).Hour() == 3 && times[0].In(location).Minute() == 23)
 		}
 
 		times, err = p.freeFormEN("mondays", user)
@@ -662,6 +698,69 @@ func TestFreeForm(t *testing.T) {
 		if err == nil {
 			assert.Equal(t, times[0].In(location).Hour(), 17)
 		}
+
+	})
+}
+
+func TestFormatWhen(t *testing.T) {
+
+	user := &model.User{
+		Email:    "-@-.-",
+		Nickname: "TestUser",
+		Password: model.NewId(),
+		Username: "testuser",
+		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Locale:   "en",
+	}
+
+	setupAPI := func() *plugintest.API {
+		api := &plugintest.API{}
+		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogInfo", mock.Anything).Maybe()
+		api.On("GetUserByUsername", mock.AnythingOfType("string")).Return(user, nil)
+		return api
+	}
+
+	t.Run("if creates occurrences", func(t *testing.T) {
+
+		api := setupAPI()
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.API = api
+
+		timeTest := time.Now().Round(time.Second).Format(time.RFC3339)
+
+		when := p.formatWhen(user.Username, "in 22 seconds", timeTest, false)
+		assert.True(t, strings.HasPrefix(when, "in 22 seconds at"))
+
+		when = p.formatWhen(user.Username, "in 22 seconds", timeTest, true)
+		assert.True(t, strings.Contains(when, "today"))
+
+		when = p.formatWhen(user.Username, "at 8pm", timeTest, false)
+		assert.True(t, strings.HasPrefix(when, "at"))
+
+		when = p.formatWhen(user.Username, "at 8pm", timeTest, true)
+		assert.True(t, strings.Contains(when, "today"))
+
+		when = p.formatWhen(user.Username, "on 8/12", timeTest, false)
+		assert.True(t, strings.Contains(when, "today"))
+
+		when = p.formatWhen(user.Username, "on 8/12", timeTest, true)
+		assert.True(t, strings.Contains(when, "today"))
+
+		when = p.formatWhen(user.Username, "every tuesday", timeTest, false)
+		assert.True(t, strings.Contains(when, "every"))
+
+		when = p.formatWhen(user.Username, "every tuesday", timeTest, true)
+		assert.True(t, strings.Contains(when, "every"))
+
+		when = p.formatWhen(user.Username, "tomorrow", timeTest, false)
+		assert.True(t, strings.Contains(when, "today"))
+
+		when = p.formatWhen(user.Username, "tomorrow", timeTest, true)
+		assert.True(t, strings.Contains(when, "today"))
 
 	})
 }

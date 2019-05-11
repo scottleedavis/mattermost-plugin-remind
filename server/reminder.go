@@ -114,84 +114,139 @@ func (p *Plugin) TriggerReminders() {
 					"Message":     reminder.Message,
 				}
 
-				siteURL := fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
-				if siteURL == "" {
-					p.API.LogError("SiteURL not set.")
+				if p.URL == "" {
+					p.API.LogError("URL not set.")
 					return
 				}
 
-				interactivePost := model.Post{
-					ChannelId:     channel.Id,
-					PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
-					UserId:        p.remindUserId,
-					Props: model.StringInterface{
-						"attachments": []*model.SlackAttachment{
-							{
-								Text: T("reminder.message", messageParameters),
-								Actions: []*model.PostAction{
-									{
-										Id: model.NewId(),
-										Integration: &model.PostActionIntegration{
-											Context: model.StringInterface{
-												"reminder_id":   reminder.Id,
-												"occurrence_id": occurrence.Id,
-												"action":        "complete",
+				interactivePost := model.Post{}
+
+				if occurrence.Repeat == "" {
+
+					interactivePost = model.Post{
+						ChannelId:     channel.Id,
+						PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
+						UserId:        p.remindUserId,
+						Props: model.StringInterface{
+							"attachments": []*model.SlackAttachment{
+								{
+									Text: T("reminder.message", messageParameters),
+									Actions: []*model.PostAction{
+										{
+											Id: model.NewId(),
+											Integration: &model.PostActionIntegration{
+												Context: model.StringInterface{
+													"reminder_id":   reminder.Id,
+													"occurrence_id": occurrence.Id,
+													"action":        "complete",
+												},
+												URL: fmt.Sprintf("%s/plugins/%s/complete", p.URL, manifest.Id),
 											},
-											URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
+											Type: model.POST_ACTION_TYPE_BUTTON,
+											Name: T("button.complete"),
 										},
-										Type: model.POST_ACTION_TYPE_BUTTON,
-										Name: T("button.complete"),
-									},
-									{
-										Integration: &model.PostActionIntegration{
-											Context: model.StringInterface{
-												"reminder_id":   reminder.Id,
-												"occurrence_id": occurrence.Id,
-												"action":        "delete",
+										{
+											Integration: &model.PostActionIntegration{
+												Context: model.StringInterface{
+													"reminder_id":   reminder.Id,
+													"occurrence_id": occurrence.Id,
+													"action":        "delete",
+												},
+												URL: fmt.Sprintf("%s/plugins/%s/delete", p.URL, manifest.Id),
 											},
-											URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
+											Name: T("button.delete"),
+											Type: "action",
 										},
-										Name: T("button.delete"),
-										Type: "action",
-									},
-									{
-										Integration: &model.PostActionIntegration{
-											Context: model.StringInterface{
-												"reminder_id":   reminder.Id,
-												"occurrence_id": occurrence.Id,
-												"action":        "snooze",
+										{
+											Integration: &model.PostActionIntegration{
+												Context: model.StringInterface{
+													"reminder_id":   reminder.Id,
+													"occurrence_id": occurrence.Id,
+													"action":        "snooze",
+												},
+												URL: fmt.Sprintf("%s/plugins/%s/snooze", p.URL, manifest.Id),
 											},
-											URL: fmt.Sprintf("%s/plugins/%s", siteURL, manifest.Id),
-										},
-										Name: T("button.snooze"),
-										Type: "select",
-										Options: []*model.PostActionOptions{
-											{
-												Text:  T("button.snooze.20min"),
-												Value: "20min",
-											},
-											{
-												Text:  T("button.snooze.1hr"),
-												Value: "1hr",
-											},
-											{
-												Text:  T("button.snooze.3hr"),
-												Value: "3hrs",
-											},
-											{
-												Text:  T("button.snooze.tomorrow"),
-												Value: "tomorrow",
-											},
-											{
-												Text:  T("button.snooze.nextweek"),
-												Value: "nextweek",
+											Name: T("button.snooze"),
+											Type: "select",
+											Options: []*model.PostActionOptions{
+												{
+													Text:  T("button.snooze.20min"),
+													Value: "20min",
+												},
+												{
+													Text:  T("button.snooze.1hr"),
+													Value: "1hr",
+												},
+												{
+													Text:  T("button.snooze.3hr"),
+													Value: "3hrs",
+												},
+												{
+													Text:  T("button.snooze.tomorrow"),
+													Value: "tomorrow",
+												},
+												{
+													Text:  T("button.snooze.nextweek"),
+													Value: "nextweek",
+												},
 											},
 										},
 									},
 								},
 							},
 						},
-					},
+					}
+
+				} else {
+
+					interactivePost = model.Post{
+						ChannelId:     channel.Id,
+						PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
+						UserId:        p.remindUserId,
+						Props: model.StringInterface{
+							"attachments": []*model.SlackAttachment{
+								{
+									Text: T("reminder.message", messageParameters),
+									Actions: []*model.PostAction{
+										{
+											Integration: &model.PostActionIntegration{
+												Context: model.StringInterface{
+													"reminder_id":   reminder.Id,
+													"occurrence_id": occurrence.Id,
+													"action":        "snooze",
+												},
+												URL: fmt.Sprintf("%s/plugins/%s/snooze", p.URL, manifest.Id),
+											},
+											Name: T("button.snooze"),
+											Type: "select",
+											Options: []*model.PostActionOptions{
+												{
+													Text:  T("button.snooze.20min"),
+													Value: "20min",
+												},
+												{
+													Text:  T("button.snooze.1hr"),
+													Value: "1hr",
+												},
+												{
+													Text:  T("button.snooze.3hr"),
+													Value: "3hrs",
+												},
+												{
+													Text:  T("button.snooze.tomorrow"),
+													Value: "tomorrow",
+												},
+												{
+													Text:  T("button.snooze.nextweek"),
+													Value: "nextweek",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					}
 				}
 
 				if _, pErr := p.API.CreatePost(&interactivePost); pErr != nil {
@@ -472,6 +527,29 @@ func (p *Plugin) rescheduleOccurrence(occurrence *Occurrence) {
 		occurrence.Occurrence = times[0]
 		p.upsertOccurrence(occurrence)
 	}
+
+	bytes, bErr := p.API.KVGet(user.Username)
+	if bErr != nil {
+		p.API.LogError("failed KVGet %s", bErr)
+	}
+	var reminders []Reminder
+	rsErr := json.Unmarshal(bytes, &reminders)
+	if rsErr != nil {
+		p.API.LogError("failed json Unmarshal %s", rsErr)
+	}
+
+	reminder := p.findReminder(reminders, *occurrence)
+
+	updatedOccurrences := []Occurrence{}
+	for _, o := range reminder.Occurrences {
+		if o.Id == occurrence.Id {
+			updatedOccurrences = append(updatedOccurrences, *occurrence)
+		} else {
+			updatedOccurrences = append(updatedOccurrences, o)
+		}
+	}
+	reminder.Occurrences = updatedOccurrences
+	p.UpdateReminder(user.Id, reminder)
 
 }
 

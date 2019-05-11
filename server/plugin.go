@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gorilla/mux"
 	"io/ioutil"
 	"time"
 
@@ -11,7 +12,11 @@ import (
 type Plugin struct {
 	plugin.MattermostPlugin
 
+	router *mux.Router
+
 	ServerConfig *model.Config
+
+	URL string
 
 	remindUserId string
 

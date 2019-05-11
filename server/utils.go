@@ -27,12 +27,15 @@ func (p *Plugin) location(user *model.User) *time.Location {
 		if tzLoc, err := timezone.GetTimezones(tzCode); err != nil {
 			return time.Now().Location()
 		} else {
-			if l, lErr := time.LoadLocation(tzLoc[0]); lErr != nil {
-				return time.Now().Location()
+			if len(tzLoc) > 0 {
+				if l, lErr := time.LoadLocation(tzLoc[0]); lErr != nil {
+					return time.Now().Location()
+				} else {
+					return l
+				}
 			} else {
-				return l
+				return time.Now().Location()
 			}
-
 		}
 	} else {
 		location, _ := time.LoadLocation(tz)

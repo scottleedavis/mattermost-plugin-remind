@@ -2,142 +2,274 @@ package main
 
 import (
 	"testing"
-	// "github.com/mattermost/mattermost-server/model"
-	// "github.com/mattermost/mattermost-server/plugin/plugintest"
-	// "github.com/stretchr/testify/assert"
-	// "github.com/stretchr/testify/mock"
+
+	"github.com/mattermost/mattermost-server/model"
+	"github.com/mattermost/mattermost-server/plugin/plugintest"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
+func TestParseRequest(t *testing.T) {
+
+	user := &model.User{
+		Email:    "-@-.-",
+		Nickname: "TestUser",
+		Password: model.NewId(),
+		Username: "testuser",
+		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Locale:   "en",
+	}
+
+	setupAPI := func() *plugintest.API {
+		api := &plugintest.API{}
+		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogInfo", mock.Anything).Maybe()
+		api.On("GetUserByUsername", mock.AnythingOfType("string")).Return(user, nil)
+		return api
+	}
+
+	t.Run("if no quotes", func(t *testing.T) {
+		api := setupAPI()
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.API = api
+
+		request := &ReminderRequest{
+			TeamId:   model.NewId(),
+			Username: user.Username,
+			Payload:  "Hello in one minute",
+			Reminder: Reminder{
+				Id:        model.NewId(),
+				TeamId:    model.NewId(),
+				Username:  user.Username,
+				Message:   "Hello",
+				Completed: p.emptyTime,
+				Target:    "me",
+				When:      "in one minute",
+			},
+		}
+
+		assert.NotNil(t, p.ParseRequest(request))
+	})
+
+	t.Run("if with quotes", func(t *testing.T) {
+		api := setupAPI()
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.API = api
+
+		request := &ReminderRequest{
+			TeamId:   model.NewId(),
+			Username: user.Username,
+			Payload:  "\"Hello\" in one minute",
+			Reminder: Reminder{
+				Id:        model.NewId(),
+				TeamId:    model.NewId(),
+				Username:  user.Username,
+				Message:   "Hello",
+				Completed: p.emptyTime,
+				Target:    "me",
+				When:      "in one minute",
+			},
+		}
+
+		assert.NotNil(t, p.ParseRequest(request))
+	})
+}
+
 func TestFindWhen(t *testing.T) {
-	// th := Setup()
-	// defer th.TearDown()
 
-	// th.Server.InitReminders()
-	// defer th.Server.StopReminders()
-	// user, _ := th.App.GetUserByUsername(model.REMIND_BOTNAME)
-	// //T := utils.GetUserTranslations(user.Locale)
+	user := &model.User{
+		Email:    "-@-.-",
+		Nickname: "TestUser",
+		Password: model.NewId(),
+		Username: "testuser",
+		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Locale:   "en",
+	}
 
-	// request := &model.ReminderRequest{}
-	// request.UserId = user.Id
+	setupAPI := func() *plugintest.API {
+		api := &plugintest.API{}
+		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogInfo", mock.Anything).Maybe()
+		api.On("GetUserByUsername", mock.AnythingOfType("string")).Return(user, nil)
+		return api
+	}
 
-	// request.Payload = "foo in one"
-	// rErr := th.App.findWhen(request)
-	// if rErr != nil {
-	// 	mlog.Error(rErr.Error())
-	// 	t.Fatal("foo in one doesn't parse")
-	// }
-	// assert.Equal(t, strings.Trim(request.Reminder.When, " "), "in one")
+	t.Run("if findWhen", func(t *testing.T) {
 
-	// request.Payload = "foo every tuesday at 10am"
-	// rErr = th.App.findWhen(request)
-	// if rErr != nil {
-	// 	mlog.Error(rErr.Error())
-	// 	t.Fatal("foo every tuesday at 10am doesn't parse")
-	// }
-	// assert.Equal(t, strings.Trim(request.Reminder.When, " "), "every tuesday at 10am")
+		api := setupAPI()
+		defer api.AssertExpectations(t)
 
-	// request.Payload = "foo today at noon"
-	// rErr = th.App.findWhen(request)
-	// if rErr != nil {
-	// 	mlog.Error(rErr.Error())
-	// 	t.Fatal("foo today at noon doesn't parse")
-	// }
-	// assert.Equal(t, strings.Trim(request.Reminder.When, " "), "today at noon")
+		p := &Plugin{}
+		p.API = api
 
-	// request.Payload = "foo tomorrow at noon"
-	// rErr = th.App.findWhen(request)
-	// if rErr != nil {
-	// 	mlog.Error(rErr.Error())
-	// 	t.Fatal("foo tomorrow at noon doesn't parse")
-	// }
-	// assert.Equal(t, strings.Trim(request.Reminder.When, " "), "tomorrow at noon")
+		request := &ReminderRequest{
+			TeamId:   model.NewId(),
+			Username: user.Username,
+			Payload:  "Hello in one minute",
+			Reminder: Reminder{
+				Id:        model.NewId(),
+				TeamId:    model.NewId(),
+				Username:  user.Username,
+				Message:   "Hello",
+				Completed: p.emptyTime,
+				Target:    "me",
+				When:      "in one minute",
+			},
+		}
 
-	// request.Payload = "foo monday at 11:11am"
-	// rErr = th.App.findWhen(request)
-	// if rErr != nil {
-	// 	mlog.Error(rErr.Error())
-	// 	t.Fatal("foo monday at 11:11am doesn't parse")
-	// }
-	// assert.Equal(t, strings.Trim(request.Reminder.When, " "), "monday at 11:11am")
+		err := p.findWhen(request)
+		assert.True(t, err == nil)
 
-	// request.Payload = "foo monday"
-	// rErr = th.App.findWhen(request)
-	// if rErr != nil {
-	// 	mlog.Error(rErr.Error())
-	// 	t.Fatal("foo monday doesn't parse")
-	// }
-	// assert.Equal(t, strings.Trim(request.Reminder.When, " "), "monday")
+		request = &ReminderRequest{
+			TeamId:   model.NewId(),
+			Username: user.Username,
+			Payload:  "Hello every tuesday at 10am",
+			Reminder: Reminder{
+				Id:        model.NewId(),
+				TeamId:    model.NewId(),
+				Username:  user.Username,
+				Message:   "Hello",
+				Completed: p.emptyTime,
+				Target:    "me",
+				When:      "every tuesday at 10am",
+			},
+		}
 
-	// request.Payload = "foo tuesday at 11:11am"
-	// rErr = th.App.findWhen(request)
-	// if rErr != nil {
-	// 	mlog.Error(rErr.Error())
-	// 	t.Fatal("foo tuesday at 11:11am doesn't parse")
-	// }
-	// assert.Equal(t, strings.Trim(request.Reminder.When, " "), "tuesday at 11:11am")
+		err = p.findWhen(request)
+		assert.True(t, err == nil)
 
-	// request.Payload = "foo wednesday at 11:11am"
-	// rErr = th.App.findWhen(request)
-	// if rErr != nil {
-	// 	mlog.Error(rErr.Error())
-	// 	t.Fatal("foo wednesday at 11:11am doesn't parse")
-	// }
-	// assert.Equal(t, strings.Trim(request.Reminder.When, " "), "wednesday at 11:11am")
+		request = &ReminderRequest{
+			TeamId:   model.NewId(),
+			Username: user.Username,
+			Payload:  "Hello today at noon",
+			Reminder: Reminder{
+				Id:        model.NewId(),
+				TeamId:    model.NewId(),
+				Username:  user.Username,
+				Message:   "Hello",
+				Completed: p.emptyTime,
+				Target:    "me",
+				When:      "today at noon",
+			},
+		}
 
-	// request.Payload = "foo thursday at 11:11am"
-	// rErr = th.App.findWhen(request)
-	// if rErr != nil {
-	// 	mlog.Error(rErr.Error())
-	// 	t.Fatal("foo thursday at 11:11am doesn't parse")
-	// }
-	// assert.Equal(t, strings.Trim(request.Reminder.When, " "), "thursday at 11:11am")
+		err = p.findWhen(request)
+		assert.True(t, err == nil)
 
-	// request.Payload = "foo friday at 11:11am"
-	// rErr = th.App.findWhen(request)
-	// if rErr != nil {
-	// 	mlog.Error(rErr.Error())
-	// 	t.Fatal("foo friday at 11:11am doesn't parse")
-	// }
-	// assert.Equal(t, strings.Trim(request.Reminder.When, " "), "friday at 11:11am")
+		request = &ReminderRequest{
+			TeamId:   model.NewId(),
+			Username: user.Username,
+			Payload:  "Hello tomorrow at noon",
+			Reminder: Reminder{
+				Id:        model.NewId(),
+				TeamId:    model.NewId(),
+				Username:  user.Username,
+				Message:   "Hello",
+				Completed: p.emptyTime,
+				Target:    "me",
+				When:      "tomorrow at noon",
+			},
+		}
 
-	// request.Payload = "foo saturday at 11:11am"
-	// rErr = th.App.findWhen(request)
-	// if rErr != nil {
-	// 	mlog.Error(rErr.Error())
-	// 	t.Fatal("foo saturday at 11:11am doesn't parse")
-	// }
-	// assert.Equal(t, strings.Trim(request.Reminder.When, " "), "saturday at 11:11am")
+		err = p.findWhen(request)
+		assert.True(t, err == nil)
 
-	// request.Payload = "foo sunday at 11:11am"
-	// rErr = th.App.findWhen(request)
-	// if rErr != nil {
-	// 	mlog.Error(rErr.Error())
-	// 	t.Fatal("foo sunday at 11:11am doesn't parse")
-	// }
-	// assert.Equal(t, strings.Trim(request.Reminder.When, " "), "sunday at 11:11am")
+		request = &ReminderRequest{
+			TeamId:   model.NewId(),
+			Username: user.Username,
+			Payload:  "Hello monday at 11:11am",
+			Reminder: Reminder{
+				Id:        model.NewId(),
+				TeamId:    model.NewId(),
+				Username:  user.Username,
+				Message:   "Hello",
+				Completed: p.emptyTime,
+				Target:    "me",
+				When:      "monday at 11:11am",
+			},
+		}
 
-	// request.Payload = "foo at 2:04 pm"
-	// rErr = th.App.findWhen(request)
-	// if rErr != nil {
-	// 	mlog.Error(rErr.Error())
-	// 	t.Fatal("foo at 2:04 pm doesn't parse")
-	// }
-	// assert.Equal(t, strings.Trim(request.Reminder.When, " "), "at 2:04 pm")
+		err = p.findWhen(request)
+		assert.True(t, err == nil)
 
-	// request.Payload = "foo at noon every monday"
-	// rErr = th.App.findWhen(request)
-	// if rErr != nil {
-	// 	mlog.Error(rErr.Error())
-	// 	t.Fatal("foo at noon every monday doesn't parse")
-	// }
-	// assert.Equal(t, strings.Trim(request.Reminder.When, " "), "at noon every monday")
+		request = &ReminderRequest{
+			TeamId:   model.NewId(),
+			Username: user.Username,
+			Payload:  "Hello monday",
+			Reminder: Reminder{
+				Id:        model.NewId(),
+				TeamId:    model.NewId(),
+				Username:  user.Username,
+				Message:   "Hello",
+				Completed: p.emptyTime,
+				Target:    "me",
+				When:      "monday",
+			},
+		}
 
-	// request.Payload = "tomorrow"
-	// rErr = th.App.findWhen(request)
-	// if rErr != nil {
-	// 	mlog.Error(rErr.Error())
-	// 	t.Fatal("tomorrow doesn't parse")
-	// }
-	// assert.Equal(t, strings.Trim(request.Reminder.When, " "), "tomorrow")
+		err = p.findWhen(request)
+		assert.True(t, err == nil)
+
+		request = &ReminderRequest{
+			TeamId:   model.NewId(),
+			Username: user.Username,
+			Payload:  "Hello at 2:04 pm",
+			Reminder: Reminder{
+				Id:        model.NewId(),
+				TeamId:    model.NewId(),
+				Username:  user.Username,
+				Message:   "Hello",
+				Completed: p.emptyTime,
+				Target:    "me",
+				When:      "at 2:04 pm",
+			},
+		}
+
+		err = p.findWhen(request)
+		assert.True(t, err == nil)
+
+		request = &ReminderRequest{
+			TeamId:   model.NewId(),
+			Username: user.Username,
+			Payload:  "Hello at noon every monday",
+			Reminder: Reminder{
+				Id:        model.NewId(),
+				TeamId:    model.NewId(),
+				Username:  user.Username,
+				Message:   "Hello",
+				Completed: p.emptyTime,
+				Target:    "me",
+				When:      "at noon every monday",
+			},
+		}
+
+		err = p.findWhen(request)
+		assert.True(t, err == nil)
+
+		request = &ReminderRequest{
+			TeamId:   model.NewId(),
+			Username: user.Username,
+			Payload:  "Hello tomorrow",
+			Reminder: Reminder{
+				Id:        model.NewId(),
+				TeamId:    model.NewId(),
+				Username:  user.Username,
+				Message:   "Hello",
+				Completed: p.emptyTime,
+				Target:    "me",
+				When:      "tomorrow",
+			},
+		}
+
+		err = p.findWhen(request)
+		assert.True(t, err == nil)
+
+	})
 
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"time"
@@ -10,19 +11,19 @@ import (
 
 const TriggerHostName = "__TRIGGERHOST__"
 
-func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
+func (p *Plugin) ScheduleReminder(request *ReminderRequest, channelId string) (*model.Post, error) {
 
 	user, uErr := p.API.GetUserByUsername(request.Username)
 	if uErr != nil {
 		p.API.LogError(uErr.Error())
-		return "", uErr
+		return nil, uErr
 	}
 	T, _ := p.translation(user)
 	location := p.location(user)
 
 	if pErr := p.ParseRequest(request); pErr != nil {
 		p.API.LogError(pErr.Error())
-		return T("exception.response"), nil
+		return nil, pErr
 	}
 
 	useTo := strings.HasPrefix(request.Reminder.Message, T("to"))
@@ -40,18 +41,22 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
 
 	if cErr := p.CreateOccurrences(request); cErr != nil {
 		p.API.LogError(cErr.Error())
-		return T("exception.response"), nil
+		return nil, cErr
 	}
 
 	if rErr := p.UpsertReminder(request); rErr != nil {
 		p.API.LogError(rErr.Error())
-		return T("exception.response"), nil
+		return nil, rErr
 	}
 
 	if request.Reminder.Target == T("me") {
 		request.Reminder.Target = T("you")
 	}
 
+	t := ""
+	if len(request.Reminder.Occurrences) > 0 {
+		t = request.Reminder.Occurrences[0].Occurrence.In(location).Format(time.RFC3339)
+	}
 	var responseParameters = map[string]interface{}{
 		"Target":  request.Reminder.Target,
 		"UseTo":   useToString,
@@ -59,12 +64,114 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest) (string, error) {
 		"When": p.formatWhen(
 			request.Username,
 			request.Reminder.When,
-			request.Reminder.Occurrences[0].Occurrence.In(location).Format(time.RFC3339),
+			t,
 			false,
 		),
 	}
 
-	return T("schedule.response", responseParameters), nil
+	return &model.Post{
+		ChannelId: channelId,
+		UserId:    p.remindUserId,
+		Props: model.StringInterface{
+			"attachments": []*model.SlackAttachment{
+				{
+					Text: T("schedule.response", responseParameters),
+					Actions: []*model.PostAction{
+						{
+							Id: model.NewId(),
+							Integration: &model.PostActionIntegration{
+								Context: model.StringInterface{
+									"reminder_id":   request.Reminder.Id,
+									"occurrence_id": request.Reminder.Occurrences[0].Id,
+									"action":        "delete/ephemeral",
+								},
+								URL: fmt.Sprintf("%s/plugins/%s/delete/ephemeral", p.URL, manifest.Id),
+							},
+							Type: model.POST_ACTION_TYPE_BUTTON,
+							Name: T("button.delete"),
+						},
+						{
+							Id: model.NewId(),
+							Integration: &model.PostActionIntegration{
+								Context: model.StringInterface{
+									"reminder_id":   request.Reminder.Id,
+									"occurrence_id": request.Reminder.Occurrences[0].Id,
+									"action":        "view/ephemeral",
+								},
+								URL: fmt.Sprintf("%s/plugins/%s/view/ephemeral", p.URL, manifest.Id),
+							},
+							Type: model.POST_ACTION_TYPE_BUTTON,
+							Name: T("button.view.reminders"),
+						},
+					},
+				},
+			},
+		},
+	}, nil
+
+}
+
+func (p *Plugin) InteractiveSchedule(triggerId string, user *model.User) {
+
+	T, _ := p.translation(user)
+
+	dialogRequest := model.OpenDialogRequest{
+		TriggerId: triggerId,
+		URL:       fmt.Sprintf("%s/plugins/%s/dialog", p.URL, manifest.Id),
+		Dialog: model.Dialog{
+			Title:       T("schedule.reminder"),
+			CallbackId:  model.NewId(),
+			SubmitLabel: T("button.schedule"),
+			Elements: []model.DialogElement{
+				{
+					DisplayName: T("schedule.message"),
+					Name:        "message",
+					Type:        "text",
+					SubType:     "text",
+				},
+				{
+					DisplayName: T("schedule.target"),
+					Name:        "target",
+					HelpText:    T("schedule.target.help"),
+					Placeholder: "me",
+					Type:        "text",
+					SubType:     "text",
+					Optional:    true,
+				},
+				{
+					DisplayName: T("schedule.time"),
+					Name:        "time",
+					Type:        "select",
+					SubType:     "select",
+					Options: []*model.PostActionOptions{
+						{
+							Text:  T("button.snooze.20min"),
+							Value: "20min",
+						},
+						{
+							Text:  T("button.snooze.1hr"),
+							Value: "1hr",
+						},
+						{
+							Text:  T("button.snooze.3hr"),
+							Value: "3hr",
+						},
+						{
+							Text:  T("button.snooze.tomorrow"),
+							Value: "tomorrow",
+						},
+						{
+							Text:  T("button.snooze.nextweek"),
+							Value: "nextweek",
+						},
+					},
+				},
+			},
+		},
+	}
+	if pErr := p.API.OpenInteractiveDialog(dialogRequest); pErr != nil {
+		p.API.LogError("Failed opening interactive dialog " + pErr.Error())
+	}
 }
 
 func (p *Plugin) Run() {

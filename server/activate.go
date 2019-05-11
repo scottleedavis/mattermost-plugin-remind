@@ -37,6 +37,8 @@ func (p *Plugin) OnActivate() error {
 		return errors.Wrap(err, "failed to query teams OnActivate")
 	}
 
+	p.router = p.InitAPI()
+
 	p.ensureBotExists()
 
 	for _, team := range teams {
@@ -51,7 +53,6 @@ func (p *Plugin) OnActivate() error {
 
 	p.emptyTime = time.Time{}.AddDate(1, 1, 1)
 	p.supportedLocales = []string{"en"}
-	p.ServerConfig = p.API.GetConfig()
 
 	p.Run()
 
@@ -73,6 +74,13 @@ func (p *Plugin) OnDeactivate() error {
 		}
 	}
 
+	return nil
+}
+
+func (p *Plugin) OnConfigurationChange() error {
+	p.ServerConfig = p.API.GetConfig()
+	//p.URL = "http://127.0.0.1" + fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.ListenAddress)
+	p.URL = fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
 	return nil
 }
 
