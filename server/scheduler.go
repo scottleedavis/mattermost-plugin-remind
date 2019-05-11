@@ -175,23 +175,12 @@ func (p *Plugin) InteractiveSchedule(triggerId string, user *model.User) {
 }
 
 func (p *Plugin) Run() {
-
-	hostname, _ := os.Hostname()
-	bytes, bErr := p.API.KVGet(TriggerHostName)
-	if bErr != nil {
-		p.API.LogError("failed KVGet %s", bErr)
-		return
-	}
-	if string(bytes) != "" && string(bytes) != hostname {
-		return
-	}
-	p.API.KVSet(TriggerHostName, []byte(hostname))
-
+	p.Stop()
+	p.getAndSetLock()
 	if !p.running {
 		p.running = true
 		p.runner()
 	}
-
 }
 
 func (p *Plugin) Stop() {
@@ -200,13 +189,29 @@ func (p *Plugin) Stop() {
 }
 
 func (p *Plugin) runner() {
-
 	go func() {
 		<-time.NewTimer(time.Second).C
-		p.TriggerReminders()
-		if !p.running {
+		if !p.running && !p.getAndSetLock() {
 			return
 		}
+		p.TriggerReminders()
 		p.runner()
 	}()
+}
+
+func (p *Plugin) getAndSetLock() bool {
+	hostname, _ := os.Hostname()
+	bytes, bErr := p.API.KVGet(TriggerHostName)
+	if bErr != nil {
+		p.API.LogError("failed KVGet %s", bErr)
+		return false
+	}
+	if string(bytes) != "" && string(bytes) != hostname {
+		return false
+	} else if string(bytes) == hostname {
+		return true
+	}
+	p.API.KVSet(TriggerHostName, []byte(hostname))
+	return true
+
 }
