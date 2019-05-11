@@ -213,5 +213,4 @@ func (p *Plugin) getAndSetLock() bool {
 	}
 	p.API.KVSet(TriggerHostName, []byte(hostname))
 	return true
-
 }
