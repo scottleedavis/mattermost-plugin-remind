@@ -41,13 +41,14 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 
 	T, locale := p.translation(user)
 	location := p.location(user)
+	command := strings.Trim(args.Command, " ")
 
-	if strings.Trim(args.Command, " ") == "/"+CommandTrigger {
+	if strings.Trim(command, " ") == "/"+CommandTrigger {
 		p.InteractiveSchedule(args.TriggerId, user)
 		return &model.CommandResponse{}, nil
 	}
 
-	if strings.HasSuffix(args.Command, T("help")) {
+	if strings.HasSuffix(command, T("help")) {
 		post := model.Post{
 			ChannelId: args.ChannelId,
 			UserId:    p.remindUserId,
@@ -57,7 +58,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		return &model.CommandResponse{}, nil
 	}
 
-	if strings.HasSuffix(args.Command, T("list")) {
+	if strings.HasSuffix(command, T("list")) {
 		listMessage := p.ListReminders(user, args.ChannelId)
 		if listMessage != "" {
 			return &model.CommandResponse{
@@ -70,7 +71,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		return &model.CommandResponse{}, nil
 	}
 
-	payload := strings.Trim(strings.Replace(args.Command, "/"+CommandTrigger, "", -1), " ")
+	payload := strings.Trim(strings.Replace(command, "/"+CommandTrigger, "", -1), " ")
 
 	if strings.HasPrefix(payload, T("me")) ||
 		strings.HasPrefix(payload, "@") ||
@@ -102,7 +103,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	// debug & troubleshooting commands
 
 	// clear all reminders for current user
-	if strings.HasSuffix(args.Command, "__clear") {
+	if strings.HasSuffix(command, "__clear") {
 		post := model.Post{
 			ChannelId: args.ChannelId,
 			UserId:    p.remindUserId,
@@ -113,7 +114,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	}
 
 	// display the plugin version
-	if strings.HasSuffix(args.Command, "__version") {
+	if strings.HasSuffix(command, "__version") {
 		post := model.Post{
 			ChannelId: args.ChannelId,
 			UserId:    p.remindUserId,
@@ -124,7 +125,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	}
 
 	// display the locale & location of user
-	if strings.HasSuffix(args.Command, "__user") {
+	if strings.HasSuffix(command, "__user") {
 		post := model.Post{
 			ChannelId: args.ChannelId,
 			UserId:    p.remindUserId,
