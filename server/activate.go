@@ -79,7 +79,6 @@ func (p *Plugin) OnDeactivate() error {
 
 func (p *Plugin) OnConfigurationChange() error {
 	p.ServerConfig = p.API.GetConfig()
-	//p.URL = "http://127.0.0.1" + fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.ListenAddress)
 	p.URL = fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
 	return nil
 }
