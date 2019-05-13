@@ -1,8 +1,8 @@
 package main
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/plugin/plugintest"
@@ -45,7 +45,7 @@ func TestHandleCommand(t *testing.T) {
 			UserId:  "userID1",
 		})
 
-		assert.NotNil(t,r)
+		assert.NotNil(t, r)
 		assert.Nil(t, err)
 	})
 
@@ -74,7 +74,7 @@ func TestHandleCommand(t *testing.T) {
 			UserId:  "userID1",
 		})
 
-		assert.NotNil(t,r)
+		assert.NotNil(t, r)
 		assert.Nil(t, err)
 	})
 
@@ -141,7 +141,6 @@ func TestHandleCommand(t *testing.T) {
 		//assert.NotNil(t,r)
 		//assert.Nil(t, err)
 	})
-
 
 	t.Run("/remind me foo in 2 seconds", func(t *testing.T) {
 
@@ -257,7 +256,7 @@ func TestHandleCommand(t *testing.T) {
 			UserId:  "userID1",
 		})
 
-		assert.NotNil(t,r)
+		assert.NotNil(t, r)
 		assert.Nil(t, err)
 	})
 
@@ -286,7 +285,7 @@ func TestHandleCommand(t *testing.T) {
 			UserId:  "userID1",
 		})
 
-		assert.NotNil(t,r)
+		assert.NotNil(t, r)
 		assert.Nil(t, err)
 	})
 }
