@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/plugin/plugintest"
@@ -80,158 +82,36 @@ func TestHandleCommand(t *testing.T) {
 
 	t.Run("/remind list", func(t *testing.T) {
 
-		//channel := &model.Channel{
-		//	Id: 	model.NewId(),
-		//	Name:   model.NewRandomString(10),
-		//}
-		//post := &model.Post{
-		//	Id:        model.NewId(),
-		//	ChannelId: channel.Id,
-		//}
-		//
-		//testTime := time.Now().UTC().Round(time.Second)
-		//
-		//occurrences := []Occurrence{
-		//	{
-		//		Id:         model.NewId(),
-		//		ReminderId: model.NewId(),
-		//		Occurrence: testTime,
-		//	},
-		//}
-		//reminders := []Reminder{
-		//	{
-		//		Id:          model.NewId(),
-		//		TeamId:      model.NewId(),
-		//		Username:    user.Username,
-		//		Message:     "Hello",
-		//		Target:      "me",
-		//		When:        "in one minute",
-		//		Occurrences: occurrences,
-		//	},
-		//}
-		//stringReminders, _ := json.Marshal(reminders)
-		//
-		//setupAPI := func() *plugintest.API {
-		//	api := &plugintest.API{}
-		//	api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
-		//	api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
-		//	api.On("LogInfo", mock.Anything).Maybe()
-		//	api.On("GetUser", mock.Anything).Return(user, nil)
-		//	api.On("GetUserByUsername", mock.Anything).Return(user, nil)
-		//	api.On("KVGet", user.Username).Return(stringReminders, nil)
-		//	api.On("GetDirectChannel", mock.Anything, mock.Anything).Return(channel, nil)
-		//	api.On("CreatePost", post).Return(post, nil)
-		//
-		//	return api
-		//}
-		//
-		//api := setupAPI()
-		//defer api.AssertExpectations(t)
-		//
-		//p := &Plugin{}
-		//p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
-		//p.router = p.InitAPI()
-		//p.API = api
-		//
-		//r, err := p.ExecuteCommand(nil, &model.CommandArgs{
-		//	Command: fmt.Sprintf("/%s list", trigger),
-		//	UserId:  "userID1",
-		//})
-		//
-		//assert.NotNil(t,r)
-		//assert.Nil(t, err)
-	})
+		channel := &model.Channel{
+			Id:   model.NewId(),
+			Name: model.NewRandomString(10),
+		}
+		post := &model.Post{
+			Id:        model.NewId(),
+			ChannelId: channel.Id,
+		}
 
-	t.Run("/remind me foo in 2 seconds", func(t *testing.T) {
+		testTime := time.Now().UTC().Round(time.Second)
 
-		//channel := &model.Channel{
-		//	Id: 	model.NewId(),
-		//	Name:   model.NewRandomString(10),
-		//}
-		//
-		//testTime := time.Now().UTC().Round(time.Second)
-		//
-		//occurrences := []Occurrence{
-		//	{
-		//		Id:         model.NewId(),
-		//		ReminderId: model.NewId(),
-		//		Occurrence: testTime,
-		//	},
-		//}
-		//reminders := []Reminder{
-		//	{
-		//		Id:          model.NewId(),
-		//		TeamId:      model.NewId(),
-		//		Username:    user.Username,
-		//		Message:     "Hello",
-		//		Target:      "me",
-		//		When:        "in 2 seconds",
-		//		Occurrences: occurrences,
-		//	},
-		//}
-		//stringReminders, _ := json.Marshal(reminders)
-		//
-		//setupAPI := func() *plugintest.API {
-		//	api := &plugintest.API{}
-		//	api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
-		//	api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
-		//	api.On("LogInfo", mock.Anything).Maybe()
-		//	api.On("GetUser", mock.Anything).Return(user, nil)
-		//	api.On("GetUserByUsername", mock.Anything).Return(user, nil)
-		//	api.On("KVGet", user.Username).Return(stringReminders, nil)
-		//	api.On("GetDirectChannel", mock.Anything, mock.Anything).Return(channel, nil)
-		//	api.On("SendEphemeralPost", mock.Anything, mock.Anything).Return(nil)
-		//
-		//	return api
-		//}
-		//
-		//api := setupAPI()
-		//defer api.AssertExpectations(t)
-		//
-		//p := &Plugin{}
-		//p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
-		//p.router = p.InitAPI()
-		//p.API = api
-		//
-		//r, err := p.ExecuteCommand(nil, &model.CommandArgs{
-		//	Command: fmt.Sprintf("/%s me Hello in 2 seconds", trigger),
-		//	UserId:  "userID1",
-		//})
-		//
-		//assert.NotNil(t,r)
-		//assert.Nil(t, err)
-	})
-
-	t.Run("/remind __clear", func(t *testing.T) {
-
-		//setupAPI := func() *plugintest.API {
-		//	api := &plugintest.API{}
-		//	api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
-		//	api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
-		//	api.On("LogInfo", mock.Anything).Maybe()
-		//	api.On("GetUser", mock.Anything).Return(user, nil)
-		//	api.On("SendEphemeralPost", mock.Anything, mock.Anything).Return(nil)
-		//	return api
-		//}
-		//
-		//api := setupAPI()
-		//defer api.AssertExpectations(t)
-		//
-		//p := &Plugin{}
-		//p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
-		//p.router = p.InitAPI()
-		//p.API = api
-		//
-		//r, err := p.ExecuteCommand(nil, &model.CommandArgs{
-		//	Command: fmt.Sprintf("/%s __clear", trigger),
-		//	UserId:  "userID1",
-		//})
-		//
-		//assert.NotNil(t,r)
-		//assert.Nil(t, err)
-	})
-
-	t.Run("/remind __version", func(t *testing.T) {
+		occurrences := []Occurrence{
+			{
+				Id:         model.NewId(),
+				ReminderId: model.NewId(),
+				Occurrence: testTime,
+			},
+		}
+		reminders := []Reminder{
+			{
+				Id:          model.NewId(),
+				TeamId:      model.NewId(),
+				Username:    user.Username,
+				Message:     "Hello",
+				Target:      "me",
+				When:        "in one minute",
+				Occurrences: occurrences,
+			},
+		}
+		stringReminders, _ := json.Marshal(reminders)
 
 		setupAPI := func() *plugintest.API {
 			api := &plugintest.API{}
@@ -239,7 +119,170 @@ func TestHandleCommand(t *testing.T) {
 			api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
 			api.On("LogInfo", mock.Anything).Maybe()
 			api.On("GetUser", mock.Anything).Return(user, nil)
+			api.On("GetUserByUsername", mock.Anything).Return(user, nil)
+			api.On("KVGet", user.Username).Return(stringReminders, nil)
+			api.On("SendEphemeralPost", mock.Anything, mock.Anything).Return(post)
+
+			return api
+		}
+
+		api := setupAPI()
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
+		p.router = p.InitAPI()
+		p.API = api
+
+		r, err := p.ExecuteCommand(nil, &model.CommandArgs{
+			Command: fmt.Sprintf("/%s list", trigger),
+			UserId:  "userID1",
+		})
+
+		assert.NotNil(t, r)
+		assert.Nil(t, err)
+	})
+
+	t.Run("/remind me foo in 2 seconds", func(t *testing.T) {
+
+		channel := &model.Channel{
+			Id:   model.NewId(),
+			Name: model.NewRandomString(10),
+		}
+
+		post := &model.Post{
+			Id:        model.NewId(),
+			ChannelId: channel.Id,
+		}
+
+		testTime := time.Now().UTC().Round(time.Second)
+
+		occurrences := []Occurrence{
+			{
+				Id:         model.NewId(),
+				ReminderId: model.NewId(),
+				Occurrence: testTime,
+			},
+		}
+		reminders := []Reminder{
+			{
+				Id:          model.NewId(),
+				TeamId:      model.NewId(),
+				Username:    user.Username,
+				Message:     "Hello",
+				Target:      "me",
+				When:        "in 2 seconds",
+				Occurrences: occurrences,
+			},
+		}
+		stringReminders, _ := json.Marshal(reminders)
+		stringOccurrences, _ := json.Marshal(occurrences)
+
+		setupAPI := func() *plugintest.API {
+			api := &plugintest.API{}
+			api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
+			api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
+			api.On("LogInfo", mock.Anything).Maybe()
+			api.On("GetUser", mock.Anything).Return(user, nil)
+			api.On("GetUserByUsername", mock.Anything).Return(user, nil)
+			api.On("KVGet", user.Username).Return(stringReminders, nil)
+			api.On("KVGet", mock.Anything).Return(stringOccurrences, nil)
+			api.On("KVSet", mock.Anything, mock.Anything).Return(nil)
+			api.On("SendEphemeralPost", mock.Anything, mock.Anything).Return(post)
+
+			return api
+		}
+
+		api := setupAPI()
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
+		p.router = p.InitAPI()
+		p.API = api
+
+		r, err := p.ExecuteCommand(nil, &model.CommandArgs{
+			Command: fmt.Sprintf("/%s me Hello in 2 seconds", trigger),
+			UserId:  "userID1",
+		})
+
+		assert.NotNil(t, r)
+		assert.Nil(t, err)
+	})
+
+	t.Run("/remind __clear", func(t *testing.T) {
+
+		testTime := time.Now().UTC().Round(time.Second)
+
+		occurrences := []Occurrence{
+			{
+				Id:         model.NewId(),
+				ReminderId: model.NewId(),
+				Occurrence: testTime,
+			},
+		}
+
+		reminders := []Reminder{
+			{
+				Id:          model.NewId(),
+				TeamId:      model.NewId(),
+				Username:    user.Username,
+				Message:     "Hello",
+				Target:      "me",
+				When:        "in one minute",
+				Occurrences: occurrences,
+			},
+		}
+
+		stringReminders, _ := json.Marshal(reminders)
+		setupAPI := func() *plugintest.API {
+			api := &plugintest.API{}
+			api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
+			api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
+			api.On("LogInfo", mock.Anything).Maybe()
+			api.On("GetUser", mock.Anything).Return(user, nil)
 			api.On("SendEphemeralPost", mock.Anything, mock.Anything).Return(nil)
+			api.On("KVGet", user.Username).Return(stringReminders, nil)
+			api.On("KVDelete", user.Username).Return(nil)
+			return api
+		}
+
+		api := setupAPI()
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
+		p.router = p.InitAPI()
+		p.API = api
+
+		r, err := p.ExecuteCommand(nil, &model.CommandArgs{
+			Command: fmt.Sprintf("/%s __clear", trigger),
+			UserId:  "userID1",
+		})
+
+		assert.NotNil(t, r)
+		assert.Nil(t, err)
+	})
+
+	t.Run("/remind __version", func(t *testing.T) {
+
+		channel := &model.Channel{
+			Id:   model.NewId(),
+			Name: model.NewRandomString(10),
+		}
+
+		post := &model.Post{
+			Id:        model.NewId(),
+			ChannelId: channel.Id,
+		}
+
+		setupAPI := func() *plugintest.API {
+			api := &plugintest.API{}
+			api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
+			api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
+			api.On("LogInfo", mock.Anything).Maybe()
+			api.On("GetUser", mock.Anything).Return(user, nil)
+			api.On("SendEphemeralPost", mock.Anything, mock.Anything).Return(post)
 			return api
 		}
 

@@ -202,140 +202,241 @@ func TestGetReminders(t *testing.T) {
 
 func TestUpdateReminder(t *testing.T) {
 
-	//user := &model.User{
-	//	Email:    "-@-.-",
-	//	Nickname: "TestUser",
-	//	Password: model.NewId(),
-	//	Username: "testuser",
-	//	Roles:    model.SYSTEM_USER_ROLE_ID,
-	//	Locale:   "en",
-	//}
-	//testTime :=  time.Now().UTC().Round(time.Second)
-	//
-	//occurrences := []Occurrence{
-	//	{
-	//		Id: model.NewId(),
-	//		ReminderId: model.NewId(),
-	//		Occurrence:  testTime,
-	//	},
-	//}
-	//
-	//reminders := []Reminder{
-	//	{
-	//		Id:        model.NewId(),
-	//		TeamId:    model.NewId(),
-	//		Username:  user.Username,
-	//		Message:   "Hello",
-	//		Target:    "me",
-	//		When:      "in one minute",
-	//		Occurrences: occurrences,
-	//	},
-	//}
-	//
-	//stringReminders, _ := json.Marshal(reminders)
-	//setupAPI := func() *plugintest.API {
-	//	api := &plugintest.API{}
-	//	api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
-	//	api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
-	//	api.On("LogInfo", mock.Anything).Maybe()
-	//	api.On("KVGet", user.Username).Return(stringReminders, nil)
-	//	api.On("KVSet", user.Username).Maybe()
-	//	api.On("GetUser", mock.AnythingOfType("string")).Return(user, nil)
-	//	//api.On("GetUserByUsername", mock.AnythingOfType("string")).Return(user, nil)
-	//	return api
-	//}
-	//
-	//t.Run("if updates reminders", func(t *testing.T) {
-	//	api := setupAPI()
-	//	defer api.AssertExpectations(t)
-	//
-	//	p := &Plugin{}
-	//	p.API = api
-	//
-	//	assert.Nil(t, p.UpdateReminder(user.Id, reminders[0]))
-	//
-	//})
-	//
+	user := &model.User{
+		Email:    "-@-.-",
+		Nickname: "TestUser",
+		Password: model.NewId(),
+		Username: "testuser",
+		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Locale:   "en",
+	}
+	testTime := time.Now().UTC().Round(time.Second)
+
+	occurrences := []Occurrence{
+		{
+			Id:         model.NewId(),
+			ReminderId: model.NewId(),
+			Occurrence: testTime,
+		},
+	}
+
+	reminders := []Reminder{
+		{
+			Id:          model.NewId(),
+			TeamId:      model.NewId(),
+			Username:    user.Username,
+			Message:     "Hello",
+			Target:      "me",
+			When:        "in one minute",
+			Occurrences: occurrences,
+		},
+	}
+
+	stringReminders, _ := json.Marshal(reminders)
+	setupAPI := func() *plugintest.API {
+		api := &plugintest.API{}
+		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogInfo", mock.Anything).Maybe()
+		api.On("KVGet", user.Username).Return(stringReminders, nil)
+		api.On("KVSet", mock.Anything, mock.Anything).Return(nil)
+		api.On("GetUser", mock.AnythingOfType("string")).Return(user, nil)
+		return api
+	}
+
+	t.Run("if updates reminders", func(t *testing.T) {
+		api := setupAPI()
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.API = api
+
+		assert.Nil(t, p.UpdateReminder(user.Id, reminders[0]))
+
+	})
 
 }
 
 func TestUpsertReminder(t *testing.T) {
 
-	//user := &model.User{
-	//	Email:    "-@-.-",
-	//	Nickname: "TestUser",
-	//	Password: model.NewId(),
-	//	Username: "testuser",
-	//	Roles:    model.SYSTEM_USER_ROLE_ID,
-	//	Locale:   "en",
-	//}
-	//testTime :=  time.Now().UTC().Round(time.Second)
-	//
-	//occurrences := []Occurrence{
-	//	{
-	//		Id: model.NewId(),
-	//		ReminderId: model.NewId(),
-	//		Occurrence:  testTime,
-	//	},
-	//}
-	//
-	//reminders := []Reminder{
-	//	{
-	//		Id:        model.NewId(),
-	//		TeamId:    model.NewId(),
-	//		Username:  user.Username,
-	//		Message:   "Hello",
-	//		Target:    "me",
-	//		When:      "in one minute",
-	//		Occurrences: occurrences,
-	//	},
-	//}
-	//
-	//
-	//request := &ReminderRequest{
-	//	TeamId:   model.NewId(),
-	//	Username: user.Username,
-	//	Payload:  "Hello in one minute",
-	//	Reminder: Reminder{
-	//		Id:        model.NewId(),
-	//		TeamId:    model.NewId(),
-	//		Username:  user.Username,
-	//		Message:   "Hello",
-	//		Target:    "me",
-	//		When:      "in one minute",
-	//	},
-	//}
-	//
-	//stringReminders, _ := json.Marshal(reminders)
-	//setupAPI := func() *plugintest.API {
-	//	api := &plugintest.API{}
-	//	api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
-	//	api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
-	//	api.On("LogInfo", mock.Anything).Maybe()
-	//	api.On("KVGet", user.Username).Return(stringReminders, nil)
-	//	api.On("KVSet", user.Username).Maybe()
-	//	//api.On("GetUser", mock.AnythingOfType("string")).Return(user, nil)
-	//	api.On("GetUserByUsername", mock.AnythingOfType("string")).Return(user, nil)
-	//	return api
-	//}
-	//
-	//t.Run("if updates reminders", func(t *testing.T) {
-	//	api := setupAPI()
-	//	defer api.AssertExpectations(t)
-	//
-	//	p := &Plugin{}
-	//	p.API = api
-	//
-	//	assert.Nil(t, p.UpsertReminder(request))
-	//
-	//})
+	user := &model.User{
+		Email:    "-@-.-",
+		Nickname: "TestUser",
+		Password: model.NewId(),
+		Username: "testuser",
+		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Locale:   "en",
+	}
+	testTime := time.Now().UTC().Round(time.Second)
+
+	occurrences := []Occurrence{
+		{
+			Id:         model.NewId(),
+			ReminderId: model.NewId(),
+			Occurrence: testTime,
+		},
+	}
+
+	reminders := []Reminder{
+		{
+			Id:          model.NewId(),
+			TeamId:      model.NewId(),
+			Username:    user.Username,
+			Message:     "Hello",
+			Target:      "me",
+			When:        "in one minute",
+			Occurrences: occurrences,
+		},
+	}
+
+	request := &ReminderRequest{
+		TeamId:   model.NewId(),
+		Username: user.Username,
+		Payload:  "Hello in one minute",
+		Reminder: Reminder{
+			Id:          model.NewId(),
+			TeamId:      model.NewId(),
+			Username:    user.Username,
+			Occurrences: occurrences,
+			Message:     "Hello",
+			Target:      "me",
+			When:        "in one minute",
+		},
+	}
+
+	stringReminders, _ := json.Marshal(reminders)
+	setupAPI := func() *plugintest.API {
+		api := &plugintest.API{}
+		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogInfo", mock.Anything).Maybe()
+		api.On("KVGet", user.Username).Return(stringReminders, nil)
+		api.On("KVSet", mock.Anything, mock.Anything).Return(nil)
+		api.On("GetUserByUsername", mock.AnythingOfType("string")).Return(user, nil)
+		return api
+	}
+
+	t.Run("if updates reminders", func(t *testing.T) {
+		api := setupAPI()
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.API = api
+
+		assert.Nil(t, p.UpsertReminder(request))
+
+	})
 
 }
 
 func TestDeleteReminder(t *testing.T) {
 
+	user := &model.User{
+		Email:    "-@-.-",
+		Nickname: "TestUser",
+		Password: model.NewId(),
+		Username: "testuser",
+		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Locale:   "en",
+	}
+	testTime := time.Now().UTC().Round(time.Second)
+
+	occurrences := []Occurrence{
+		{
+			Id:         model.NewId(),
+			ReminderId: model.NewId(),
+			Occurrence: testTime,
+		},
+	}
+
+	reminders := []Reminder{
+		{
+			Id:          model.NewId(),
+			TeamId:      model.NewId(),
+			Username:    user.Username,
+			Message:     "Hello",
+			Target:      "me",
+			When:        "in one minute",
+			Occurrences: occurrences,
+		},
+	}
+
+	stringReminders, _ := json.Marshal(reminders)
+	setupAPI := func() *plugintest.API {
+		api := &plugintest.API{}
+		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogInfo", mock.Anything).Maybe()
+		api.On("KVGet", user.Username).Return(stringReminders, nil)
+		api.On("KVSet", mock.Anything, mock.Anything).Return(nil)
+		api.On("GetUser", mock.AnythingOfType("string")).Return(user, nil)
+		return api
+	}
+
+	t.Run("if deletes reminder", func(t *testing.T) {
+		api := setupAPI()
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.API = api
+
+		assert.Nil(t, p.DeleteReminder(user.Id, reminders[0]))
+
+	})
+
 }
 
 func TestDeleteReminders(t *testing.T) {
+	user := &model.User{
+		Email:    "-@-.-",
+		Nickname: "TestUser",
+		Password: model.NewId(),
+		Username: "testuser",
+		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Locale:   "en",
+	}
+	testTime := time.Now().UTC().Round(time.Second)
+
+	occurrences := []Occurrence{
+		{
+			Id:         model.NewId(),
+			ReminderId: model.NewId(),
+			Occurrence: testTime,
+		},
+	}
+
+	reminders := []Reminder{
+		{
+			Id:          model.NewId(),
+			TeamId:      model.NewId(),
+			Username:    user.Username,
+			Message:     "Hello",
+			Target:      "me",
+			When:        "in one minute",
+			Occurrences: occurrences,
+		},
+	}
+
+	stringReminders, _ := json.Marshal(reminders)
+	setupAPI := func() *plugintest.API {
+		api := &plugintest.API{}
+		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogInfo", mock.Anything).Maybe()
+		api.On("KVGet", user.Username).Return(stringReminders, nil)
+		api.On("KVDelete", user.Username).Return(nil)
+		return api
+	}
+
+	t.Run("if deletes reminders", func(t *testing.T) {
+		api := setupAPI()
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.API = api
+
+		assert.Equal(t, p.DeleteReminders(user), "clear.response")
+
+	})
 
 }
