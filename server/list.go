@@ -69,7 +69,7 @@ func (p *Plugin) ListReminders(user *model.User, channelId string) *model.Post {
 
 }
 
-func (p *Plugin) UpdateListReminders(userId string, postId string, offset int) {
+func (p *Plugin) UpdateListReminders(userId string, postId string, channelId string, offset int) {
 
 	user, uErr := p.API.GetUser(userId)
 	if uErr != nil {
@@ -116,8 +116,9 @@ func (p *Plugin) UpdateListReminders(userId string, postId string, offset int) {
 		attachments)
 
 	post := &model.Post{
-		Id:     postId,
-		UserId: p.remindUserId,
+		Id:        postId,
+		ChannelId: channelId,
+		UserId:    p.remindUserId,
 		Props: model.StringInterface{
 			"attachments": attachments,
 		},
@@ -567,7 +568,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 	return &model.SlackAttachment{}
 }
 
-func (p *Plugin) ListCompletedReminders(userId string, postId string) {
+func (p *Plugin) ListCompletedReminders(userId string, postId string, channelId string) {
 
 	user, uErr := p.API.GetUser(userId)
 	if uErr != nil {
@@ -584,13 +585,13 @@ func (p *Plugin) ListCompletedReminders(userId string, postId string) {
 		}
 	}
 
-	if post, pErr := p.API.GetPost(postId); pErr != nil {
-		p.API.LogError(pErr.Error())
-	} else {
-		post.Message = output
-		post.Props = model.StringInterface{}
-		p.API.UpdatePost(post)
+	post := &model.Post{
+		Id:        postId,
+		ChannelId: channelId,
+		Message:   output,
+		Props:     model.StringInterface{},
 	}
+	p.API.UpdateEphemeralPost(userId, post)
 }
 
 func (p *Plugin) DeleteCompletedReminders(userId string) {
