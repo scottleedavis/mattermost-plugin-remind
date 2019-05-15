@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/mattermost/mattermost-server/model"
@@ -59,15 +58,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	}
 
 	if strings.HasSuffix(command, T("list")) {
-		listMessage := p.ListReminders(user, args.ChannelId)
-		if listMessage != "" {
-			return &model.CommandResponse{
-				ResponseType: model.COMMAND_RESPONSE_TYPE_EPHEMERAL,
-				Text:         fmt.Sprintf(listMessage),
-				Username:     botName,
-			}, nil
-		}
-		// p.API.SendEphemeralPost(user.Id, p.ListReminders(user, args.ChannelId))
+		p.API.SendEphemeralPost(user.Id, p.ListReminders(user, args.ChannelId))
 		return &model.CommandResponse{}, nil
 	}
 
