@@ -104,6 +104,7 @@ func TestHandleViewEphmeral(t *testing.T) {
 		api.On("GetUserByUsername", mock.Anything).Return(user, nil)
 		api.On("KVGet", user.Username).Return(stringReminders, nil)
 		api.On("CreatePost", mock.Anything).Maybe()
+		api.On("SendEphemeralPost", mock.Anything, mock.Anything).Return(nil)
 
 		return api
 	}

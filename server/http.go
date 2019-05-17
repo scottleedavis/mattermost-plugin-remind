@@ -178,7 +178,8 @@ func (p *Plugin) handleViewEphemeral(w http.ResponseWriter, r *http.Request) {
 		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
 		return
 	}
-	p.ListReminders(user, "")
+	p.API.SendEphemeralPost(user.Id, p.ListReminders(user, request.ChannelId))
+
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 
 }
