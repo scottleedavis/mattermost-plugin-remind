@@ -25,7 +25,7 @@ func TestListReminders(t *testing.T) {
 	occurrences := []Occurrence{
 		{
 			Id:         model.NewId(),
-			ReminderId: "ididididid",
+			ReminderId: model.NewId(),
 			Occurrence: time.Now(),
 		},
 	}
