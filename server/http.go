@@ -64,9 +64,45 @@ func (p *Plugin) handleReminder(w http.ResponseWriter, r *http.Request) {
 		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
 		return
 	}
+	post, pErr := p.API.GetPost(request.PostId)
+	if pErr != nil {
+		p.API.LogError(pErr.Error())
+		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
+		return
+	}
 
-	p.API.LogInfo(fmt.Sprintf("%v", request))
-	p.API.LogInfo(user.Username)
+	rr := &ReminderRequest{
+		TeamId:   "",
+		Username: user.Username,
+		Reminder: Reminder{
+			Id:        model.NewId(),
+			TeamId:    "",
+			Username:  user.Username,
+			Message:   post.Message,
+			Completed: p.emptyTime,
+			Target:    "@" + user.Username,
+			When:      "in 1 hour",
+		},
+	}
+
+	if cErr := p.CreateOccurrences(rr); cErr != nil {
+		p.API.LogError(cErr.Error())
+		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
+		return
+	}
+
+	if rErr := p.UpsertReminder(rr); rErr != nil {
+		p.API.LogError(rErr.Error())
+		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
+		return
+	}
+
+	responsePost := &model.Post{
+		ChannelId: post.ChannelId,
+		UserId:    p.remindUserId,
+		Message:   "I'll remind you \"" + post.Message + "\" in 1 hour.",
+	}
+	p.API.SendEphemeralPost(user.Id, responsePost)
 
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 
@@ -136,23 +172,6 @@ func (p *Plugin) handleReminder(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	*/
-
-	/*
-	 opts = {
-	            postId,
-	            userId: getUserId(state),
-	        };
-	*/
-	//request := model.PostActionIntegrationRequestFromJson(r.Body)
-	//
-	//user, uErr := p.API.GetUser(request.UserId)
-	//if uErr != nil {
-	//	p.API.LogError(uErr.Error())
-	//	writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
-	//	return
-	//}
-	//p.ListReminders(user, "")
-	//writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 
 }
 
