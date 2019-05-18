@@ -1,9 +1,10 @@
 // import PropTypes from 'prop-types';
 
 const RemindMenuItem = () => {
-    return 'Remind me about this';
+    return 'Remind me in 1 hour';
 };
 
-RemindMenuItem.propTypes = {};
+RemindMenuItem.propTypes = {
+};
 
 export default RemindMenuItem;
