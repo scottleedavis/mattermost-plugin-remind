@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 	"time"
@@ -17,34 +18,75 @@ func TestClearScheduledOccurrence(t *testing.T) {
 
 func TestCreateOccurrences(t *testing.T) {
 
-	//user := &model.User{
-	//	Email:    "-@-.-",
-	//	Nickname: "TestUser",
-	//	Password: model.NewId(),
-	//	Username: "testuser",
-	//	Roles:    model.SYSTEM_USER_ROLE_ID,
-	//	Locale:   "en",
+	user := &model.User{
+		Email:    "-@-.-",
+		Nickname: "TestUser",
+		Password: model.NewId(),
+		Username: "testuser",
+		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Locale:   "en",
+	}
+	testTime := time.Now().UTC().Round(time.Second)
+
+	occurrences := []Occurrence{
+		{
+			Id:         model.NewId(),
+			ReminderId: model.NewId(),
+			Occurrence: testTime,
+		},
+	}
+
+	//reminders := []Reminder{
+	//	{
+	//		Id:        model.NewId(),
+	//		TeamId:    model.NewId(),
+	//		Username:  user.Username,
+	//		Message:   "Hello",
+	//		Target:    "me",
+	//		When:      "in one minute",
+	//		Occurrences: occurrences,
+	//	},
 	//}
-	//
-	//setupAPI := func() *plugintest.API {
-	//	api := &plugintest.API{}
-	//	api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
-	//	api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
-	//	api.On("LogInfo", mock.Anything).Maybe()
-	//	api.On("GetUserByUsername", mock.AnythingOfType("string")).Return(user, nil)
-	//	return api
-	//}
-	//
-	//t.Run("if creates occurrences", func(t *testing.T) {
-	//
-	//	api := setupAPI()
-	//	defer api.AssertExpectations(t)
-	//
-	//	p := &Plugin{}
-	//	p.API = api
-	//
-	//
-	//})
+
+	request := &ReminderRequest{
+		TeamId:   model.NewId(),
+		Username: user.Username,
+		Payload:  "Hello in one minute",
+		Reminder: Reminder{
+			Id:          model.NewId(),
+			TeamId:      model.NewId(),
+			Username:    user.Username,
+			Occurrences: occurrences,
+			Message:     "Hello",
+			Target:      "me",
+			When:        "in one minute",
+		},
+	}
+
+	//stringReminders, _ := json.Marshal(reminders)
+	stringOccurrences, _ := json.Marshal(occurrences)
+	setupAPI := func() *plugintest.API {
+		api := &plugintest.API{}
+		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogInfo", mock.Anything).Maybe()
+		api.On("KVGet", mock.Anything).Return(stringOccurrences, nil)
+		api.On("KVSet", mock.Anything, mock.Anything).Return(nil)
+		api.On("GetUserByUsername", mock.AnythingOfType("string")).Return(user, nil)
+		return api
+	}
+
+	t.Run("if creates occurrences", func(t *testing.T) {
+
+		api := setupAPI()
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.API = api
+
+		assert.Nil(t, p.CreateOccurrences(request))
+
+	})
 }
 
 func TestIn(t *testing.T) {

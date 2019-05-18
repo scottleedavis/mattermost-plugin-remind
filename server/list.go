@@ -10,13 +10,18 @@ import (
 
 const RemindersPerPage = 4
 
-func (p *Plugin) ListReminders(user *model.User, channelId string) string {
+func (p *Plugin) ListReminders(user *model.User, channelId string) *model.Post {
 
 	T, _ := p.translation(user)
 	offset := 0
 	reminders := p.GetReminders(user.Username)
 	if len(reminders) == 0 {
-		return T("no.reminders")
+		return &model.Post{
+			ChannelId:     channelId,
+			PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
+			UserId:        p.remindUserId,
+			Message:       T("no.reminders"),
+		}
 	}
 	completedReminderCount := 0
 	for _, reminder := range reminders {
@@ -53,14 +58,8 @@ func (p *Plugin) ListReminders(user *model.User, channelId string) string {
 		endOffset,
 		attachments)
 
-	channel, cErr := p.API.GetDirectChannel(p.remindUserId, user.Id)
-	if cErr != nil {
-		p.API.LogError("failed to create channel " + cErr.Error())
-		return ""
-	}
-
-	interactivePost := model.Post{
-		ChannelId:     channel.Id,
+	return &model.Post{
+		ChannelId:     channelId,
 		PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
 		UserId:        p.remindUserId,
 		Props: model.StringInterface{
@@ -68,19 +67,9 @@ func (p *Plugin) ListReminders(user *model.User, channelId string) string {
 		},
 	}
 
-	defer p.API.CreatePost(&interactivePost)
-
-	if channel.Id == channelId {
-		return ""
-	} else {
-		messageParameters := map[string]interface{}{
-			"RemindUser": botName,
-		}
-		return T("list.reminders", messageParameters)
-	}
 }
 
-func (p *Plugin) UpdateListReminders(userId string, postId string, offset int) {
+func (p *Plugin) UpdateListReminders(userId string, postId string, channelId string, offset int) {
 
 	user, uErr := p.API.GetUser(userId)
 	if uErr != nil {
@@ -126,14 +115,16 @@ func (p *Plugin) UpdateListReminders(userId string, postId string, offset int) {
 		endOffset,
 		attachments)
 
-	if post, pErr := p.API.GetPost(postId); pErr != nil {
-		p.API.LogError(pErr.Error())
-	} else {
-		post.Props = model.StringInterface{
+	post := &model.Post{
+		Id:        postId,
+		ChannelId: channelId,
+		UserId:    p.remindUserId,
+		Props: model.StringInterface{
 			"attachments": attachments,
-		}
-		defer p.API.UpdatePost(post)
+		},
 	}
+	p.API.UpdateEphemeralPost(userId, post)
+
 }
 
 func (p *Plugin) categorizeOccurrences(reminders []Reminder) (
@@ -577,7 +568,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 	return &model.SlackAttachment{}
 }
 
-func (p *Plugin) ListCompletedReminders(userId string, postId string) {
+func (p *Plugin) ListCompletedReminders(userId string, postId string, channelId string) {
 
 	user, uErr := p.API.GetUser(userId)
 	if uErr != nil {
@@ -594,13 +585,13 @@ func (p *Plugin) ListCompletedReminders(userId string, postId string) {
 		}
 	}
 
-	if post, pErr := p.API.GetPost(postId); pErr != nil {
-		p.API.LogError(pErr.Error())
-	} else {
-		post.Message = output
-		post.Props = model.StringInterface{}
-		p.API.UpdatePost(post)
+	post := &model.Post{
+		Id:        postId,
+		ChannelId: channelId,
+		Message:   output,
+		Props:     model.StringInterface{},
 	}
+	p.API.UpdateEphemeralPost(userId, post)
 }
 
 func (p *Plugin) DeleteCompletedReminders(userId string) {

@@ -270,6 +270,41 @@ func TestFindWhen(t *testing.T) {
 		err = p.findWhen(request)
 		assert.True(t, err == nil)
 
+		request = &ReminderRequest{
+			TeamId:   model.NewId(),
+			Username: user.Username,
+			Payload:  "Hello on 12/22",
+			Reminder: Reminder{
+				Id:        model.NewId(),
+				TeamId:    model.NewId(),
+				Username:  user.Username,
+				Message:   "Hello",
+				Completed: p.emptyTime,
+				Target:    "me",
+				When:      "on 12/22",
+			},
+		}
+
+		err = p.findWhen(request)
+		assert.True(t, err == nil)
+
+		request = &ReminderRequest{
+			TeamId:   model.NewId(),
+			Username: user.Username,
+			Payload:  "Hello every day",
+			Reminder: Reminder{
+				Id:        model.NewId(),
+				TeamId:    model.NewId(),
+				Username:  user.Username,
+				Message:   "Hello",
+				Completed: p.emptyTime,
+				Target:    "me",
+				When:      "every day",
+			},
+		}
+
+		err = p.findWhen(request)
+		assert.True(t, err == nil)
 	})
 
 }

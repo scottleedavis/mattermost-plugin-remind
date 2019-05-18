@@ -237,7 +237,6 @@ func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {
 					Text: T("schedule.response", responseParameters),
 					Actions: []*model.PostAction{
 						{
-							Id: model.NewId(),
 							Integration: &model.PostActionIntegration{
 								Context: model.StringInterface{
 									"reminder_id":   r.Reminder.Id,
@@ -250,7 +249,6 @@ func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {
 							Name: T("button.delete"),
 						},
 						{
-							Id: model.NewId(),
 							Integration: &model.PostActionIntegration{
 								Context: model.StringInterface{
 									"reminder_id":   r.Reminder.Id,
@@ -281,7 +279,8 @@ func (p *Plugin) handleViewEphemeral(w http.ResponseWriter, r *http.Request) {
 		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
 		return
 	}
-	p.ListReminders(user, "")
+	p.API.SendEphemeralPost(user.Id, p.ListReminders(user, request.ChannelId))
+
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 
 }
@@ -526,7 +525,7 @@ func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request) {
 
 func (p *Plugin) handleNextReminders(w http.ResponseWriter, r *http.Request) {
 	request := model.PostActionIntegrationRequestFromJson(r.Body)
-	p.UpdateListReminders(request.UserId, request.PostId, int(request.Context["offset"].(float64)))
+	p.UpdateListReminders(request.UserId, request.PostId, request.ChannelId, int(request.Context["offset"].(float64)))
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
@@ -540,13 +539,13 @@ func (p *Plugin) handleCompleteList(w http.ResponseWriter, r *http.Request) {
 
 	reminder.Completed = time.Now().UTC()
 	p.UpdateReminder(request.UserId, reminder)
-	p.UpdateListReminders(request.UserId, request.PostId, 0)
+	p.UpdateListReminders(request.UserId, request.PostId, request.ChannelId, 0)
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
 func (p *Plugin) handleViewCompleteList(w http.ResponseWriter, r *http.Request) {
 	request := model.PostActionIntegrationRequestFromJson(r.Body)
-	p.ListCompletedReminders(request.UserId, request.PostId)
+	p.ListCompletedReminders(request.UserId, request.PostId, request.ChannelId)
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
@@ -559,14 +558,14 @@ func (p *Plugin) handleDeleteList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p.DeleteReminder(request.UserId, reminder)
-	p.UpdateListReminders(request.UserId, request.PostId, 0)
+	p.UpdateListReminders(request.UserId, request.PostId, request.ChannelId, 0)
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
 func (p *Plugin) handleDeleteCompleteList(w http.ResponseWriter, r *http.Request) {
 	request := model.PostActionIntegrationRequestFromJson(r.Body)
 	p.DeleteCompletedReminders(request.UserId)
-	p.UpdateListReminders(request.UserId, request.PostId, 0)
+	p.UpdateListReminders(request.UserId, request.PostId, request.ChannelId, 0)
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
@@ -664,14 +663,17 @@ func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		p.UpdateListReminders(request.UserId, request.PostId, 0)
+		p.UpdateListReminders(request.UserId, request.PostId, request.ChannelId, 0)
 		writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 	}
 }
 
 func (p *Plugin) handleCloseList(w http.ResponseWriter, r *http.Request) {
 	request := model.PostActionIntegrationRequestFromJson(r.Body)
-	p.API.DeletePost(request.PostId)
+	post := &model.Post{
+		Id: request.PostId,
+	}
+	p.API.DeleteEphemeralPost(request.UserId, post)
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
