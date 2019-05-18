@@ -117,7 +117,7 @@
   },
   {
     "id": "action.snooze.tomorrow",
-    "translation": "Snoozed. I’ll remind you \"{{.Message}}\" at 9am tommorrow"
+    "translation": "Snoozed. I’ll remind you \"{{.Message}}\" at 9am tomorrow"
   },
   {
     "id": "action.snooze.nextweek",
@@ -197,7 +197,7 @@
   },
   {
     "id": "snooze.tomorrow",
-    "translation": "Snoozed. I’ll remind you \"{{.Message}}\" at 9am tommorrow"
+    "translation": "Snoozed. I’ll remind you \"{{.Message}}\" at 9am tomorrow"
   },
   {
     "id": "button.snooze.nextweek",
