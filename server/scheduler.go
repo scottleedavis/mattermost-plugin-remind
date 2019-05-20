@@ -2,14 +2,11 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/mattermost/mattermost-server/model"
 )
-
-const TriggerHostName = "__TRIGGERHOST__"
 
 func (p *Plugin) ScheduleReminder(request *ReminderRequest, channelId string) (*model.Post, error) {
 
@@ -176,7 +173,6 @@ func (p *Plugin) InteractiveSchedule(triggerId string, user *model.User) {
 
 func (p *Plugin) Run() {
 	p.Stop()
-	p.getAndSetLock()
 	if !p.running {
 		p.running = true
 		p.runner()
@@ -184,33 +180,16 @@ func (p *Plugin) Run() {
 }
 
 func (p *Plugin) Stop() {
-	p.API.KVSet(TriggerHostName, []byte(""))
 	p.running = false
 }
 
 func (p *Plugin) runner() {
 	go func() {
 		<-time.NewTimer(time.Second).C
-		if !p.running && !p.getAndSetLock() {
+		if !p.running {
 			return
 		}
 		p.TriggerReminders()
 		p.runner()
 	}()
-}
-
-func (p *Plugin) getAndSetLock() bool {
-	hostname, _ := os.Hostname()
-	bytes, bErr := p.API.KVGet(TriggerHostName)
-	if bErr != nil {
-		p.API.LogError("failed KVGet %s", bErr)
-		return false
-	}
-	if string(bytes) != "" && string(bytes) != hostname {
-		return false
-	} else if string(bytes) == hostname {
-		return true
-	}
-	p.API.KVSet(TriggerHostName, []byte(hostname))
-	return true
 }

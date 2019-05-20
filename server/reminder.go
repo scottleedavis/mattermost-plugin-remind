@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strings"
 	"time"
 
@@ -53,9 +54,13 @@ func (p *Plugin) TriggerReminders() {
 			p.API.LogError("Failed to unmarshal reminder occurrences " + fmt.Sprintf("%v", oErr))
 			return
 		}
+		hostname, _ := os.Hostname()
 
 		for _, occurrence := range occurrences {
 
+			if hostname != occurrence.Hostname {
+				continue
+			}
 			user, uErr := p.API.GetUserByUsername(occurrence.Username)
 			if uErr != nil {
 				p.API.LogError("failed to query user %s", user.Id)
