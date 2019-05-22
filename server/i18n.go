@@ -14,11 +14,11 @@ import (
 	"github.com/nicksnyder/go-i18n/i18n"
 )
 
-var locales map[string]string = make(map[string]string)
+var locales = make(map[string]string)
 
-func TranslationsPreInit() error {
+func (p *Plugin) TranslationsPreInit() error {
 
-	i18nDirectory, found := fileutils.FindDir("plugins/" + manifest.Id + "/server/dist/i18n/")
+	i18nDirectory, found := fileutils.FindDir(*p.ServerConfig.PluginSettings.Directory + "/" + manifest.Id + "/server/dist/i18n/")
 	if !found {
 		return fmt.Errorf("unable to find i18n directory")
 	}
