@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -24,8 +25,10 @@ func TestTriggerReminders(t *testing.T) {
 	}
 	testTime := time.Now().UTC().Round(time.Second)
 
+	hostname, _ := os.Hostname()
 	occurrences := []Occurrence{
 		{
+			Hostname:   hostname,
 			Id:         model.NewId(),
 			ReminderId: model.NewId(),
 			Occurrence: testTime,

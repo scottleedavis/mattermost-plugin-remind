@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -12,6 +13,8 @@ import (
 )
 
 type Occurrence struct {
+	Hostname string
+
 	Id string
 
 	Username string
@@ -215,7 +218,9 @@ func (p *Plugin) addOccurrences(request *ReminderRequest, occurrences []time.Tim
 			}
 		}
 
+		hostname, _ := os.Hostname()
 		occurrence := Occurrence{
+			Hostname:   hostname,
 			Id:         model.NewId(),
 			Username:   request.Username,
 			ReminderId: request.Reminder.Id,
