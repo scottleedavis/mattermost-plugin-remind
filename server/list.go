@@ -159,9 +159,9 @@ func (p *Plugin) categorizeOccurrences(reminders []Reminder) (
 					t.After(time.Now().UTC()) {
 					channelOccurrences = append(channelOccurrences, occurrence)
 				} else if reminder.Completed != p.emptyTime {
-					p.API.LogInfo("completed reminder: " + fmt.Sprintf("%v", reminder))
+					//p.API.LogInfo("completed reminder: " + fmt.Sprintf("%v", reminder))
 				} else {
-					p.API.LogInfo("unknown reminder: " + fmt.Sprintf("%v", reminder))
+					//p.API.LogInfo("unknown reminder: " + fmt.Sprintf("%v", reminder))
 				}
 
 			}
