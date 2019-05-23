@@ -76,6 +76,10 @@
     "translation": "\"{{.Message}}\""
   },
   {
+    "id": "list.element.past.snoozed",
+    "translation": "\"{{.Message}}\" (snoozed until {{.Snoozed}})"
+  },
+  {
     "id": "list.element.channel",
     "translation": "\"{{.Message}}\" (in {{.Channel}}) {{.Occurrence}}"
   },

@@ -153,7 +153,7 @@ func (p *Plugin) categorizeOccurrences(reminders []Reminder) (
 				} else if !strings.HasPrefix(reminder.Target, "~") &&
 					reminder.Completed == p.emptyTime &&
 					t.Before(time.Now().UTC()) &&
-					s == p.emptyTime {
+					(s == p.emptyTime || s.Before(time.Now().UTC())) {
 					pastOccurrences = append(pastOccurrences, occurrence)
 				} else if strings.HasPrefix(reminder.Target, "~") &&
 					reminder.Completed == p.emptyTime &&
@@ -161,10 +161,8 @@ func (p *Plugin) categorizeOccurrences(reminders []Reminder) (
 					channelOccurrences = append(channelOccurrences, occurrence)
 				} else if reminder.Completed != p.emptyTime {
 					p.API.LogInfo("completed reminder: " + fmt.Sprintf("%v", reminder))
-					p.API.LogInfo("completed occurrence: " + fmt.Sprintf("%v", occurrence))
 				} else {
 					p.API.LogInfo("unknown reminder: " + fmt.Sprintf("%v", reminder))
-					p.API.LogInfo("unknown occurrence: " + fmt.Sprintf("%v", occurrence))
 				}
 
 			}
