@@ -150,8 +150,7 @@ func (p *Plugin) categorizeOccurrences(reminders []Reminder) (
 				} else if !strings.HasPrefix(reminder.Target, "~") &&
 					occurrence.Repeat != "" && t.After(time.Now().UTC()) {
 					recurringOccurrences = append(recurringOccurrences, occurrence)
-				} else if !strings.HasPrefix(reminder.Target, "~") &&
-					reminder.Completed == p.emptyTime &&
+				} else if reminder.Completed == p.emptyTime &&
 					t.Before(time.Now().UTC()) &&
 					(s == p.emptyTime || s.Before(time.Now().UTC())) {
 					pastOccurrences = append(pastOccurrences, occurrence)
