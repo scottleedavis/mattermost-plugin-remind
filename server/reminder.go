@@ -260,7 +260,7 @@ func (p *Plugin) TriggerReminders() {
 				}
 
 				if occurrence.Repeat != "" {
-					p.rescheduleOccurrence(&occurrence)
+					defer p.rescheduleOccurrence(&occurrence)
 				}
 
 			} else if strings.HasPrefix(reminder.Target, "~") { //~ channel
@@ -293,7 +293,7 @@ func (p *Plugin) TriggerReminders() {
 					}
 
 					if occurrence.Repeat != "" {
-						p.rescheduleOccurrence(&occurrence)
+						defer p.rescheduleOccurrence(&occurrence)
 					}
 
 				}
@@ -507,6 +507,8 @@ func (p *Plugin) DeleteReminders(user *model.User) string {
 }
 
 func (p *Plugin) rescheduleOccurrence(occurrence *Occurrence) {
+
+	time.Sleep(1000 * time.Millisecond)
 
 	user, _ := p.API.GetUserByUsername(occurrence.Username)
 	_, locale := p.translation(user)
