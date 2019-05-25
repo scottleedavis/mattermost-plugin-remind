@@ -86,6 +86,8 @@ func (p *Plugin) UpdateListReminders(userId string, postId string, channelId str
 	activeReminderCount := len(reminders) - completedReminderCount
 	if offset < 0 {
 		offset = 0
+	} else if offset >= activeReminderCount {
+		offset = 0
 	}
 	endOffset := offset + RemindersPerPage - 1
 	if endOffset >= activeReminderCount {
@@ -187,7 +189,7 @@ func (p *Plugin) pagedOccurrences(
 	if len(upcomingOccurrences) > 0 {
 		for _, o := range upcomingOccurrences {
 			if offsetCount >= offset && offsetCount <= endOffset {
-				attachments = append(attachments, p.addAttachment(user, o, reminders, "upcoming"))
+				attachments = append(attachments, p.addAttachment(user, o, reminders, "upcoming", offset))
 			}
 			offsetCount += 1
 		}
@@ -196,7 +198,7 @@ func (p *Plugin) pagedOccurrences(
 	if len(recurringOccurrences) > 0 {
 		for _, o := range recurringOccurrences {
 			if offsetCount >= offset && offsetCount <= endOffset {
-				attachments = append(attachments, p.addAttachment(user, o, reminders, "recurring"))
+				attachments = append(attachments, p.addAttachment(user, o, reminders, "recurring", offset))
 			}
 			offsetCount += 1
 		}
@@ -205,7 +207,7 @@ func (p *Plugin) pagedOccurrences(
 	if len(pastOccurrences) > 0 {
 		for _, o := range pastOccurrences {
 			if offsetCount >= offset && offsetCount <= endOffset {
-				attachments = append(attachments, p.addAttachment(user, o, reminders, "past"))
+				attachments = append(attachments, p.addAttachment(user, o, reminders, "past", offset))
 			}
 			offsetCount += 1
 		}
@@ -213,7 +215,7 @@ func (p *Plugin) pagedOccurrences(
 	if len(channelOccurrences) > 0 {
 		for _, o := range channelOccurrences {
 			if offsetCount >= offset && offsetCount <= endOffset {
-				attachments = append(attachments, p.addAttachment(user, o, reminders, "channel"))
+				attachments = append(attachments, p.addAttachment(user, o, reminders, "channel", offset))
 			}
 			offsetCount += 1
 		}
@@ -337,6 +339,7 @@ func (p *Plugin) listControl(
 				Integration: &model.PostActionIntegration{
 					Context: model.StringInterface{
 						"action": "delete/complete/list",
+						"offset": offset,
 					},
 					URL: fmt.Sprintf("%s/plugins/%s/delete/complete/list", p.URL, manifest.Id),
 				},
@@ -364,7 +367,7 @@ func (p *Plugin) listControl(
 	})
 }
 
-func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminders []Reminder, gType string) *model.SlackAttachment {
+func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminders []Reminder, gType string, offset int) *model.SlackAttachment {
 
 	location := p.location(user)
 	T, _ := p.translation(user)
@@ -409,6 +412,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 								"reminder_id":   reminder.Id,
 								"occurrence_id": occurrence.Id,
 								"action":        "complete/list",
+								"offset":        offset,
 							},
 							URL: fmt.Sprintf("%s/plugins/%s/complete/list", p.URL, manifest.Id),
 						},
@@ -421,6 +425,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 								"reminder_id":   reminder.Id,
 								"occurrence_id": occurrence.Id,
 								"action":        "delete/list",
+								"offset":        offset,
 							},
 							URL: fmt.Sprintf("%s/plugins/%s/delete/list", p.URL, manifest.Id),
 						},
@@ -445,6 +450,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 								"reminder_id":   reminder.Id,
 								"occurrence_id": occurrence.Id,
 								"action":        "delete/list",
+								"offset":        offset,
 							},
 							URL: fmt.Sprintf("%s/plugins/%s/delete/list", p.URL, manifest.Id),
 						},
@@ -469,6 +475,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 								"reminder_id":   reminder.Id,
 								"occurrence_id": occurrence.Id,
 								"action":        "complete/list",
+								"offset":        offset,
 							},
 							URL: fmt.Sprintf("%s/plugins/%s/complete/list", p.URL, manifest.Id),
 						},
@@ -481,6 +488,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 								"reminder_id":   reminder.Id,
 								"occurrence_id": occurrence.Id,
 								"action":        "delete/list",
+								"offset":        offset,
 							},
 							URL: fmt.Sprintf("%s/plugins/%s/delete/list", p.URL, manifest.Id),
 						},
@@ -493,6 +501,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 								"reminder_id":   reminder.Id,
 								"occurrence_id": occurrence.Id,
 								"action":        "snooze/list",
+								"offset":        offset,
 							},
 							URL: fmt.Sprintf("%s/plugins/%s/snooze/list", p.URL, manifest.Id),
 						},
@@ -539,6 +548,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 								"reminder_id":   reminder.Id,
 								"occurrence_id": occurrence.Id,
 								"action":        "complete/list",
+								"offset":        offset,
 							},
 							URL: fmt.Sprintf("%s/plugins/%s/complete/list", p.URL, manifest.Id),
 						},
@@ -551,6 +561,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 								"reminder_id":   reminder.Id,
 								"occurrence_id": occurrence.Id,
 								"action":        "delete/list",
+								"offset":        offset,
 							},
 							URL: fmt.Sprintf("%s/plugins/%s/delete/list", p.URL, manifest.Id),
 						},
