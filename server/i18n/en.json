@@ -260,6 +260,14 @@
   	"translation": "tomorrow"
   },
   {
+    "id": "weekday",
+    "translation": "weekday"
+  },
+  {
+    "id": "weekdays",
+    "translation": "weekdays"
+  },
+  {
     "id": "mon",
     "translation": "mon"
   },

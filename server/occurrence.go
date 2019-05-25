@@ -935,6 +935,9 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 		chronoTime = strings.Trim(dateTimeSplit[1], " ")
 	}
 
+	if chronoDate == T("weekday") || chronoDate == T("weekdays") {
+		chronoDate = T("monday") + "," + T("tuesday") + "," + T("wednesday") + "," + T("thursday") + "," + T("friday")
+	}
 	days := p.regSplit(chronoDate, "("+T("and")+")|(,)")
 
 	for _, chrono := range days {
