@@ -633,6 +633,7 @@ func TestHandleCompleteList(t *testing.T) {
 			Context: model.StringInterface{
 				"reminder_id":   model.NewId(),
 				"occurrence_id": model.NewId(),
+				"offset":        0,
 			},
 		}
 
@@ -785,6 +786,7 @@ func TestHandleDeleteList(t *testing.T) {
 			Context: model.StringInterface{
 				"reminder_id":   model.NewId(),
 				"occurrence_id": model.NewId(),
+				"offset":        0,
 			},
 		}
 
@@ -859,7 +861,15 @@ func TestHandleDeleteCompleteList(t *testing.T) {
 		p.router = p.InitAPI()
 		p.API = api
 
-		request := &model.PostActionIntegrationRequest{UserId: "userID1", PostId: "postID1"}
+		request := &model.PostActionIntegrationRequest{
+			UserId: "userID1",
+			PostId: "postID1",
+			Context: model.StringInterface{
+				"reminder_id":   model.NewId(),
+				"occurrence_id": model.NewId(),
+				"offset":        0,
+			},
+		}
 
 		w := httptest.NewRecorder()
 		r := httptest.NewRequest("POST", "/delete/complete/list", bytes.NewReader(request.ToJson()))
@@ -959,6 +969,7 @@ func TestHandleSnoozeList(t *testing.T) {
 					"reminder_id":     model.NewId(),
 					"occurrence_id":   model.NewId(),
 					"selected_option": test.SnoozeTime,
+					"offset":          0,
 				},
 			}
 

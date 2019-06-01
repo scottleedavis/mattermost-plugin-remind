@@ -76,6 +76,10 @@
     "translation": "\"{{.Message}}\""
   },
   {
+    "id": "list.element.past.snoozed",
+    "translation": "\"{{.Message}}\" (snoozed until {{.Snoozed}})"
+  },
+  {
     "id": "list.element.channel",
     "translation": "\"{{.Message}}\" (in {{.Channel}}) {{.Occurrence}}"
   },
@@ -254,6 +258,14 @@
   {
   	"id": "tomorrow",
   	"translation": "tomorrow"
+  },
+  {
+    "id": "weekday",
+    "translation": "weekday"
+  },
+  {
+    "id": "weekdays",
+    "translation": "weekdays"
   },
   {
     "id": "mon",

@@ -69,6 +69,7 @@ ifneq ($(HAS_SERVER),)
 	cd server && env GOOS=linux GOARCH=amd64 $(GO) build -o dist/plugin-linux-amd64;
 	cd server && env GOOS=darwin GOARCH=amd64 $(GO) build -o dist/plugin-darwin-amd64;
 	cd server && env GOOS=windows GOARCH=amd64 $(GO) build -o dist/plugin-windows-amd64.exe;
+	cd server && cp -a i18n dist/i18n
 endif
 
 ## Ensures NPM dependencies are installed without having to run this all the time.

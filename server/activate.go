@@ -38,21 +38,15 @@ func (p *Plugin) OnActivate() error {
 	}
 
 	p.router = p.InitAPI()
-
 	p.ensureBotExists()
+	p.emptyTime = time.Time{}.AddDate(1, 1, 1)
+	p.supportedLocales = []string{"en"}
 
 	for _, team := range teams {
 		if err := p.registerCommand(team.Id); err != nil {
 			return errors.Wrap(err, "failed to register command")
 		}
 	}
-
-	if err := TranslationsPreInit(); err != nil {
-		return errors.Wrap(err, "failed to initialize translations OnActivate message")
-	}
-
-	p.emptyTime = time.Time{}.AddDate(1, 1, 1)
-	p.supportedLocales = []string{"en"}
 
 	p.Run()
 
@@ -80,6 +74,9 @@ func (p *Plugin) OnDeactivate() error {
 func (p *Plugin) OnConfigurationChange() error {
 	p.ServerConfig = p.API.GetConfig()
 	p.URL = fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
+	if err := p.TranslationsPreInit(); err != nil {
+		return errors.Wrap(err, "failed to initialize translations")
+	}
 	return nil
 }
 

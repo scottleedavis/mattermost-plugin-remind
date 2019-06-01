@@ -832,7 +832,7 @@ func (p *Plugin) onEN(when string, user *model.User) (times []time.Time, err err
 			return []time.Time{}, pErr
 		}
 
-		todayWeekDayNum := int(time.Now().Weekday())
+		todayWeekDayNum := int(time.Now().In(location).Weekday())
 		weekDayNum := p.weekDayNumber(dateUnit, user)
 		day := 0
 
@@ -935,6 +935,9 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 		chronoTime = strings.Trim(dateTimeSplit[1], " ")
 	}
 
+	if chronoDate == T("weekday") || chronoDate == T("weekdays") {
+		chronoDate = T("monday") + "," + T("tuesday") + "," + T("wednesday") + "," + T("thursday") + "," + T("friday")
+	}
 	days := p.regSplit(chronoDate, "("+T("and")+")|(,)")
 
 	for _, chrono := range days {
@@ -1000,7 +1003,7 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 			T("friday"),
 			T("saturday"):
 
-			todayWeekDayNum := int(time.Now().Weekday())
+			todayWeekDayNum := int(time.Now().In(location).Weekday())
 			weekDayNum := p.weekDayNumber(dateUnit, user)
 			day := 0
 
@@ -1192,14 +1195,16 @@ func (p *Plugin) formatWhenEN(username string, when string, occurrence string, s
 		return ""
 	}
 	T, _ := p.translation(user)
+	location := p.location(user)
+	now := time.Now().In(location)
+	t, _ := time.Parse(time.RFC3339, occurrence)
 
 	if strings.HasPrefix(when, T("in")) {
 
-		t, _ := time.Parse(time.RFC3339, occurrence)
 		endDate := ""
-		if time.Now().YearDay() == t.YearDay() {
+		if now.YearDay() == t.YearDay() {
 			endDate = T("today")
-		} else if time.Now().YearDay() == t.YearDay()-1 {
+		} else if now.YearDay() == t.YearDay()-1 {
 			endDate = T("tomorrow")
 		} else {
 			endDate = t.Weekday().String() + ", " + t.Month().String() + " " + p.daySuffixFromInt(user, t.Day())
@@ -1213,11 +1218,10 @@ func (p *Plugin) formatWhenEN(username string, when string, occurrence string, s
 
 	if strings.HasPrefix(when, T("at")) {
 
-		t, _ := time.Parse(time.RFC3339, occurrence)
 		endDate := ""
-		if time.Now().YearDay() == t.YearDay() {
+		if now.YearDay() == t.YearDay() {
 			endDate = T("today")
-		} else if time.Now().YearDay() == t.YearDay()-1 {
+		} else if now.YearDay() == t.YearDay()-1 {
 			endDate = T("tomorrow")
 		} else {
 			endDate = t.Weekday().String() + ", " + t.Month().String() + " " + p.daySuffixFromInt(user, t.Day())
@@ -1232,11 +1236,10 @@ func (p *Plugin) formatWhenEN(username string, when string, occurrence string, s
 
 	if strings.HasPrefix(when, T("on")) {
 
-		t, _ := time.Parse(time.RFC3339, occurrence)
 		endDate := ""
-		if time.Now().YearDay() == t.YearDay() {
+		if now.YearDay() == t.YearDay() {
 			endDate = T("today")
-		} else if time.Now().YearDay() == t.YearDay()-1 {
+		} else if now.YearDay() == t.YearDay()-1 {
 			endDate = T("tomorrow")
 		} else {
 			endDate = t.Weekday().String() + ", " + t.Month().String() + " " + p.daySuffixFromInt(user, t.Day())
@@ -1251,7 +1254,6 @@ func (p *Plugin) formatWhenEN(username string, when string, occurrence string, s
 
 	if strings.HasPrefix(when, T("every")) {
 
-		t, _ := time.Parse(time.RFC3339, occurrence)
 		repeatDate := strings.Trim(strings.Split(when, T("at"))[0], " ")
 		repeatDate = strings.Replace(repeatDate, T("every"), "", -1)
 		repeatDate = strings.Title(strings.ToLower(repeatDate))
@@ -1264,11 +1266,10 @@ func (p *Plugin) formatWhenEN(username string, when string, occurrence string, s
 
 	}
 
-	t, _ := time.Parse(time.RFC3339, occurrence)
 	endDate := ""
-	if time.Now().YearDay() == t.YearDay() {
+	if now.YearDay() == t.YearDay() {
 		endDate = T("today")
-	} else if time.Now().YearDay() == t.YearDay()-1 {
+	} else if now.YearDay() == t.YearDay()-1 {
 		endDate = T("tomorrow")
 	} else {
 		endDate = t.Weekday().String() + ", " + t.Month().String() + " " + p.daySuffixFromInt(user, t.Day())
@@ -1284,16 +1285,17 @@ func (p *Plugin) formatWhenEN(username string, when string, occurrence string, s
 func (p *Plugin) chooseClosest(user *model.User, chosen *time.Time, dayInterval bool) time.Time {
 
 	location := p.location(user)
+	now := time.Now().In(location)
 
 	if dayInterval {
-		if chosen.Before(time.Now().In(location)) {
+		if chosen.Before(now) {
 			return chosen.In(location).Round(time.Second).Add(time.Hour * 24 * time.Duration(1))
 		} else {
 			return *chosen
 		}
 	} else {
 		if chosen.Before(time.Now().In(location)) {
-			if chosen.Add(time.Hour * 12 * time.Duration(1)).Before(time.Now()) {
+			if chosen.Add(time.Hour * 12 * time.Duration(1)).Before(now) {
 				return chosen.In(location).Round(time.Second).Add(time.Hour * 24 * time.Duration(1))
 			} else {
 				return chosen.In(location).Round(time.Second).Add(time.Hour * 12 * time.Duration(1))

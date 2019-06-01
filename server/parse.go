@@ -645,7 +645,7 @@ func (p *Plugin) normalizeDate(text string, user *model.User) (string, error) {
 
 		switch len(date) {
 		case 2:
-			year := time.Now().Year()
+			year := time.Now().In(location).Year()
 			month, mErr := strconv.Atoi(date[0])
 			if mErr != nil {
 				return "", mErr
@@ -686,7 +686,7 @@ func (p *Plugin) normalizeDate(text string, user *model.User) (string, error) {
 
 		switch len(date) {
 		case 2:
-			year := time.Now().Year()
+			year := time.Now().In(location).Year()
 			month, mErr := strconv.Atoi(date[1])
 			if mErr != nil {
 				return "", mErr
@@ -737,11 +737,11 @@ func (p *Plugin) normalizeDate(text string, user *model.User) (string, error) {
 			dayInt = d
 		}
 
-		month := time.Now().Month()
-		year := time.Now().Year()
+		month := time.Now().In(location).Month()
+		year := time.Now().In(location).Year()
 		t := time.Date(year, month, dayInt, 0, 0, 0, 0, location)
 
-		if t.Before(time.Now()) {
+		if t.Before(time.Now().In(location)) {
 			t = t.AddDate(0, 1, 0)
 		}
 
