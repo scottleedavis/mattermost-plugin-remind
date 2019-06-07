@@ -62,37 +62,6 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		return &model.CommandResponse{}, nil
 	}
 
-	payload := strings.Trim(strings.Replace(command, "/"+CommandTrigger, "", -1), " ")
-
-	if strings.HasPrefix(payload, T("me")) ||
-		strings.HasPrefix(payload, "@") ||
-		strings.HasPrefix(payload, "~") {
-
-		request := ReminderRequest{
-			TeamId:   args.TeamId,
-			Username: user.Username,
-			Payload:  payload,
-			Reminder: Reminder{},
-		}
-		reminder, err := p.ScheduleReminder(&request, args.ChannelId)
-
-		if err != nil {
-			post := model.Post{
-				ChannelId: args.ChannelId,
-				UserId:    p.remindUserId,
-				Message:   T("exception.response"),
-			}
-			p.API.SendEphemeralPost(user.Id, &post)
-			return &model.CommandResponse{}, nil
-		}
-
-		p.API.SendEphemeralPost(user.Id, reminder)
-		return &model.CommandResponse{}, nil
-
-	}
-
-	// debug & troubleshooting commands
-
 	// clear all reminders for current user
 	if strings.HasSuffix(command, "__clear") {
 		post := model.Post{
@@ -126,12 +95,26 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		return &model.CommandResponse{}, nil
 	}
 
-	post := model.Post{
-		ChannelId: args.ChannelId,
-		UserId:    p.remindUserId,
-		Message:   T("exception.response"),
+	payload := strings.Trim(strings.Replace(command, "/"+CommandTrigger, "", -1), " ")
+	request := ReminderRequest{
+		TeamId:   args.TeamId,
+		Username: user.Username,
+		Payload:  payload,
+		Reminder: Reminder{},
 	}
-	p.API.SendEphemeralPost(user.Id, &post)
+	reminder, err := p.ScheduleReminder(&request, args.ChannelId)
+
+	if err != nil {
+		post := model.Post{
+			ChannelId: args.ChannelId,
+			UserId:    p.remindUserId,
+			Message:   T("exception.response"),
+		}
+		p.API.SendEphemeralPost(user.Id, &post)
+		return &model.CommandResponse{}, nil
+	}
+
+	p.API.SendEphemeralPost(user.Id, reminder)
 	return &model.CommandResponse{}, nil
 
 }

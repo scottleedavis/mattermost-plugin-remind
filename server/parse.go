@@ -35,7 +35,7 @@ func (p *Plugin) ParseRequest(request *ReminderRequest) error {
 			message := request.Payload[firstIndex : lastIndex+1]
 
 			when := strings.Replace(request.Payload, message, "", -1)
-			when = strings.Replace(when, commandSplit[0], "", 1)
+			when = strings.Replace(when, request.Reminder.Target, "", 1)
 			when = strings.Trim(when, " ")
 
 			message = strings.Replace(message, "\"", "", -1)
@@ -55,7 +55,46 @@ func (p *Plugin) ParseRequest(request *ReminderRequest) error {
 		}
 
 		message := strings.Replace(request.Payload, request.Reminder.When, "", -1)
-		message = strings.Replace(message, commandSplit[0], "", 1)
+		message = strings.Replace(message, request.Reminder.Target, "", 1)
+		message = strings.Trim(message, " \"")
+
+		if message == "" {
+			return errors.New("no message parsed")
+		}
+		request.Reminder.Message = message
+
+		return nil
+
+	} else {
+		request.Reminder.Target = T("me")
+
+		firstIndex := strings.Index(request.Payload, "\"")
+		lastIndex := strings.LastIndex(request.Payload, "\"")
+
+		if firstIndex > -1 && lastIndex > -1 && firstIndex != lastIndex { // has quotes
+
+			message := request.Payload[firstIndex : lastIndex+1]
+
+			when := strings.Replace(request.Payload, message, "", -1)
+			when = strings.Trim(when, " ")
+
+			message = strings.Replace(message, "\"", "", -1)
+
+			request.Reminder.When = when
+			request.Reminder.Message = message
+			return nil
+		}
+
+		if wErr := p.findWhen(request); wErr != nil {
+			return wErr
+		}
+
+		toIndex := strings.Index(request.Reminder.When, T("to")+" ")
+		if toIndex > -1 {
+			request.Reminder.When = request.Reminder.When[0:toIndex]
+		}
+
+		message := strings.Replace(request.Payload, request.Reminder.When, "", -1)
 		message = strings.Trim(message, " \"")
 
 		if message == "" {
@@ -67,7 +106,6 @@ func (p *Plugin) ParseRequest(request *ReminderRequest) error {
 
 	}
 
-	return errors.New("unrecognized target")
 }
 
 func (p *Plugin) findWhen(request *ReminderRequest) error {
