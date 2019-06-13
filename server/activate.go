@@ -73,6 +73,9 @@ func (p *Plugin) OnDeactivate() error {
 
 func (p *Plugin) OnConfigurationChange() error {
 	p.ServerConfig = p.API.GetConfig()
+	if p.ServerConfig.ServiceSettings.SiteURL == nil {
+		return errors.New("siteURL is not set. Please set a siteURL and restart the plugin")
+	}
 	p.URL = fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
 	if err := p.TranslationsPreInit(); err != nil {
 		return errors.Wrap(err, "failed to initialize translations")
