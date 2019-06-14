@@ -32,6 +32,11 @@ func (p *Plugin) OnActivate() error {
 		return err
 	}
 
+	p.ServerConfig = p.API.GetConfig()
+	if p.ServerConfig.ServiceSettings.SiteURL == nil {
+		return errors.New("siteURL is not set. Please set a siteURL and restart the plugin")
+	}
+
 	teams, err := p.API.GetTeams()
 	if err != nil {
 		return errors.Wrap(err, "failed to query teams OnActivate")
@@ -48,6 +53,7 @@ func (p *Plugin) OnActivate() error {
 		}
 	}
 
+	p.activated = true
 	p.Run()
 
 	return nil
@@ -68,17 +74,17 @@ func (p *Plugin) OnDeactivate() error {
 		}
 	}
 
+	p.activated = false
+
 	return nil
 }
 
 func (p *Plugin) OnConfigurationChange() error {
-	p.ServerConfig = p.API.GetConfig()
-	if p.ServerConfig.ServiceSettings.SiteURL == nil {
-		return errors.New("siteURL is not set. Please set a siteURL and restart the plugin")
-	}
-	p.URL = fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
-	if err := p.TranslationsPreInit(); err != nil {
-		return errors.Wrap(err, "failed to initialize translations")
+	if p.activated {
+		p.URL = fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
+		if err := p.TranslationsPreInit(); err != nil {
+			return errors.Wrap(err, "failed to initialize translations")
+		}
 	}
 	return nil
 }
