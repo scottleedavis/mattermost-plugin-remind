@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-const minimumServerVersion = "5.10.0"
+const minimumServerVersion = "5.12.0"
 const botName = "remindbot"
 const botDisplayName = "Remindbot"
 
