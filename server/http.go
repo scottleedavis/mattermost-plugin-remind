@@ -569,10 +569,7 @@ func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request) {
 
 func (p *Plugin) handleCloseList(w http.ResponseWriter, r *http.Request) {
 	request := model.PostActionIntegrationRequestFromJson(r.Body)
-	post := &model.Post{
-		Id: request.PostId,
-	}
-	p.API.DeleteEphemeralPost(request.UserId, post)
+	p.API.DeleteEphemeralPost(request.UserId, request.PostId)
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
