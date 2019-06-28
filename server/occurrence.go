@@ -1104,9 +1104,15 @@ func (p *Plugin) freeFormEN(when string, user *model.User) (times []time.Time, e
 			chronoTime = dateTimeSplit[1]
 		}
 	} else {
-		_, ntErr := p.normalizeTime(chronoDate, user)
-		if ntErr == nil {
-			return p.at(T("at")+" "+chronoDate, user)
+		dateTimeSplit := strings.Split(chronoDate, " ")
+		if len(dateTimeSplit) == 2 {
+			chronoDate = dateTimeSplit[0]
+			chronoTime = dateTimeSplit[1]
+		} else {
+			_, ntErr := p.normalizeTime(chronoDate, user)
+			if ntErr == nil {
+				return p.at(T("at")+" "+chronoDate, user)
+			}
 		}
 	}
 
