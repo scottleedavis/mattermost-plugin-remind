@@ -187,6 +187,7 @@ func TestAt(t *testing.T) {
 		api := &plugintest.API{}
 		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
 		api.On("LogInfo", mock.Anything).Maybe()
+		api.On("LogError", mock.Anything).Maybe()
 		return api
 	}
 
@@ -259,6 +260,10 @@ func TestAt(t *testing.T) {
 		times, err = p.atEN("at 5PM", user)
 		assert.Nil(t, err)
 		assert.True(t, times[0].In(location).Hour() == 17 && times[0].In(location).Minute() == 0)
+
+		times, err = p.atEN("at 10PM", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Hour() == 22 && times[0].In(location).Minute() == 0)
 
 		times, err = p.atEN("at 4 am", user)
 		assert.Nil(t, err)
