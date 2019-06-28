@@ -624,7 +624,10 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 			if len(normalizedWhen) == 3 {
 				s = normalizedWhen[:len(normalizedWhen)-2]
 				s2 = normalizedWhen[len(normalizedWhen)-2:]
-			} else if len(normalizedWhen) >= 4 {
+			} else if len(normalizedWhen) == 4 {
+				s = normalizedWhen[:len(normalizedWhen)-2]
+				s2 = normalizedWhen[len(normalizedWhen)-2:]
+			} else if len(normalizedWhen) > 4 {
 				s = normalizedWhen[:len(normalizedWhen)-4]
 				s2 = normalizedWhen[len(normalizedWhen)-4:]
 			}
@@ -935,7 +938,7 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 		chronoTime = strings.Trim(dateTimeSplit[1], " ")
 	}
 
-	if chronoDate == T("weekday") || chronoDate == T("weekdays") {
+	if chronoDate == T("weekday") || chronoDate == T("weekdaysgh") {
 		chronoDate = T("monday") + "," + T("tuesday") + "," + T("wednesday") + "," + T("thursday") + "," + T("friday")
 	}
 	days := p.regSplit(chronoDate, "("+T("and")+")|(,)")
