@@ -20,8 +20,6 @@ type Plugin struct {
 
 	remindUserId string
 
-	activated bool
-
 	running bool
 
 	emptyTime time.Time

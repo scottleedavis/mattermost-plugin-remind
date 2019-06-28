@@ -53,27 +53,17 @@ func (p *Plugin) OnActivate() error {
 		}
 	}
 
-	p.activated = true
+	p.URL = fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
+	if err := p.TranslationsPreInit(); err != nil {
+		return errors.Wrap(err, "failed to initialize translations")
+	}
 	p.Run()
 
 	return nil
 }
 
 func (p *Plugin) OnDeactivate() error {
-
 	p.Stop()
-	p.activated = false
-
-	return nil
-}
-
-func (p *Plugin) OnConfigurationChange() error {
-	if p.activated {
-		p.URL = fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
-		if err := p.TranslationsPreInit(); err != nil {
-			return errors.Wrap(err, "failed to initialize translations")
-		}
-	}
 	return nil
 }
 
