@@ -2,7 +2,7 @@
 
 _**A bot that schedules reminders for Mattermost**_
 
-<img src="remind.png" height="500">
+<img src="remind.png">
 
 ### Installation
 
