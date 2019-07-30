@@ -5,13 +5,9 @@ import es from 'i18n/es.json';
 
 import {id as pluginId} from './manifest';
 
-import RemindMenuItem from './components/remind_menu_item';
-
 import {
     postDropdownMenuAction,
 } from './actions';
-
-// import reducer from './reducer';
 
 function getTranslations(locale) {
     switch (locale) {
@@ -23,14 +19,24 @@ function getTranslations(locale) {
     return {};
 }
 
+function getSubMenu() {
+    const primary = 'Remind me about this';
+    const secondary = [
+        'In 20 minutes',
+        'In 1 hour',
+        'In 3 hours',
+        'Tomorrow',
+        'Next week',
+    ];
+    return {primary, secondary};
+}
+
 export default class RemindPlugin {
     initialize(registry, store) {
         registry.registerPostDropdownMenuAction(
-            <RemindMenuItem/>,
-            (postId) => store.dispatch(postDropdownMenuAction(postId)),
+            getSubMenu(),
+            (postId, item) => store.dispatch(postDropdownMenuAction(postId, item)),
         );
-
-        // registry.registerReducer(reducer);
 
         registry.registerTranslations(getTranslations);
     }

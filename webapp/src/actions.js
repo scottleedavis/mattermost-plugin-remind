@@ -4,20 +4,24 @@ import {getUserId} from 'selectors';
 
 import {id as pluginId} from './manifest';
 
-export const postDropdownMenuAction = openInteractiveDialog;
+// export const postDropdownMenuAction = openInteractiveDialog;
 
-export function openInteractiveDialog(postId) {
+export function postDropdownMenuAction(postId, item) {
     return async (dispatch, getState) => {
         const state = getState();
         const opts = {
             postId,
             userId: getUserId(state),
+            item,
         };
 
-        fetch(getPluginServerRoute(state) + '/remind/' + postId, {
-            method: 'post',
-            body: JSON.stringify(opts),
-        });
+        //eslint-disable-next-line no-console
+        console.log(opts);
+
+        // fetch(getPluginServerRoute(state) + '/remind/' + postId, {
+        //     method: 'post',
+        //     body: JSON.stringify(opts),
+        // });
     };
 }
 
