@@ -1,8 +1,8 @@
 {
     "id": "com.github.scottleedavis.mattermost-plugin-remind",
-    "name": "Remind Bot Mattermost Plugin",
+    "name": "Remind Bot",
     "description": "Sets Reminders for users and channels",
-    "version": "0.3.1",
+    "version": "0.4.1",
     "server": {
         "executables": {
             "linux-amd64": "server/dist/plugin-linux-amd64",

@@ -624,7 +624,10 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 			if len(normalizedWhen) == 3 {
 				s = normalizedWhen[:len(normalizedWhen)-2]
 				s2 = normalizedWhen[len(normalizedWhen)-2:]
-			} else if len(normalizedWhen) >= 4 {
+			} else if len(normalizedWhen) == 4 {
+				s = normalizedWhen[:len(normalizedWhen)-2]
+				s2 = normalizedWhen[len(normalizedWhen)-2:]
+			} else if len(normalizedWhen) > 4 {
 				s = normalizedWhen[:len(normalizedWhen)-4]
 				s2 = normalizedWhen[len(normalizedWhen)-4:]
 			}
@@ -1101,9 +1104,15 @@ func (p *Plugin) freeFormEN(when string, user *model.User) (times []time.Time, e
 			chronoTime = dateTimeSplit[1]
 		}
 	} else {
-		_, ntErr := p.normalizeTime(chronoDate, user)
-		if ntErr == nil {
-			return p.at(T("at")+" "+chronoDate, user)
+		dateTimeSplit := strings.Split(chronoDate, " ")
+		if len(dateTimeSplit) == 2 {
+			chronoDate = dateTimeSplit[0]
+			chronoTime = dateTimeSplit[1]
+		} else {
+			_, ntErr := p.normalizeTime(chronoDate, user)
+			if ntErr == nil {
+				return p.at(T("at")+" "+chronoDate, user)
+			}
 		}
 	}
 

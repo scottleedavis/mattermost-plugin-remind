@@ -2,11 +2,11 @@
 
 _**A bot that schedules reminders for Mattermost**_
 
-<img src="buttons.jpg" height="500">
+<img src="remind.png">
 
 ### Installation
 
-_requires Mattermost 5.10 or greater_
+_requires Mattermost 5.12 or greater._
 
 1) Go to the [releases page](https://github.com/scottleedavis/mattermost-plugin-remind/releases) of this GitHub repository and download the latest release for your Mattermost server.
 2) Upload this file in the Mattermost System Console > Plugins > Management page to install the plugin. To learn more about how to upload a plugin, see the documentation.

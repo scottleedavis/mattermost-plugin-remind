@@ -51,7 +51,32 @@ func TestParseRequest(t *testing.T) {
 			},
 		}
 
-		assert.NotNil(t, p.ParseRequest(request))
+		assert.Nil(t, p.ParseRequest(request))
+	})
+
+	t.Run("if no quotes with target", func(t *testing.T) {
+		api := setupAPI()
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.API = api
+
+		request := &ReminderRequest{
+			TeamId:   model.NewId(),
+			Username: user.Username,
+			Payload:  "me Hello in one minute",
+			Reminder: Reminder{
+				Id:        model.NewId(),
+				TeamId:    model.NewId(),
+				Username:  user.Username,
+				Message:   "Hello",
+				Completed: p.emptyTime,
+				Target:    "me",
+				When:      "in one minute",
+			},
+		}
+
+		assert.Nil(t, p.ParseRequest(request))
 	})
 
 	t.Run("if with quotes", func(t *testing.T) {
@@ -76,7 +101,32 @@ func TestParseRequest(t *testing.T) {
 			},
 		}
 
-		assert.NotNil(t, p.ParseRequest(request))
+		assert.Nil(t, p.ParseRequest(request))
+	})
+
+	t.Run("if with quotes with target", func(t *testing.T) {
+		api := setupAPI()
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.API = api
+
+		request := &ReminderRequest{
+			TeamId:   model.NewId(),
+			Username: user.Username,
+			Payload:  "me \"Hello\" in one minute",
+			Reminder: Reminder{
+				Id:        model.NewId(),
+				TeamId:    model.NewId(),
+				Username:  user.Username,
+				Message:   "Hello",
+				Completed: p.emptyTime,
+				Target:    "me",
+				When:      "in one minute",
+			},
+		}
+
+		assert.Nil(t, p.ParseRequest(request))
 	})
 }
 

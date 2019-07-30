@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-const minimumServerVersion = "5.10.0"
+const minimumServerVersion = "5.12.0"
 const botName = "remindbot"
 const botDisplayName = "Remindbot"
 
@@ -32,6 +32,11 @@ func (p *Plugin) OnActivate() error {
 		return err
 	}
 
+	p.ServerConfig = p.API.GetConfig()
+	if p.ServerConfig.ServiceSettings.SiteURL == nil {
+		return errors.New("siteURL is not set. Please set a siteURL and restart the plugin")
+	}
+
 	teams, err := p.API.GetTeams()
 	if err != nil {
 		return errors.Wrap(err, "failed to query teams OnActivate")
@@ -48,35 +53,17 @@ func (p *Plugin) OnActivate() error {
 		}
 	}
 
+	p.URL = fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
+	if err := p.TranslationsPreInit(); err != nil {
+		return errors.Wrap(err, "failed to initialize translations")
+	}
 	p.Run()
 
 	return nil
 }
 
 func (p *Plugin) OnDeactivate() error {
-
-	teams, err := p.API.GetTeams()
-	if err != nil {
-		return errors.Wrap(err, "failed to query teams OnDeactivate")
-	}
-
 	p.Stop()
-
-	for _, team := range teams {
-		if cErr := p.API.UnregisterCommand(team.Id, CommandTrigger); cErr != nil {
-			return errors.Wrap(cErr, "failed to unregister command")
-		}
-	}
-
-	return nil
-}
-
-func (p *Plugin) OnConfigurationChange() error {
-	p.ServerConfig = p.API.GetConfig()
-	p.URL = fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
-	if err := p.TranslationsPreInit(); err != nil {
-		return errors.Wrap(err, "failed to initialize translations")
-	}
 	return nil
 }
 
