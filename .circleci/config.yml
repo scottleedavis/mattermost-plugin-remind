@@ -4,7 +4,7 @@ orbs:
 jobs:
   build:
     docker:
-      - image: circleci/golang:1.12
+      - image: circleci/golang:1.12-node
 
     working_directory: /go/src/github.com/scottleedavis/mattermost-plugin-remind
     steps:
@@ -12,7 +12,6 @@ jobs:
 
       # specify any bash command here prefixed with `run: `
       - run: go get -v -t -d ./...
-      # - run: go test -v ./...
       - run: make test
       - codecov/upload:
           file: server/coverage.txt
