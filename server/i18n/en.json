@@ -96,8 +96,16 @@
   	"translation": "I will remind {{.Target}}{{.UseTo}} \"{{.Message}}\" {{.When}}"
   },
   {
+    "id": "schedule.post.response",
+    "translation": "I will remind you about [this message]({{.PostLink}}) (\"{{.Message}}\") {{.When}}"
+  },
+  {
   	"id": "reminder.message",
   	"translation": "{{.FinalTarget}} asked me to remind you \"{{.Message}}\"."
+  },
+  {
+    "id": "reminder.post.message",
+    "translation": "You asked me to remind you about [this message]({{.PostLink}})."
   },
   {
     "id": "action.complete",
@@ -106,6 +114,26 @@
   {
     "id": "action.delete",
     "translation": "I’ve deleted the reminder \"{{.Message}}\"."
+  },
+  {
+    "id": "action.20min",
+    "translation":  "in 20 minutes"
+  },
+  {
+    "id": "action.1hr",
+    "translation":  "in 1 hour"
+  },
+  {
+    "id": "action.3hr",
+    "translation":  "in 3 hours"
+  },
+  {
+    "id": "action.tomorrow",
+    "translation":  "tomorrow"
+  },
+  {
+    "id": "action.nextweek",
+    "translation":  "on monday"
   },
   {
     "id": "action.snooze.20min",

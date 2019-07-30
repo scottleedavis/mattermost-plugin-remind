@@ -16,6 +16,10 @@ type ReminderHTTPRequest struct {
 	PostId string
 
 	UserId string
+
+	TeamId string
+
+	TimeId string
 }
 
 func (p *Plugin) InitAPI() *mux.Router {
@@ -70,18 +74,41 @@ func (p *Plugin) handleReminder(w http.ResponseWriter, r *http.Request) {
 		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
 		return
 	}
+	team, tErr := p.API.GetTeam(request.TeamId)
+	if tErr != nil {
+		p.API.LogError(tErr.Error())
+		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
+	}
+
+	location := p.location(user)
+	T, _ := p.translation(user)
+
+	var timeChoice string
+	switch request.TimeId {
+	case "20min":
+		timeChoice = T("action.20min")
+	case "1hr":
+		timeChoice = T("action.1hr")
+	case "3hr":
+		timeChoice = T("action.3hr")
+	case "tomorrow":
+		timeChoice = T("action.tomorrow")
+	case "nextweek":
+		timeChoice = T("action.nextweek")
+	}
 
 	rr := &ReminderRequest{
-		TeamId:   "",
+		TeamId:   team.Id,
 		Username: user.Username,
 		Reminder: Reminder{
 			Id:        model.NewId(),
-			TeamId:    "",
+			TeamId:    team.Id,
+			PostId:    post.Id,
 			Username:  user.Username,
 			Message:   post.Message,
 			Completed: p.emptyTime,
 			Target:    "@" + user.Username,
-			When:      "in 1 hour",
+			When:      timeChoice,
 		},
 	}
 
@@ -97,81 +124,67 @@ func (p *Plugin) handleReminder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	t := ""
+	if len(rr.Reminder.Occurrences) > 0 {
+		t = rr.Reminder.Occurrences[0].Occurrence.In(location).Format(time.RFC3339)
+	}
+	message := post.Message
+	if len(message) > 9 {
+		message = message[0:9] + "..."
+	}
+	var responseParameters = map[string]interface{}{
+		"PostLink": p.URL + "/" + team.Name + "/pl/" + post.Id,
+		"Message":  message,
+		"When": p.formatWhen(
+			rr.Username,
+			rr.Reminder.When,
+			t,
+			false,
+		),
+	}
+
 	responsePost := &model.Post{
 		ChannelId: post.ChannelId,
 		UserId:    p.remindUserId,
-		Message:   "I'll remind you \"" + post.Message + "\" in 1 hour.",
+		Props: model.StringInterface{
+			"attachments": []*model.SlackAttachment{
+				{
+					Text: T("schedule.post.response", responseParameters),
+					Actions: []*model.PostAction{
+						{
+							Id: model.NewId(),
+							Integration: &model.PostActionIntegration{
+								Context: model.StringInterface{
+									"reminder_id":   rr.Reminder.Id,
+									"occurrence_id": rr.Reminder.Occurrences[0].Id,
+									"action":        "delete/ephemeral",
+								},
+								URL: fmt.Sprintf("%s/plugins/%s/delete/ephemeral", p.URL, manifest.Id),
+							},
+							Type: model.POST_ACTION_TYPE_BUTTON,
+							Name: T("button.delete"),
+						},
+						{
+							Id: model.NewId(),
+							Integration: &model.PostActionIntegration{
+								Context: model.StringInterface{
+									"reminder_id":   rr.Reminder.Id,
+									"occurrence_id": rr.Reminder.Occurrences[0].Id,
+									"action":        "view/ephemeral",
+								},
+								URL: fmt.Sprintf("%s/plugins/%s/view/ephemeral", p.URL, manifest.Id),
+							},
+							Type: model.POST_ACTION_TYPE_BUTTON,
+							Name: T("button.view.reminders"),
+						},
+					},
+				},
+			},
+		},
 	}
 	p.API.SendEphemeralPost(user.Id, responsePost)
 
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
-
-	/*
-		if user, uErr := p.API.GetUser(request.UserId); uErr == nil {
-			if post, pErr := p.API.GetPost(request.PostId); pErr == nil {
-				T, _ := p.translation(user)
-
-				dialogRequest := model.OpenDialogRequest{
-					TriggerId: model.NewId(),
-					URL:       fmt.Sprintf("%s/plugins/%s/dialog", p.URL, manifest.Id),
-					Dialog: model.Dialog{
-						Title:       T("schedule.reminder"),
-						CallbackId:  model.NewId(),
-						SubmitLabel: T("button.schedule"),
-						Elements: []model.DialogElement{
-							{
-								DisplayName: T("schedule.message"),
-								Name:        "message",
-								Placeholder: post.Message,
-								Type:        "text",
-								SubType:     "text",
-							},
-							{
-								DisplayName: T("schedule.target"),
-								Name:        "target",
-								HelpText:    T("schedule.target.help"),
-								Placeholder: "me",
-								Type:        "text",
-								SubType:     "text",
-								Optional:    true,
-							},
-							{
-								DisplayName: T("schedule.time"),
-								Name:        "time",
-								Type:        "select",
-								SubType:     "select",
-								Options: []*model.PostActionOptions{
-									{
-										Text:  T("button.snooze.20min"),
-										Value: "20min",
-									},
-									{
-										Text:  T("button.snooze.1hr"),
-										Value: "1hr",
-									},
-									{
-										Text:  T("button.snooze.3hr"),
-										Value: "3hr",
-									},
-									{
-										Text:  T("button.snooze.tomorrow"),
-										Value: "tomorrow",
-									},
-									{
-										Text:  T("button.snooze.nextweek"),
-										Value: "nextweek",
-									},
-								},
-							},
-						},
-					},
-				}
-				if pErr := p.API.OpenInteractiveDialog(dialogRequest); pErr != nil {
-					p.API.LogError("Failed opening interactive dialog " + pErr.Error())
-				}
-			}
-		}
-	*/
 
 }
 

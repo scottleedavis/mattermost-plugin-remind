@@ -1,14 +1,8 @@
 {
-  "demo.testintl": "This is the English String",
-  "plugin.name": "Demo Plugin",
-  "plugin.upload": "Upload using Demo Plugin",
-  "root.clicktoclose": "Click anywhere to close.",
-  "root.triggered": "You have triggered the root component of the demo plugin.",
-  "sidebar.demo": "Demo Plugin:",
-  "sidebar.disabled": "Disabled",
-  "sidebar.enabled": "Enabled",
-  "tooltip.message": "This is a custom tooltip from the Demo Plugin",
-  "useractions.action": "Action",
-  "useractions.demo": "Demo Plugin: ",
-  "submenu.message": "Remind me about this"
+  "submenu.message": "Remind me about this",
+  "submenu.20min": "In 20 minutes",
+  "submenu.1hr": "In 1 hour",
+  "submenu.3hr": "In 3 hours",
+  "submenu.tomorrow": "Tomorrow",
+  "submenu.nextweek": "Next week"
 }

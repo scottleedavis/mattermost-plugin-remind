@@ -1,10 +1,8 @@
 import {getConfig} from 'mattermost-redux/selectors/entities/general';
 
-import {getUserId} from 'selectors';
+import {getUserId, getTeamId} from 'selectors';
 
 import {id as pluginId} from './manifest';
-
-// export const postDropdownMenuAction = openInteractiveDialog;
 
 export function postDropdownMenuAction(postId, item) {
     return async (dispatch, getState) => {
@@ -12,20 +10,17 @@ export function postDropdownMenuAction(postId, item) {
         const opts = {
             postId,
             userId: getUserId(state),
-            item,
+            teamId: getTeamId(state),
+            timeId: item.key.replace('submenu.', ''),
         };
 
-        //eslint-disable-next-line no-console
-        console.log(opts);
-
-        // fetch(getPluginServerRoute(state) + '/remind/' + postId, {
-        //     method: 'post',
-        //     body: JSON.stringify(opts),
-        // });
+        fetch(getPluginServerRoute(state) + '/remind/' + postId, {
+            method: 'post',
+            body: JSON.stringify(opts),
+        });
     };
 }
 
-// TODO: Move this into mattermost-redux or mattermost-webapp.
 export const getPluginServerRoute = (state) => {
     const config = getConfig(state);
 
@@ -40,17 +35,3 @@ export const getPluginServerRoute = (state) => {
 
     return basePath + '/plugins/' + pluginId;
 };
-
-// export const getStatus = () => async (dispatch, getState) => {
-//     fetch(getPluginServerRoute(getState()) + '/status').then((r) => r.json()).then((r) => {
-//         dispatch({
-//             type: STATUS_CHANGE,
-//             data: r.enabled,
-//         });
-//     });
-// };
-//
-// export const websocketStatusChange = (message) => (dispatch) => dispatch({
-//     type: STATUS_CHANGE,
-//     data: message.data.enabled,
-// });
