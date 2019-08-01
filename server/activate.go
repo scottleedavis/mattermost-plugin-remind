@@ -2,36 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/blang/semver"
-	"github.com/mattermost/mattermost-server/model"
-	"github.com/pkg/errors"
 	"path/filepath"
 	"time"
+
+	"github.com/mattermost/mattermost-server/model"
+	"github.com/pkg/errors"
 )
 
-const minimumServerVersion = "5.12.0"
 const botName = "remindbot"
 const botDisplayName = "Remindbot"
 
-func (p *Plugin) checkServerVersion() error {
-	serverVersion, err := semver.Parse(p.API.GetServerVersion())
-	if err != nil {
-		return errors.Wrap(err, "failed to parse server version")
-	}
-
-	r := semver.MustParseRange(">=" + minimumServerVersion)
-	if !r(serverVersion) {
-		return fmt.Errorf("this plugin requires Mattermost v%s or later", minimumServerVersion)
-	}
-
-	return nil
-}
-
 func (p *Plugin) OnActivate() error {
-	if err := p.checkServerVersion(); err != nil {
-		return err
-	}
-
 	p.ServerConfig = p.API.GetConfig()
 	if p.ServerConfig.ServiceSettings.SiteURL == nil {
 		return errors.New("siteURL is not set. Please set a siteURL and restart the plugin")
