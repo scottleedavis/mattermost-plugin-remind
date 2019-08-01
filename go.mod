@@ -3,7 +3,6 @@ module github.com/scottleedavis/mattermost-plugin-remind
 go 1.12
 
 require (
-	github.com/blang/semver v3.5.1+incompatible
 	github.com/go-ldap/ldap v3.0.3+incompatible // indirect
 	github.com/gorilla/mux v1.7.2
 	github.com/mattermost/mattermost-server v5.12.0+incompatible
