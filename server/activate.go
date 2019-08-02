@@ -26,7 +26,6 @@ func (p *Plugin) OnActivate() error {
 	p.router = p.InitAPI()
 	p.ensureBotExists()
 	p.emptyTime = time.Time{}.AddDate(1, 1, 1)
-	p.supportedLocales = []string{"en"}
 
 	for _, team := range teams {
 		if err := p.registerCommand(team.Id); err != nil {

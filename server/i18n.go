@@ -4,42 +4,45 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
+	"path"
 	"path/filepath"
 	"strings"
 
 	"github.com/mattermost/mattermost-server/model"
-	"github.com/mattermost/mattermost-server/utils/fileutils"
 	"github.com/nicksnyder/go-i18n/i18n"
+	"github.com/pkg/errors"
 )
 
-var locales = make(map[string]string)
-
 func (p *Plugin) TranslationsPreInit() error {
-
-	i18nDirectory, found := fileutils.FindDir(*p.ServerConfig.PluginSettings.Directory + "/" + manifest.Id + "/server/dist/i18n/")
-	if !found {
-		return fmt.Errorf("unable to find i18n directory")
+	bundlePath, err := p.API.GetBundlePath()
+	if err != nil {
+		return errors.Wrap(err, "unable to find i18n directory")
 	}
 
-	files, _ := ioutil.ReadDir(i18nDirectory)
+	i18nDirectory := path.Join(bundlePath, "assets", "i18n")
+	files, err := ioutil.ReadDir(i18nDirectory)
+	if err != nil {
+		return errors.Wrap(err, "unable to read i18n directory")
+	}
 	for _, f := range files {
-		if filepath.Ext(f.Name()) == ".json" {
-			filename := f.Name()
-			locales[strings.Split(filename, ".")[0]] = filepath.Join(i18nDirectory, filename)
-
+		filename := f.Name()
+		if filepath.Ext(filename) == ".json" {
 			if err := i18n.LoadTranslationFile(filepath.Join(i18nDirectory, filename)); err != nil {
-				return err
+				p.API.LogError("Failed to load translation file", "filename", filename, "err", err.Error())
+				continue
 			}
+
+			p.API.LogDebug("Loaded translation file", "filename", filename)
+			p.locales[strings.TrimSuffix(filename, filepath.Ext(filename))] = filepath.Join(i18nDirectory, filename)
 		}
 	}
 
 	return nil
 }
 
-func GetUserTranslations(locale string) i18n.TranslateFunc {
-	if _, ok := locales[locale]; !ok {
+func (p *Plugin) GetUserTranslations(locale string) i18n.TranslateFunc {
+	if _, ok := p.locales[locale]; !ok {
 		locale = model.DEFAULT_LOCALE
 	}
 

@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/gorilla/mux"
 	"io/ioutil"
 	"time"
+
+	"github.com/gorilla/mux"
 
 	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/plugin"
@@ -26,13 +27,14 @@ type Plugin struct {
 
 	defaultTime time.Time
 
-	supportedLocales []string
-
 	readFile func(path string) ([]byte, error)
+
+	locales map[string]string
 }
 
 func NewPlugin() *Plugin {
 	return &Plugin{
 		readFile: ioutil.ReadFile,
+		locales:  make(map[string]string),
 	}
 }
