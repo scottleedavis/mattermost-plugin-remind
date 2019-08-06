@@ -17,50 +17,67 @@ function getTranslations(locale) {
 }
 
 function getSubMenu() {
-    const menu = (
-        <FormattedMessage
-            id='submenu.message'
-            defaultMessage='Remind me about this'
-        />
-    );
-    const subMenu = [
-        (
+    return {
+        id: 'submenu.message',
+        text: (
             <FormattedMessage
-                id='submenu.20min'
-                key='submenu.20min'
-                defaultMessage='In 20 minutes'
+                id='submenu.message'
+                defaultMessage='Remind me about this'
             />
         ),
-        (
-            <FormattedMessage
-                id='submenu.1hr'
-                key='submenu.1hr'
-                defaultMessage='In 1 hour'
-            />
-        ),
-        (
-            <FormattedMessage
-                id='submenu.3hr'
-                key='submenu.3hr'
-                defaultMessage='In 3 hours'
-            />
-        ),
-        (
-            <FormattedMessage
-                id='submenu.tomorrow'
-                key='submenu.tomorrow'
-                defaultMessage='Tomorrow'
-            />
-        ),
-        (
-            <FormattedMessage
-                id='submenu.nextweek'
-                key='submenu.nextweek'
-                defaultMessage='Next week'
-            />
-        ),
-    ];
-    return {menu, subMenu};
+        subMenu: [
+            {
+                id: 'submenu.20min',
+                text: (
+                    <FormattedMessage
+                        id='submenu.20min'
+                        key='submenu.20min'
+                        defaultMessage='In 20 minutes'
+                    />
+                ),
+            },
+            {
+                id: 'submenu.1hr',
+                text: (
+                    <FormattedMessage
+                        id='submenu.1hr'
+                        key='submenu.1hr'
+                        defaultMessage='In 1 hour'
+                    />
+                ),
+            },
+            {
+                id: 'submenu.3hr',
+                text: (
+                    <FormattedMessage
+                        id='submenu.3hr'
+                        key='submenu.3hr'
+                        defaultMessage='In 3 hours'
+                    />
+                ),
+            },
+            {
+                id: 'submenu.tomorrow',
+                text: (
+                    <FormattedMessage
+                        id='submenu.tomorrow'
+                        key='submenu.tomorrow'
+                        defaultMessage='Tomorrow'
+                    />
+                ),
+            },
+            {
+                id: 'submenu.nextweek',
+                text: (
+                    <FormattedMessage
+                        id='submenu.nextweek'
+                        key='submenu.nextweek'
+                        defaultMessage='Next week'
+                    />
+                ),
+            },
+        ],
+    };
 }
 
 export default class RemindPlugin {

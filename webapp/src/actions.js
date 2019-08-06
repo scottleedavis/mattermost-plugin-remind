@@ -4,14 +4,14 @@ import {getUserId, getTeamId} from 'selectors';
 
 import {id as pluginId} from './manifest';
 
-export function postDropdownMenuAction(postId, item) {
+export function postDropdownMenuAction(postId, menuItemId) {
     return async (dispatch, getState) => {
         const state = getState();
         const opts = {
             postId,
             userId: getUserId(state),
             teamId: getTeamId(state),
-            timeId: item.key.replace('submenu.', ''),
+            timeId: menuItemId.replace('submenu.', ''),
         };
 
         fetch(getPluginServerRoute(state) + '/remind/' + postId, {
