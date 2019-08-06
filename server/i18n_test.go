@@ -49,7 +49,8 @@ func TestTranslationsPreInit(t *testing.T) {
 		p := &Plugin{}
 		p.API = api
 		err = p.TranslationsPreInit()
-		require.EqualError(t, err, fmt.Sprintf("unable to read i18n directory: readdirent: invalid argument"))
+		require.True(t, err.Error() == "unable to read i18n directory: readdirent: invalid argument" ||
+			err.Error() == "unable to read i18n directory: readdirent: not a directory")
 	})
 
 	t.Run("no i18n files", func(t *testing.T) {
