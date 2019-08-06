@@ -192,6 +192,8 @@ func (p *Plugin) handleComplete(w http.ResponseWriter, r *http.Request) {
 	user, uErr := p.API.GetUser(request.UserId)
 	if uErr != nil {
 		p.API.LogError(uErr.Error())
+		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
+		return
 	}
 	T, _ := p.translation(user)
 
@@ -231,6 +233,33 @@ func (p *Plugin) handleComplete(w http.ResponseWriter, r *http.Request) {
 		post.Message = "~~" + T("reminder.message", messageParameters) + "~~\n" + T("action.complete", updateParameters)
 		post.Props = model.StringInterface{}
 		p.API.UpdatePost(post)
+
+		if reminder.Username != user.Username {
+			if originalUser, uErr := p.API.GetUserByUsername(reminder.Username); uErr != nil {
+				p.API.LogError(uErr.Error())
+				writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
+				return
+			} else {
+				if channel, cErr := p.API.GetDirectChannel(p.remindUserId, originalUser.Id); cErr != nil {
+					p.API.LogError("failed to create channel " + cErr.Error())
+					writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
+				} else {
+					var postbackUpdateParameters = map[string]interface{}{
+						"User":    "@" + user.Username,
+						"Message": reminder.Message,
+					}
+					if _, pErr := p.API.CreatePost(&model.Post{
+						ChannelId: channel.Id,
+						UserId:    p.remindUserId,
+						Message:   T("action.complete.callback", postbackUpdateParameters),
+					}); pErr != nil {
+						p.API.LogError(pErr.Error())
+						writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
+					}
+				}
+			}
+		}
+
 		writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 	}
 
