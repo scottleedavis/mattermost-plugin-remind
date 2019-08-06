@@ -209,6 +209,7 @@ func TestHandleComplete(t *testing.T) {
 			UserId: "userID1",
 			PostId: "postID1",
 			Context: model.StringInterface{
+				"orig_user_id":  "foobar",
 				"reminder_id":   model.NewId(),
 				"occurrence_id": model.NewId(),
 			},
@@ -291,6 +292,7 @@ func TestHandleDelete(t *testing.T) {
 			UserId: "userID1",
 			PostId: "postID1",
 			Context: model.StringInterface{
+				"orig_user_id":  "foobar",
 				"reminder_id":   model.NewId(),
 				"occurrence_id": model.NewId(),
 			},
@@ -472,6 +474,7 @@ func TestHandleSnooze(t *testing.T) {
 				UserId: "userID1",
 				PostId: "postID1",
 				Context: model.StringInterface{
+					"orig_user_id":    "foobar",
 					"reminder_id":     model.NewId(),
 					"occurrence_id":   model.NewId(),
 					"selected_option": test.SnoozeTime,

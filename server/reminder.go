@@ -141,6 +141,7 @@ func (p *Plugin) TriggerReminders() {
 											Id: model.NewId(),
 											Integration: &model.PostActionIntegration{
 												Context: model.StringInterface{
+													"orig_user_id":  user.Id,
 													"reminder_id":   reminder.Id,
 													"occurrence_id": occurrence.Id,
 													"action":        "complete",
@@ -153,6 +154,7 @@ func (p *Plugin) TriggerReminders() {
 										{
 											Integration: &model.PostActionIntegration{
 												Context: model.StringInterface{
+													"orig_user_id":  user.Id,
 													"reminder_id":   reminder.Id,
 													"occurrence_id": occurrence.Id,
 													"action":        "delete",
@@ -165,6 +167,7 @@ func (p *Plugin) TriggerReminders() {
 										{
 											Integration: &model.PostActionIntegration{
 												Context: model.StringInterface{
+													"orig_user_id":  user.Id,
 													"reminder_id":   reminder.Id,
 													"occurrence_id": occurrence.Id,
 													"action":        "snooze",
@@ -341,7 +344,7 @@ func (p *Plugin) GetReminders(username string) []Reminder {
 	err := json.Unmarshal(bytes, &reminders)
 
 	if err != nil {
-		p.API.LogError("new reminder " + user.Username)
+		p.API.LogError("no reminders for " + user.Username)
 	}
 	return reminders
 }
