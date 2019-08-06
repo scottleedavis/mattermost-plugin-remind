@@ -112,6 +112,10 @@
     "translation": "I've marked \"{{.Message}}\" as complete."
   },
   {
+    "id": "action.complete.callback",
+    "translation": "{{.User}} marked their reminder \"{{.Message}}\" as complete."
+  },
+  {
     "id": "action.delete",
     "translation": "I’ve deleted the reminder \"{{.Message}}\"."
   },

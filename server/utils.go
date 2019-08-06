@@ -9,13 +9,13 @@ import (
 
 func (p *Plugin) translation(user *model.User) (i18n.TranslateFunc, string) {
 	locale := "en"
-	for _, l := range p.supportedLocales {
+	for l := range p.locales {
 		if user.Locale == l {
 			locale = user.Locale
 			break
 		}
 	}
-	return GetUserTranslations(locale), locale
+	return p.GetUserTranslations(locale), locale
 }
 
 func (p *Plugin) location(user *model.User) *time.Location {
