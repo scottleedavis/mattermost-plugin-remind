@@ -174,6 +174,9 @@ func TestHandleComplete(t *testing.T) {
 		},
 	}
 	stringReminders, _ := json.Marshal(reminders)
+	channel := &model.Channel{
+		Id: model.NewId(),
+	}
 
 	setupAPI := func() *plugintest.API {
 		api := &plugintest.API{}
@@ -181,11 +184,13 @@ func TestHandleComplete(t *testing.T) {
 		api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
 		api.On("LogInfo", mock.Anything).Maybe()
 		api.On("GetPost", mock.Anything).Return(post, nil)
+		api.On("CreatePost", mock.Anything).Return(post, nil)
 		api.On("UpdatePost", mock.Anything).Return(post, nil)
 		api.On("GetUser", mock.Anything).Return(user, nil)
 		api.On("GetUserByUsername", mock.Anything).Return(user, nil)
 		api.On("KVGet", user.Username).Return(stringReminders, nil)
 		api.On("KVSet", mock.Anything, mock.Anything).Return(nil)
+		api.On("GetDirectChannel", mock.Anything, mock.Anything).Return(channel, nil)
 
 		return api
 	}
@@ -204,6 +209,7 @@ func TestHandleComplete(t *testing.T) {
 			UserId: "userID1",
 			PostId: "postID1",
 			Context: model.StringInterface{
+				"orig_user_id":  "foobar",
 				"reminder_id":   model.NewId(),
 				"occurrence_id": model.NewId(),
 			},
@@ -286,6 +292,7 @@ func TestHandleDelete(t *testing.T) {
 			UserId: "userID1",
 			PostId: "postID1",
 			Context: model.StringInterface{
+				"orig_user_id":  "foobar",
 				"reminder_id":   model.NewId(),
 				"occurrence_id": model.NewId(),
 			},
@@ -467,6 +474,7 @@ func TestHandleSnooze(t *testing.T) {
 				UserId: "userID1",
 				PostId: "postID1",
 				Context: model.StringInterface{
+					"orig_user_id":    "foobar",
 					"reminder_id":     model.NewId(),
 					"occurrence_id":   model.NewId(),
 					"selected_option": test.SnoozeTime,
