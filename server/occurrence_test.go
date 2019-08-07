@@ -37,18 +37,6 @@ func TestCreateOccurrences(t *testing.T) {
 		},
 	}
 
-	//reminders := []Reminder{
-	//	{
-	//		Id:        model.NewId(),
-	//		TeamId:    model.NewId(),
-	//		Username:  user.Username,
-	//		Message:   "Hello",
-	//		Target:    "me",
-	//		When:      "in one minute",
-	//		Occurrences: occurrences,
-	//	},
-	//}
-
 	request := &ReminderRequest{
 		TeamId:   model.NewId(),
 		Username: user.Username,
@@ -64,7 +52,6 @@ func TestCreateOccurrences(t *testing.T) {
 		},
 	}
 
-	//stringReminders, _ := json.Marshal(reminders)
 	stringOccurrences, _ := json.Marshal(occurrences)
 	setupAPI := func() *plugintest.API {
 		api := &plugintest.API{}
@@ -499,6 +486,9 @@ func TestOn(t *testing.T) {
 
 		today := time.Now().In(location)
 		hour, min, _ := today.Add(2 * time.Minute).Clock()
+		if hour == 0 {
+			hour = 12
+		}
 		todayWeekday := today.Weekday().String()
 		times, err = p.onEN("on "+todayWeekday+" at "+strconv.Itoa(hour)+":"+strconv.Itoa(min), user)
 		assert.Nil(t, err)
