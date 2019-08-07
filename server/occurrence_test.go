@@ -585,7 +585,7 @@ func TestEvery(t *testing.T) {
 		today := time.Now().In(location)
 		hour, min, _ := today.Add(2 * time.Minute).Clock()
 		todayWeekday := today.Weekday().String()
-		times, err = p.everyEN("every "+todayWeekday+" at "+strconv.Itoa(hour)+":"+strconv.Itoa(min), user)
+		times, err = p.everyEN("every "+todayWeekday+" at "+strconv.Itoa(hour)+strconv.Itoa(min), user)
 		assert.Nil(t, err)
 		if err == nil {
 			assert.True(t, times[0].In(location).Weekday().String() == todayWeekday)
@@ -597,7 +597,7 @@ func TestEvery(t *testing.T) {
 			assert.True(t, times[0].In(location).Weekday().String() == "Friday" && times[1].In(location).Weekday().String() == "Saturday")
 		}
 
-		times, err = p.everyEN("every other "+todayWeekday+" at "+strconv.Itoa(hour)+":"+strconv.Itoa(min), user)
+		times, err = p.everyEN("every other "+todayWeekday+" at "+strconv.Itoa(hour)+strconv.Itoa(min), user)
 		assert.Nil(t, err)
 		if err == nil {
 			assert.True(t, times[0].In(location).Weekday().String() == todayWeekday)
