@@ -326,6 +326,7 @@ func (p *Plugin) handleDeleteEphemeral(w http.ResponseWriter, r *http.Request) {
 	post := &model.Post{
 		Id:      request.PostId,
 		UserId:  p.remindUserId,
+		ChannelId: request.ChannelId,
 		Message: T("action.delete", deleteParameters),
 	}
 	p.API.UpdateEphemeralPost(request.UserId, post)
