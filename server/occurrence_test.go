@@ -585,8 +585,10 @@ func TestEvery(t *testing.T) {
 
 		today := time.Now().In(location)
 		hour, min, _ := today.Add(2 * time.Minute).Clock()
+		if hour == 0 {
+			hour = 12
+		}
 		todayWeekday := today.Weekday().String()
-		fmt.Printf("every "+todayWeekday+" at "+strconv.Itoa(hour)+":"+strconv.Itoa(min))
 		times, err = p.everyEN("every "+todayWeekday+" at "+strconv.Itoa(hour)+":"+strconv.Itoa(min), user)
 		assert.Nil(t, err)
 		if err == nil {
