@@ -22,22 +22,47 @@ func TestListReminders(t *testing.T) {
 		Locale:   "en",
 	}
 
-	occurrences := []Occurrence{
-		{
-			Id:         model.NewId(),
-			ReminderId: model.NewId(),
-			Occurrence: time.Now(),
-		},
-	}
-
 	reminders := []Reminder{
 		{
-			Id:          model.NewId(),
-			Username:    user.Username,
-			Message:     "Message",
-			When:        "in 1 second",
-			Occurrences: occurrences,
-			Completed:   time.Time{}.AddDate(1, 1, 1),
+			Id:       model.NewId(),
+			Username: user.Username,
+			Message:  "Message",
+			When:     "in 1 second",
+			Occurrences: []Occurrence{
+				{
+					Id:         model.NewId(),
+					ReminderId: model.NewId(),
+					Occurrence: time.Now(),
+				},
+			},
+			Completed: time.Time{}.AddDate(1, 1, 1),
+		},
+		{
+			Id:       model.NewId(),
+			Username: user.Username,
+			Message:  "Message 2",
+			When:     "in 20 second",
+			Occurrences: []Occurrence{
+				{
+					Id:         model.NewId(),
+					ReminderId: model.NewId(),
+					Occurrence: time.Now().Add(20 * time.Second),
+				},
+			},
+		},
+		{
+			Id:       model.NewId(),
+			Username: user.Username,
+			Message:  "Message 3",
+			When:     "in 20 second",
+			Occurrences: []Occurrence{
+				{
+					Id:         model.NewId(),
+					ReminderId: model.NewId(),
+					Occurrence: time.Now(),
+					Snoozed:    time.Now().Add(time.Minute),
+				},
+			},
 		},
 	}
 

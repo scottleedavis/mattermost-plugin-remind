@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -496,6 +497,11 @@ func TestOn(t *testing.T) {
 		assert.True(t, times[0].In(location).Month() == 1 && times[0].In(location).Day() == 1 &&
 			times[0].In(location).Hour() == 0)
 
+		today := time.Now().In(location)
+		hour, min, _ := today.Add(2 * time.Minute).Clock()
+		todayWeekday := today.Weekday().String()
+		times, err = p.onEN("on "+todayWeekday+" at "+strconv.Itoa(hour)+":"+strconv.Itoa(min), user)
+		assert.Nil(t, err)
 	})
 }
 
@@ -576,10 +582,25 @@ func TestEvery(t *testing.T) {
 			assert.True(t, times[0].In(location).Weekday().String() == "Wednesday" && times[1].In(location).Weekday().String() == "Thursday")
 		}
 
+		today := time.Now().In(location)
+		hour, min, _ := today.Add(2 * time.Minute).Clock()
+		todayWeekday := today.Weekday().String()
+		times, err = p.everyEN("every "+todayWeekday+" at "+strconv.Itoa(hour)+":"+strconv.Itoa(min), user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.True(t, times[0].In(location).Weekday().String() == todayWeekday)
+		}
+
 		times, err = p.everyEN("every other friday and saturday", user)
 		assert.Nil(t, err)
 		if err == nil {
 			assert.True(t, times[0].In(location).Weekday().String() == "Friday" && times[1].In(location).Weekday().String() == "Saturday")
+		}
+
+		times, err = p.everyEN("every other "+todayWeekday+" at "+strconv.Itoa(hour)+":"+strconv.Itoa(min), user)
+		assert.Nil(t, err)
+		if err == nil {
+			assert.True(t, times[0].In(location).Weekday().String() == todayWeekday)
 		}
 
 		times, err = p.everyEN("every monday and wednesday at 1:39am", user)
