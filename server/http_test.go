@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http/httptest"
 	"testing"
@@ -38,7 +37,6 @@ func TestHandleDialog(t *testing.T) {
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
-		p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
 		p.router = p.InitAPI()
 		p.API = api
 
@@ -115,7 +113,6 @@ func TestHandleViewEphmeral(t *testing.T) {
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
-		p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
 		p.router = p.InitAPI()
 		p.API = api
 
@@ -201,7 +198,6 @@ func TestHandleComplete(t *testing.T) {
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
-		p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
 		p.router = p.InitAPI()
 		p.API = api
 
@@ -284,7 +280,6 @@ func TestHandleDelete(t *testing.T) {
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
-		p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
 		p.router = p.InitAPI()
 		p.API = api
 
@@ -365,7 +360,6 @@ func TestHandleDeleteEphemeral(t *testing.T) {
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
-		p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
 		p.router = p.InitAPI()
 		p.API = api
 
@@ -466,7 +460,6 @@ func TestHandleSnooze(t *testing.T) {
 			defer api.AssertExpectations(t)
 
 			p := &Plugin{}
-			p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
 			p.router = p.InitAPI()
 			p.API = api
 
@@ -548,7 +541,6 @@ func TestHandleNextReminders(t *testing.T) {
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
-		p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
 		p.router = p.InitAPI()
 		p.API = api
 
@@ -631,7 +623,6 @@ func TestHandleCompleteList(t *testing.T) {
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
-		p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
 		p.router = p.InitAPI()
 		p.API = api
 
@@ -711,7 +702,6 @@ func TestHandleViewCompleteList(t *testing.T) {
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
-		p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
 		p.router = p.InitAPI()
 		p.API = api
 
@@ -784,7 +774,6 @@ func TestHandleDeleteList(t *testing.T) {
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
-		p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
 		p.router = p.InitAPI()
 		p.API = api
 
@@ -865,7 +854,6 @@ func TestHandleDeleteCompleteList(t *testing.T) {
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
-		p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
 		p.router = p.InitAPI()
 		p.API = api
 
@@ -966,7 +954,6 @@ func TestHandleSnoozeList(t *testing.T) {
 			defer api.AssertExpectations(t)
 
 			p := &Plugin{}
-			p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
 			p.router = p.InitAPI()
 			p.API = api
 
@@ -1014,7 +1001,6 @@ func TestHandleCloseList(t *testing.T) {
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
-		p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
 		p.router = p.InitAPI()
 		p.API = api
 

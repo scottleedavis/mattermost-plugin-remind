@@ -17,8 +17,6 @@ type Plugin struct {
 
 	ServerConfig *model.Config
 
-	URL string
-
 	remindUserId string
 
 	running bool

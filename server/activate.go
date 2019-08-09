@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"path/filepath"
 	"time"
 
@@ -33,7 +32,6 @@ func (p *Plugin) OnActivate() error {
 		}
 	}
 
-	p.URL = fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
 	if err := p.TranslationsPreInit(); err != nil {
 		return errors.Wrap(err, "failed to initialize translations")
 	}
