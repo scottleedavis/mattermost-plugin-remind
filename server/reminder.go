@@ -136,12 +136,8 @@ func (p *Plugin) TriggerReminders() {
 						continue
 					}
 
-					url := ""
-					if p.API.GetConfig().ServiceSettings.SiteURL != nil {
-						url = *p.API.GetConfig().ServiceSettings.SiteURL
-					}
 					messageParameters := map[string]interface{}{
-						"PostLink": url + "/" + team.Name + "/pl/" + reminder.PostId,
+						"PostLink": "/" + team.Name + "/pl/" + reminder.PostId,
 					}
 
 					interactivePost = model.Post{
@@ -216,7 +212,7 @@ func (p *Plugin) TriggerReminders() {
 								},
 								{
 									AuthorName: pUser.Username,
-									AuthorIcon: url + "/api/v4/users/" + pUser.Id + "/image",
+									AuthorIcon: "/api/v4/users/" + pUser.Id + "/image",
 									Text:       reminder.Message,
 								},
 							},

@@ -93,19 +93,12 @@ func TestTriggerReminders(t *testing.T) {
 	}
 
 	post := &model.Post{
-		Id: model.NewId(),
+		Id:        model.NewId(),
 		ChannelId: channel.Id,
 	}
 
 	team := &model.Team{
 		Id: model.NewId(),
-	}
-
-	siteURL := "http://localhost"
-	config := &model.Config{
-		ServiceSettings: model.ServiceSettings{
-			SiteURL: &siteURL,
-		},
 	}
 
 	setupAPI := func() *plugintest.API {
@@ -120,7 +113,6 @@ func TestTriggerReminders(t *testing.T) {
 		api.On("GetPost", mock.Anything).Return(post, nil)
 		api.On("GetTeam", mock.Anything).Return(team, nil)
 		api.On("GetUser", mock.Anything).Return(user, nil)
-		api.On("GetConfig").Return(config)
 		return api
 	}
 

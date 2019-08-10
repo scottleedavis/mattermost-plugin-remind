@@ -12,9 +12,6 @@ const botName = "remindbot"
 const botDisplayName = "Remindbot"
 
 func (p *Plugin) OnActivate() error {
-	if p.API.GetConfig().ServiceSettings.SiteURL == nil {
-		return errors.New("siteURL is not set. Please set a siteURL and restart the plugin")
-	}
 
 	teams, err := p.API.GetTeams()
 	if err != nil {

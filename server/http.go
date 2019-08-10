@@ -132,12 +132,9 @@ func (p *Plugin) handleReminder(w http.ResponseWriter, r *http.Request) {
 	if len(message) > 9 {
 		message = message[0:9] + "..."
 	}
-	url := ""
-	if p.API.GetConfig().ServiceSettings.SiteURL != nil {
-		url = *p.API.GetConfig().ServiceSettings.SiteURL
-	}
+
 	var responseParameters = map[string]interface{}{
-		"PostLink": url + "/" + team.Name + "/pl/" + post.Id,
+		"PostLink": "/" + team.Name + "/pl/" + post.Id,
 		"Message":  message,
 		"When": p.formatWhen(
 			rr.Username,
