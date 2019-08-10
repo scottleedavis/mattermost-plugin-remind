@@ -95,6 +95,8 @@ func (p *Plugin) handleReminder(w http.ResponseWriter, r *http.Request) {
 		timeChoice = T("action.tomorrow")
 	case "nextweek":
 		timeChoice = T("action.nextweek")
+	default:
+		timeChoice = request.TimeId
 	}
 
 	rr := &ReminderRequest{

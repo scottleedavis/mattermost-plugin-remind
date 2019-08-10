@@ -14,6 +14,74 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+func TestHandleReminder(t *testing.T) {
+
+	user := &model.User{
+		Id:       model.NewId(),
+		Username: model.NewRandomString(10),
+	}
+
+	post := &model.Post{
+		Id: model.NewId(),
+	}
+
+	team := &model.Team{
+		Id: model.NewId(),
+	}
+
+	reminderRequest := ReminderHTTPRequest{
+		PostId: post.Id,
+		UserId: user.Id,
+		TeamId: team.Id,
+	}
+
+	testTime := time.Now().UTC().Round(time.Second)
+	occurrences := []Occurrence{
+		{
+			Id:         model.NewId(),
+			ReminderId: model.NewId(),
+			Occurrence: testTime,
+		},
+	}
+
+	stringOccurrences, _ := json.Marshal(occurrences)
+	setupAPI := func() *plugintest.API {
+		api := &plugintest.API{}
+		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogInfo", mock.Anything).Maybe()
+		api.On("GetUser", mock.Anything).Return(user, nil)
+		api.On("GetUserByUsername", mock.Anything).Return(user, nil)
+		api.On("GetPost", mock.Anything).Return(post, nil)
+		api.On("GetTeam", mock.Anything).Return(team, nil)
+		api.On("KVGet", mock.Anything).Return(stringOccurrences, nil)
+		api.On("KVSet", mock.Anything, mock.Anything).Return(nil)
+		api.On("SendEphemeralPost", mock.Anything, mock.Anything).Return(nil)
+
+		return api
+	}
+
+	t.Run("handle reminder created from webapp", func(t *testing.T) {
+
+		api := setupAPI()
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.router = p.InitAPI()
+		p.API = api
+
+		reminderRequest.TimeId = "in 20 minutes"
+		reminderJson, _ := json.Marshal(&reminderRequest)
+		w := httptest.NewRecorder()
+		r := httptest.NewRequest("POST", "/remind/"+post.Id, bytes.NewReader(reminderJson))
+		p.ServeHTTP(nil, w, r)
+
+		result := w.Result()
+		assert.NotNil(t, result)
+
+	})
+}
+
 func TestHandleDialog(t *testing.T) {
 	user := &model.User{
 		Id:       model.NewId(),
