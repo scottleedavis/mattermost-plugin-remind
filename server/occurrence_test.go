@@ -496,6 +496,12 @@ func TestOn(t *testing.T) {
 		assert.True(t, times[0].In(location).Month() == 1 && times[0].In(location).Day() == 1 &&
 			times[0].In(location).Hour() == 0)
 
+		times, err = p.onEN("on 2020-08-10 13:55", user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Year() == 2020 &&
+			times[0].In(location).Month() == 8 && times[0].In(location).Day() == 10 &&
+			times[0].In(location).Hour() == 13 && times[0].In(location).Minute() == 55)
+
 	})
 }
 
