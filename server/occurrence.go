@@ -796,6 +796,15 @@ func (p *Plugin) onEN(when string, user *model.User) (times []time.Time, err err
 	chronoTime := "9:00AM"
 	if len(dateTimeSplit) > 1 {
 		chronoTime = dateTimeSplit[1]
+	} else {
+		timeTest := strings.Split(chronoDate, " ")
+		if len(timeTest) > 1 {
+			check := timeTest[len(timeTest)-1]
+			if strings.Contains(check, ":") {
+				chronoDate = strings.Join(timeTest[:len(timeTest)-1], " ")
+				chronoTime = check
+			}
+		}
 	}
 
 	dateUnit, ndErr := p.normalizeDate(chronoDate, user)
