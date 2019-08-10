@@ -484,7 +484,6 @@ func TestOn(t *testing.T) {
 		assert.True(t, times[0].In(location).Month() == 1 && times[0].In(location).Day() == 1 &&
 			times[0].In(location).Hour() == 0)
 
-
 		today := time.Now().In(location)
 		hour, min, _ := today.Add(2 * time.Minute).Clock()
 		if hour == 0 {
@@ -495,7 +494,6 @@ func TestOn(t *testing.T) {
 		assert.Nil(t, err)
 		assert.True(t, times[0].In(location).Weekday().String() == todayWeekday &&
 			times[0].In(location).Hour() == hour && times[0].In(location).Minute() == min)
-
 
 		times, err = p.onEN("on 2020-08-10 13:55", user)
 		assert.Nil(t, err)

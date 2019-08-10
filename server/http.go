@@ -132,8 +132,12 @@ func (p *Plugin) handleReminder(w http.ResponseWriter, r *http.Request) {
 	if len(message) > 9 {
 		message = message[0:9] + "..."
 	}
+	url := ""
+	if p.API.GetConfig().ServiceSettings.SiteURL != nil {
+		url = *p.API.GetConfig().ServiceSettings.SiteURL
+	}
 	var responseParameters = map[string]interface{}{
-		"PostLink": p.URL + "/" + team.Name + "/pl/" + post.Id,
+		"PostLink": url + "/" + team.Name + "/pl/" + post.Id,
 		"Message":  message,
 		"When": p.formatWhen(
 			rr.Username,
@@ -159,7 +163,7 @@ func (p *Plugin) handleReminder(w http.ResponseWriter, r *http.Request) {
 									"occurrence_id": rr.Reminder.Occurrences[0].Id,
 									"action":        "delete/ephemeral",
 								},
-								URL: fmt.Sprintf("%s/plugins/%s/delete/ephemeral", p.URL, manifest.Id),
+								URL: fmt.Sprintf("/plugins/%s/delete/ephemeral", manifest.Id),
 							},
 							Type: model.POST_ACTION_TYPE_BUTTON,
 							Name: T("button.delete"),
@@ -172,7 +176,7 @@ func (p *Plugin) handleReminder(w http.ResponseWriter, r *http.Request) {
 									"occurrence_id": rr.Reminder.Occurrences[0].Id,
 									"action":        "view/ephemeral",
 								},
-								URL: fmt.Sprintf("%s/plugins/%s/view/ephemeral", p.URL, manifest.Id),
+								URL: fmt.Sprintf("/plugins/%s/view/ephemeral", manifest.Id),
 							},
 							Type: model.POST_ACTION_TYPE_BUTTON,
 							Name: T("button.view.reminders"),

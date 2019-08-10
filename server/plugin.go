@@ -6,7 +6,6 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/mattermost/mattermost-server/model"
 	"github.com/mattermost/mattermost-server/plugin"
 )
 
@@ -14,8 +13,6 @@ type Plugin struct {
 	plugin.MattermostPlugin
 
 	router *mux.Router
-
-	ServerConfig *model.Config
 
 	remindUserId string
 

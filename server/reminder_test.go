@@ -91,6 +91,23 @@ func TestTriggerReminders(t *testing.T) {
 		Id:   model.NewId(),
 		Name: model.NewId(),
 	}
+
+	post := &model.Post{
+		Id: model.NewId(),
+		ChannelId: channel.Id,
+	}
+
+	team := &model.Team{
+		Id: model.NewId(),
+	}
+
+	siteURL := "http://localhost"
+	config := &model.Config{
+		ServiceSettings: model.ServiceSettings{
+			SiteURL: &siteURL,
+		},
+	}
+
 	setupAPI := func() *plugintest.API {
 		api := &plugintest.API{}
 		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
@@ -99,6 +116,11 @@ func TestTriggerReminders(t *testing.T) {
 		api.On("KVGet", string(fmt.Sprintf("%v", testTime))).Return(stringOccurrences, nil)
 		api.On("GetUserByUsername", mock.AnythingOfType("string")).Return(user, nil)
 		api.On("GetDirectChannel", mock.Anything, mock.Anything).Return(channel, nil)
+		api.On("CreatePost", mock.Anything).Return(post, nil)
+		api.On("GetPost", mock.Anything).Return(post, nil)
+		api.On("GetTeam", mock.Anything).Return(team, nil)
+		api.On("GetUser", mock.Anything).Return(user, nil)
+		api.On("GetConfig").Return(config)
 		return api
 	}
 

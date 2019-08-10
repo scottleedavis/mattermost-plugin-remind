@@ -12,7 +12,6 @@ const botName = "remindbot"
 const botDisplayName = "Remindbot"
 
 func (p *Plugin) OnActivate() error {
-	p.ServerConfig = p.API.GetConfig()
 
 	teams, err := p.API.GetTeams()
 	if err != nil {
