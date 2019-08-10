@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"path/filepath"
 	"time"
 
@@ -14,9 +13,6 @@ const botDisplayName = "Remindbot"
 
 func (p *Plugin) OnActivate() error {
 	p.ServerConfig = p.API.GetConfig()
-	if p.ServerConfig.ServiceSettings.SiteURL == nil {
-		return errors.New("siteURL is not set. Please set a siteURL and restart the plugin")
-	}
 
 	teams, err := p.API.GetTeams()
 	if err != nil {
@@ -33,7 +29,6 @@ func (p *Plugin) OnActivate() error {
 		}
 	}
 
-	p.URL = fmt.Sprintf("%s", *p.ServerConfig.ServiceSettings.SiteURL)
 	if err := p.TranslationsPreInit(); err != nil {
 		return errors.Wrap(err, "failed to initialize translations")
 	}

@@ -38,7 +38,6 @@ func TestHandleCommand(t *testing.T) {
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
-		p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
 		p.router = p.InitAPI()
 		p.API = api
 
@@ -67,7 +66,6 @@ func TestHandleCommand(t *testing.T) {
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
-		p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
 		p.router = p.InitAPI()
 		p.API = api
 
@@ -130,7 +128,6 @@ func TestHandleCommand(t *testing.T) {
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
-		p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
 		p.router = p.InitAPI()
 		p.API = api
 
@@ -197,7 +194,6 @@ func TestHandleCommand(t *testing.T) {
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
-		p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
 		p.router = p.InitAPI()
 		p.API = api
 
@@ -251,7 +247,6 @@ func TestHandleCommand(t *testing.T) {
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
-		p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
 		p.router = p.InitAPI()
 		p.API = api
 
@@ -290,7 +285,6 @@ func TestHandleCommand(t *testing.T) {
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
-		p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
 		p.router = p.InitAPI()
 		p.API = api
 
@@ -319,7 +313,6 @@ func TestHandleCommand(t *testing.T) {
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
-		p.URL = fmt.Sprintf("http://localhost/plugins/%s", manifest.Id)
 		p.router = p.InitAPI()
 		p.API = api
 

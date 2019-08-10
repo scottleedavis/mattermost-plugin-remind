@@ -677,6 +677,31 @@ func (p *Plugin) normalizeDate(text string, user *model.User) (string, error) {
 		}
 		return parts[2] + "-" + parts[0] + "-" + parts[1] + "T00:00:00Z", nil
 
+	} else if match, _ := regexp.MatchString("^([0-9]{4}-[0-9]{2}-[0-9]{2})", date); match {
+
+		date := p.regSplit(date, "-")
+
+		switch len(date) {
+		case 3:
+			year, yErr := strconv.Atoi(date[0])
+			if yErr != nil {
+				return "", yErr
+			}
+			month, mErr := strconv.Atoi(date[1])
+			if mErr != nil {
+				return "", mErr
+			}
+			day, dErr := strconv.Atoi(date[2])
+			if dErr != nil {
+				return "", dErr
+			}
+
+			return time.Date(year, time.Month(month), day, 0, 0, 0, 0, location).Format(time.RFC3339), nil
+
+		default:
+			return "", errors.New("unrecognized date")
+		}
+
 	} else if match, _ := regexp.MatchString("^(([0-9]{2}|[0-9]{1})(-|/)([0-9]{2}|[0-9]{1})((-|/)([0-9]{4}|[0-9]{2}))?)", date); match {
 
 		date := p.regSplit(date, "-|/")

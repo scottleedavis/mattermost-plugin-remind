@@ -290,7 +290,7 @@ func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {
 									"occurrence_id": r.Reminder.Occurrences[0].Id,
 									"action":        "delete/ephemeral",
 								},
-								URL: fmt.Sprintf("%s/plugins/%s/delete/ephemeral", p.URL, manifest.Id),
+								URL: fmt.Sprintf("/plugins/%s/delete/ephemeral", manifest.Id),
 							},
 							Type: model.POST_ACTION_TYPE_BUTTON,
 							Name: T("button.delete"),
@@ -302,7 +302,7 @@ func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {
 									"occurrence_id": r.Reminder.Occurrences[0].Id,
 									"action":        "view/ephemeral",
 								},
-								URL: fmt.Sprintf("%s/plugins/%s/view/ephemeral", p.URL, manifest.Id),
+								URL: fmt.Sprintf("/plugins/%s/view/ephemeral", manifest.Id),
 							},
 							Type: model.POST_ACTION_TYPE_BUTTON,
 							Name: T("button.view.reminders"),
@@ -472,9 +472,10 @@ func (p *Plugin) handleDeleteEphemeral(w http.ResponseWriter, r *http.Request) {
 		"Message": message,
 	}
 	post := &model.Post{
-		Id:      request.PostId,
-		UserId:  p.remindUserId,
-		Message: T("action.delete", deleteParameters),
+		Id:        request.PostId,
+		UserId:    p.remindUserId,
+		ChannelId: request.ChannelId,
+		Message:   T("action.delete", deleteParameters),
 	}
 	p.API.UpdateEphemeralPost(request.UserId, post)
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})

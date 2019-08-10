@@ -116,9 +116,9 @@ func (p *Plugin) TriggerReminders() {
 					finalTarget = "@" + user.Username
 				}
 
-				if p.URL == "" {
-					p.API.LogError("URL not set.")
-					return
+				messageParameters := map[string]interface{}{
+					"FinalTarget": finalTarget,
+					"Message":     reminder.Message,
 				}
 
 				interactivePost := model.Post{}
@@ -141,8 +141,12 @@ func (p *Plugin) TriggerReminders() {
 						continue
 					}
 
+					url := "";
+					if p.ServerConfig.ServiceSettings.SiteURL != nil {
+						url = *p.ServerConfig.ServiceSettings.SiteURL
+					}
 					messageParameters := map[string]interface{}{
-						"PostLink": p.URL + "/" + team.Name + "/pl/" + reminder.PostId,
+						"PostLink": url + "/" + team.Name + "/pl/" + reminder.PostId,
 					}
 
 					interactivePost = model.Post{
@@ -162,7 +166,7 @@ func (p *Plugin) TriggerReminders() {
 													"occurrence_id": occurrence.Id,
 													"action":        "complete",
 												},
-												URL: fmt.Sprintf("%s/plugins/%s/complete", p.URL, manifest.Id),
+												URL: fmt.Sprintf("/plugins/%s/complete", manifest.Id),
 											},
 											Type: model.POST_ACTION_TYPE_BUTTON,
 											Name: T("button.complete"),
@@ -174,7 +178,7 @@ func (p *Plugin) TriggerReminders() {
 													"occurrence_id": occurrence.Id,
 													"action":        "delete",
 												},
-												URL: fmt.Sprintf("%s/plugins/%s/delete", p.URL, manifest.Id),
+												URL: fmt.Sprintf("/plugins/%s/delete", manifest.Id),
 											},
 											Name: T("button.delete"),
 											Type: "action",
@@ -186,7 +190,7 @@ func (p *Plugin) TriggerReminders() {
 													"occurrence_id": occurrence.Id,
 													"action":        "snooze",
 												},
-												URL: fmt.Sprintf("%s/plugins/%s/snooze", p.URL, manifest.Id),
+												URL: fmt.Sprintf("/plugins/%s/snooze", manifest.Id),
 											},
 											Name: T("button.snooze"),
 											Type: "select",
@@ -217,7 +221,7 @@ func (p *Plugin) TriggerReminders() {
 								},
 								{
 									AuthorName: pUser.Username,
-									AuthorIcon: p.URL + "/api/v4/users/" + pUser.Id + "/image",
+									AuthorIcon: url + "/api/v4/users/" + pUser.Id + "/image",
 									Text:       reminder.Message,
 								},
 							},
@@ -249,7 +253,7 @@ func (p *Plugin) TriggerReminders() {
 													"occurrence_id": occurrence.Id,
 													"action":        "complete",
 												},
-												URL: fmt.Sprintf("%s/plugins/%s/complete", p.URL, manifest.Id),
+												URL: fmt.Sprintf("/plugins/%s/complete", manifest.Id),
 											},
 											Type: model.POST_ACTION_TYPE_BUTTON,
 											Name: T("button.complete"),
@@ -262,7 +266,7 @@ func (p *Plugin) TriggerReminders() {
 													"occurrence_id": occurrence.Id,
 													"action":        "delete",
 												},
-												URL: fmt.Sprintf("%s/plugins/%s/delete", p.URL, manifest.Id),
+												URL: fmt.Sprintf("/plugins/%s/delete", manifest.Id),
 											},
 											Name: T("button.delete"),
 											Type: "action",
@@ -275,7 +279,7 @@ func (p *Plugin) TriggerReminders() {
 													"occurrence_id": occurrence.Id,
 													"action":        "snooze",
 												},
-												URL: fmt.Sprintf("%s/plugins/%s/snooze", p.URL, manifest.Id),
+												URL: fmt.Sprintf("/plugins/%s/snooze", manifest.Id),
 											},
 											Name: T("button.snooze"),
 											Type: "select",
@@ -331,7 +335,7 @@ func (p *Plugin) TriggerReminders() {
 													"occurrence_id": occurrence.Id,
 													"action":        "snooze",
 												},
-												URL: fmt.Sprintf("%s/plugins/%s/snooze", p.URL, manifest.Id),
+												URL: fmt.Sprintf("/plugins/%s/snooze", manifest.Id),
 											},
 											Name: T("button.snooze"),
 											Type: "select",
