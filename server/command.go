@@ -27,10 +27,6 @@ func (p *Plugin) registerCommand(teamId string) error {
 	return nil
 }
 
-func (p *Plugin) unregisterCommand(teamId string) error {
-	return p.API.UnregisterCommand(teamId, CommandTrigger)
-}
-
 func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*model.CommandResponse, *model.AppError) {
 
 	user, uErr := p.API.GetUser(args.UserId)
