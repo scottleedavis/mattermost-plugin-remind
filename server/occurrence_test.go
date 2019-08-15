@@ -36,18 +36,6 @@ func TestCreateOccurrences(t *testing.T) {
 		},
 	}
 
-	//reminders := []Reminder{
-	//	{
-	//		Id:        model.NewId(),
-	//		TeamId:    model.NewId(),
-	//		Username:  user.Username,
-	//		Message:   "Hello",
-	//		Target:    "me",
-	//		When:      "in one minute",
-	//		Occurrences: occurrences,
-	//	},
-	//}
-
 	request := &ReminderRequest{
 		TeamId:   model.NewId(),
 		Username: user.Username,

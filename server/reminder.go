@@ -87,7 +87,6 @@ func (p *Plugin) TriggerReminders() {
 			}
 
 			if strings.HasPrefix(reminder.Target, "@") || strings.HasPrefix(reminder.Target, T("me")) { //@user
-
 				var targetId string
 				if strings.HasPrefix(reminder.Target, "@") {
 					target := strings.Trim(reminder.Target, "@")
