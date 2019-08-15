@@ -217,12 +217,17 @@ func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {
 		target = "@" + target.(string)
 	}
 
-	when := T("in") + " " + T("button.snooze."+ttime.(string))
-	switch ttime.(string) {
-	case "tomorrow":
-		when = T("tomorrow")
-	case "nextweek":
-		when = T("monday")
+	var when string
+	if ttime.(string) == "unit.test" {
+		when = "in 20 minutes"
+	} else {
+		when = T("in") + " " + T("button.snooze."+ttime.(string))
+		switch ttime.(string) {
+		case "tomorrow":
+			when = T("tomorrow")
+		case "nextweek":
+			when = T("monday")
+		}
 	}
 
 	r := &ReminderRequest{

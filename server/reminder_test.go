@@ -23,8 +23,17 @@ func TestTriggerReminders(t *testing.T) {
 		Roles:    model.SYSTEM_USER_ROLE_ID,
 		Locale:   "en",
 	}
-	testTime := time.Now().UTC().Round(time.Second)
 
+	channel := &model.Channel{
+		Id: model.NewId(),
+	}
+
+	post := &model.Post{
+		Id: model.NewId(),
+		ChannelId: channel.Id,
+	}
+
+	testTime := time.Now().UTC().Round(time.Second)
 	hostname, _ := os.Hostname()
 	reminder1 := model.NewId()
 	reminder2 := model.NewId()
@@ -87,16 +96,6 @@ func TestTriggerReminders(t *testing.T) {
 
 	stringOccurrences, _ := json.Marshal(occurrences)
 
-	channel := &model.Channel{
-		Id:   model.NewId(),
-		Name: model.NewId(),
-	}
-
-	post := &model.Post{
-		Id:        model.NewId(),
-		ChannelId: channel.Id,
-	}
-
 	team := &model.Team{
 		Id: model.NewId(),
 	}
@@ -113,13 +112,30 @@ func TestTriggerReminders(t *testing.T) {
 		api.On("GetPost", mock.Anything).Return(post, nil)
 		api.On("GetTeam", mock.Anything).Return(team, nil)
 		api.On("GetUser", mock.Anything).Return(user, nil)
+
 		return api
 	}
 
-	t.Run("if triggers reminder for user", func(t *testing.T) {
+	t.Run("if triggers reminder for me", func(t *testing.T) {
 		api := setupAPI()
 		stringReminders, _ := json.Marshal(reminders)
 		api.On("KVGet", user.Username).Return(stringReminders, nil)
+		api.On("GetDirectChannel", mock.Anything, mock.Anything).Return(channel, nil)
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.API = api
+
+		p.TriggerReminders()
+
+	})
+
+	t.Run("if triggers reminder for user", func(t *testing.T) {
+		api := setupAPI()
+		reminders[0].Target = "@testuser"
+		stringReminders, _ := json.Marshal(reminders)
+		api.On("KVGet", user.Username).Return(stringReminders, nil)
+		api.On("GetDirectChannel", mock.Anything, mock.Anything).Return(channel, nil)
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
@@ -136,6 +152,22 @@ func TestTriggerReminders(t *testing.T) {
 		api.On("KVGet", user.Username).Return(stringReminders, nil)
 		api.On("GetChannelByName", mock.Anything, mock.Anything, mock.Anything).Return(channel, nil)
 		api.On("CreatePost", mock.Anything).Return(nil, nil)
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.API = api
+
+		p.TriggerReminders()
+
+	})
+
+	t.Run("if triggers reminder recurring", func(t *testing.T) {
+		api := setupAPI()
+		reminders[0].Target = "me"
+		reminders[0].When = "every tuesday at 3pm"
+		stringReminders, _ := json.Marshal(reminders)
+		api.On("KVGet", user.Username).Return(stringReminders, nil)
+		api.On("GetDirectChannel", mock.Anything, mock.Anything).Return(channel, nil)
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
