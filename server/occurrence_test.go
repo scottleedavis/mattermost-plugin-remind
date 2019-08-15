@@ -36,18 +36,6 @@ func TestCreateOccurrences(t *testing.T) {
 		},
 	}
 
-	//reminders := []Reminder{
-	//	{
-	//		Id:        model.NewId(),
-	//		TeamId:    model.NewId(),
-	//		Username:  user.Username,
-	//		Message:   "Hello",
-	//		Target:    "me",
-	//		When:      "in one minute",
-	//		Occurrences: occurrences,
-	//	},
-	//}
-
 	request := &ReminderRequest{
 		TeamId:   model.NewId(),
 		Username: user.Username,
@@ -70,8 +58,6 @@ func TestCreateOccurrences(t *testing.T) {
 		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
 		api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
 		api.On("LogInfo", mock.Anything).Maybe()
-		api.On("KVGet", mock.Anything).Return(stringOccurrences, nil)
-		api.On("KVSet", mock.Anything, mock.Anything).Return(nil)
 		api.On("GetUserByUsername", mock.AnythingOfType("string")).Return(user, nil)
 		return api
 	}
@@ -81,11 +67,28 @@ func TestCreateOccurrences(t *testing.T) {
 		api := setupAPI()
 		defer api.AssertExpectations(t)
 
+		api.On("KVGet", mock.Anything).Return(stringOccurrences, nil)
+		api.On("KVSet", mock.Anything, mock.Anything).Return(nil)
 		p := &Plugin{}
 		p.API = api
 
 		assert.Nil(t, p.CreateOccurrences(request))
 
+	})
+
+	t.Run("if fails to create occurrences", func(t *testing.T) {
+
+		api := setupAPI()
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.API = api
+
+		request.Reminder.When = "in foobar"
+		assert.NotNil(t, p.CreateOccurrences(request))
+
+		request.Reminder.When = "in foo seconds"
+		assert.NotNil(t, p.CreateOccurrences(request))
 	})
 }
 
