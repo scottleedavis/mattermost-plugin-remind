@@ -3,8 +3,10 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http/httptest"
+	"os"
 	"testing"
 	"time"
 
@@ -19,14 +21,45 @@ func TestHandleDialog(t *testing.T) {
 		Id:       model.NewId(),
 		Username: model.NewRandomString(10),
 	}
+	testTime := time.Now().UTC().Round(time.Second).Add(20 * time.Duration(time.Minute))
+	hostname, _ := os.Hostname()
+	reminderId := model.NewId()
+
+	occurrences := []Occurrence{
+		{
+			Hostname:   hostname,
+			Id:         model.NewId(),
+			ReminderId: reminderId,
+			Occurrence: testTime,
+		},
+	}
+
+	reminders := []Reminder{
+		{
+			Id:          reminderId,
+			TeamId:      model.NewId(),
+			Username:    user.Username,
+			Message:     "Hello",
+			Target:      "me",
+			When:        "in one minute",
+			Occurrences: occurrences,
+		},
+	}
+
+	stringOccurrences, _ := json.Marshal(occurrences)
+	stringReminders, _ := json.Marshal(reminders)
 
 	setupAPI := func() *plugintest.API {
 		api := &plugintest.API{}
 		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
 		api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
 		api.On("LogInfo", mock.Anything).Maybe()
+		api.On("KVGet", string(fmt.Sprintf("%v", testTime))).Return(stringOccurrences, nil)
+		api.On("KVGet", user.Username).Return(stringReminders, nil)
+		api.On("KVSet", mock.Anything, mock.Anything).Return(nil)
 		api.On("GetUser", mock.Anything).Return(user, nil)
 		api.On("GetUserByUsername", mock.Anything).Return(user, nil)
+		api.On("SendEphemeralPost", mock.Anything, mock.Anything).Return(nil)
 
 		return api
 	}
@@ -45,7 +78,7 @@ func TestHandleDialog(t *testing.T) {
 			Submission: model.StringInterface{
 				"message": "hello",
 				"target":  "me",
-				"time":    "in 2 seconds",
+				"time":    "unit.test",
 			},
 		}
 

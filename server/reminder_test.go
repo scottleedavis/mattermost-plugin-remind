@@ -104,7 +104,7 @@ func TestTriggerReminders(t *testing.T) {
 		reminders[0].Target = "~off-topic"
 		stringReminders, _ := json.Marshal(reminders)
 		api.On("KVGet", user.Username).Return(stringReminders, nil)
-		api.On("GetChannelByName",mock.Anything, mock.Anything, mock.Anything).Return(channel, nil)
+		api.On("GetChannelByName", mock.Anything, mock.Anything, mock.Anything).Return(channel, nil)
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
