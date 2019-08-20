@@ -664,93 +664,88 @@ func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if _, pErr := p.API.GetPost(request.PostId); pErr != nil {
-		p.API.LogError(pErr.Error())
-		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
-	} else {
-		switch request.Context["selected_option"].(string) {
-		case "20min":
-			for i, occurrence := range reminder.Occurrences {
-				if occurrence.Id == request.Context["occurrence_id"].(string) {
-					occurrence.Snoozed = time.Now().UTC().Round(time.Second).Add(time.Minute * time.Duration(20))
+	switch request.Context["selected_option"].(string) {
+	case "20min":
+		for i, occurrence := range reminder.Occurrences {
+			if occurrence.Id == request.Context["occurrence_id"].(string) {
+				occurrence.Snoozed = time.Now().UTC().Round(time.Second).Add(time.Minute * time.Duration(20))
+				reminder.Occurrences[i] = occurrence
+				p.UpdateReminder(request.UserId, reminder)
+				p.upsertSnoozedOccurrence(&occurrence)
+				break
+			}
+		}
+	case "1hr":
+		for i, occurrence := range reminder.Occurrences {
+			if occurrence.Id == request.Context["occurrence_id"].(string) {
+				occurrence.Snoozed = time.Now().UTC().Round(time.Second).Add(time.Hour * time.Duration(1))
+				reminder.Occurrences[i] = occurrence
+				p.UpdateReminder(request.UserId, reminder)
+				p.upsertSnoozedOccurrence(&occurrence)
+				break
+			}
+		}
+	case "3hrs":
+		for i, occurrence := range reminder.Occurrences {
+			if occurrence.Id == request.Context["occurrence_id"].(string) {
+				occurrence.Snoozed = time.Now().UTC().Round(time.Second).Add(time.Hour * time.Duration(3))
+				reminder.Occurrences[i] = occurrence
+				p.UpdateReminder(request.UserId, reminder)
+				p.upsertSnoozedOccurrence(&occurrence)
+				break
+			}
+		}
+	case "tomorrow":
+		for i, occurrence := range reminder.Occurrences {
+			if occurrence.Id == request.Context["occurrence_id"].(string) {
+
+				if user, uErr := p.API.GetUser(request.UserId); uErr != nil {
+					p.API.LogError(uErr.Error())
+					return
+				} else {
+					location := p.location(user)
+					tt := time.Now().In(location).Add(time.Hour * time.Duration(24))
+					occurrence.Snoozed = time.Date(tt.Year(), tt.Month(), tt.Day(), 9, 0, 0, 0, location).UTC()
 					reminder.Occurrences[i] = occurrence
 					p.UpdateReminder(request.UserId, reminder)
 					p.upsertSnoozedOccurrence(&occurrence)
 					break
-				}
-			}
-		case "1hr":
-			for i, occurrence := range reminder.Occurrences {
-				if occurrence.Id == request.Context["occurrence_id"].(string) {
-					occurrence.Snoozed = time.Now().UTC().Round(time.Second).Add(time.Hour * time.Duration(1))
-					reminder.Occurrences[i] = occurrence
-					p.UpdateReminder(request.UserId, reminder)
-					p.upsertSnoozedOccurrence(&occurrence)
-					break
-				}
-			}
-		case "3hrs":
-			for i, occurrence := range reminder.Occurrences {
-				if occurrence.Id == request.Context["occurrence_id"].(string) {
-					occurrence.Snoozed = time.Now().UTC().Round(time.Second).Add(time.Hour * time.Duration(3))
-					reminder.Occurrences[i] = occurrence
-					p.UpdateReminder(request.UserId, reminder)
-					p.upsertSnoozedOccurrence(&occurrence)
-					break
-				}
-			}
-		case "tomorrow":
-			for i, occurrence := range reminder.Occurrences {
-				if occurrence.Id == request.Context["occurrence_id"].(string) {
-
-					if user, uErr := p.API.GetUser(request.UserId); uErr != nil {
-						p.API.LogError(uErr.Error())
-						return
-					} else {
-						location := p.location(user)
-						tt := time.Now().In(location).Add(time.Hour * time.Duration(24))
-						occurrence.Snoozed = time.Date(tt.Year(), tt.Month(), tt.Day(), 9, 0, 0, 0, location).UTC()
-						reminder.Occurrences[i] = occurrence
-						p.UpdateReminder(request.UserId, reminder)
-						p.upsertSnoozedOccurrence(&occurrence)
-						break
-					}
-				}
-			}
-		case "nextweek":
-			for i, occurrence := range reminder.Occurrences {
-				if occurrence.Id == request.Context["occurrence_id"].(string) {
-
-					if user, uErr := p.API.GetUser(request.UserId); uErr != nil {
-						p.API.LogError(uErr.Error())
-						return
-					} else {
-						location := p.location(user)
-
-						todayWeekDayNum := int(time.Now().In(location).Weekday())
-						weekDayNum := 1
-						day := 0
-
-						if weekDayNum < todayWeekDayNum {
-							day = 7 - (todayWeekDayNum - weekDayNum)
-						} else if weekDayNum >= todayWeekDayNum {
-							day = 7 + (weekDayNum - todayWeekDayNum)
-						}
-
-						tt := time.Now().In(location).Add(time.Hour * time.Duration(24))
-						occurrence.Snoozed = time.Date(tt.Year(), tt.Month(), tt.Day(), 9, 0, 0, 0, location).AddDate(0, 0, day).UTC()
-						reminder.Occurrences[i] = occurrence
-						p.UpdateReminder(request.UserId, reminder)
-						p.upsertSnoozedOccurrence(&occurrence)
-						break
-					}
 				}
 			}
 		}
+	case "nextweek":
+		for i, occurrence := range reminder.Occurrences {
+			if occurrence.Id == request.Context["occurrence_id"].(string) {
 
-		p.UpdateListReminders(request.UserId, request.PostId, request.ChannelId, int(request.Context["offset"].(float64)))
-		writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
+				if user, uErr := p.API.GetUser(request.UserId); uErr != nil {
+					p.API.LogError(uErr.Error())
+					return
+				} else {
+					location := p.location(user)
+
+					todayWeekDayNum := int(time.Now().In(location).Weekday())
+					weekDayNum := 1
+					day := 0
+
+					if weekDayNum < todayWeekDayNum {
+						day = 7 - (todayWeekDayNum - weekDayNum)
+					} else if weekDayNum >= todayWeekDayNum {
+						day = 7 + (weekDayNum - todayWeekDayNum)
+					}
+
+					tt := time.Now().In(location).Add(time.Hour * time.Duration(24))
+					occurrence.Snoozed = time.Date(tt.Year(), tt.Month(), tt.Day(), 9, 0, 0, 0, location).AddDate(0, 0, day).UTC()
+					reminder.Occurrences[i] = occurrence
+					p.UpdateReminder(request.UserId, reminder)
+					p.upsertSnoozedOccurrence(&occurrence)
+					break
+				}
+			}
+		}
 	}
+
+	p.UpdateListReminders(request.UserId, request.PostId, request.ChannelId, int(request.Context["offset"].(float64)))
+	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
 func (p *Plugin) handleCloseList(w http.ResponseWriter, r *http.Request) {

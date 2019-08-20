@@ -204,12 +204,28 @@
     "translation": "Snooze"
   },
   {
+    "id": "button.snooze.10min",
+    "translation": "10 minutes"
+  },
+  {
     "id": "button.snooze.20min",
     "translation": "20 minutes"
   },
   {
     "id": "snooze.20min",
     "translation": "Snoozed. I’ll remind you \"{{.Message}}\" in 20 minutes"
+  },
+  {
+    "id": "button.snooze.30min",
+    "translation": "30 minutes"
+  },
+  {
+    "id": "button.snooze.40min",
+    "translation": "40 minutes"
+  },
+  {
+    "id": "button.snooze.50min",
+    "translation": "50 minutes"
   },
   {
     "id": "button.snooze.1hr",
@@ -220,6 +236,10 @@
     "translation": "Snoozed. I’ll remind you \"{{.Message}}\" in 1 hour"
   },
   {
+    "id": "button.snooze.2hr",
+    "translation": "2 hours"
+  },
+  {
     "id": "button.snooze.3hr",
     "translation": "3 hours"
   },
@@ -228,8 +248,116 @@
     "translation": "Ok! I’ll remind you \"{{.Message}}\" in 3 hours"
   },
   {
+    "id": "button.snooze.4hr",
+    "translation": "4 hours"
+  },
+  {
+    "id": "button.snooze.5hr",
+    "translation": "5 hours"
+  },
+  {
+    "id": "button.snooze.6hr",
+    "translation": "6 hours"
+  },
+  {
+    "id": "button.snooze.7hr",
+    "translation": "7 hours"
+  },
+  {
+    "id": "button.snooze.8hr",
+    "translation": "8 hours"
+  },
+  {
+    "id": "button.snooze.9hr",
+    "translation": "9 hours"
+  },
+  {
+    "id": "button.snooze.10hr",
+    "translation": "10 hours"
+  },
+  {
+    "id": "button.snooze.11hr",
+    "translation": "11 hours"
+  },
+  {
+    "id": "button.snooze.12hr",
+    "translation": "12 hours"
+  },
+  {
+    "id": "button.snooze.13hr",
+    "translation": "13 hours"
+  },
+  {
+    "id": "button.snooze.14hr",
+    "translation": "14 hours"
+  },
+  {
+    "id": "button.snooze.15hr",
+    "translation": "15 hours"
+  },
+  {
+    "id": "button.snooze.16hr",
+    "translation": "16 hours"
+  },
+  {
+    "id": "button.snooze.17hr",
+    "translation": "17 hours"
+  },
+  {
+    "id": "button.snooze.18hr",
+    "translation": "18 hours"
+  },
+  {
+    "id": "button.snooze.19hr",
+    "translation": "19 hours"
+  },
+  {
+    "id": "button.snooze.20hr",
+    "translation": "20 hours"
+  },
+  {
+    "id": "button.snooze.21hr",
+    "translation": "21 hours"
+  },
+  {
+    "id": "button.snooze.22hr",
+    "translation": "22 hours"
+  },
+  {
+    "id": "button.snooze.23hr",
+    "translation": "23 hours"
+  },
+  {
     "id": "button.snooze.tomorrow",
     "translation": "Tomorrow at 9AM"
+  },
+  {
+    "id": "button.snooze.1day",
+    "translation": "1 day"
+  },
+  {
+    "id": "button.snooze.2day",
+    "translation": "2 days"
+  },
+  {
+    "id": "button.snooze.3day",
+    "translation": "3 days"
+  },
+  {
+    "id": "button.snooze.4day",
+    "translation": "4 days"
+  },
+  {
+    "id": "button.snooze.5day",
+    "translation": "5 days"
+  },
+  {
+    "id": "button.snooze.6day",
+    "translation": "6 days"
+  },
+  {
+    "id": "button.snooze.7day",
+    "translation": "7 days"
   },
   {
     "id": "snooze.tomorrow",
