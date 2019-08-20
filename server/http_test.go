@@ -952,7 +952,6 @@ func TestHandleSnoozeList(t *testing.T) {
 		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
 		api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
 		api.On("LogInfo", mock.Anything).Maybe()
-		api.On("GetPost", mock.Anything).Return(post, nil)
 		api.On("GetUser", mock.Anything).Return(user, nil)
 		api.On("GetUserByUsername", mock.Anything).Return(user, nil)
 		api.On("KVGet", user.Username).Return(stringReminders, nil)
