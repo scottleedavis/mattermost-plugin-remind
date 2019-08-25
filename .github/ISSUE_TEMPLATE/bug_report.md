@@ -30,7 +30,7 @@ What did you see happen? Please include relevant error messages and/or screensho
 
 **Matterpoll version:**
 
-**Updated from an older Matterpoll version or fresh install:**
+**Updated from an older Remind bot version or fresh install:**
 
 <details>
 <summary>Mattermost server logs</summary>
