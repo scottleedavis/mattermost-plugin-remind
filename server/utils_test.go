@@ -9,7 +9,7 @@ import (
 
 func TestTranslation(t *testing.T) {
 
-	t.Run("if can translate", func(t *testing.T) {
+	t.Run("if can translate with locale", func(t *testing.T) {
 
 		p := &Plugin{}
 
@@ -22,10 +22,11 @@ func TestTranslation(t *testing.T) {
 			Locale:   "en",
 		}
 
+		p.locales = make(map[string]string)
+		p.locales["en"] = "/test/en.json"
 		T, locale := p.translation(user)
 		assert.Equal(t, T("me"), "me")
 		assert.Equal(t, locale, "en")
-
 	})
 }
 
@@ -34,7 +35,8 @@ func TestLocation(t *testing.T) {
 	t.Run("if can locate", func(t *testing.T) {
 
 		p := &Plugin{}
-
+		timezone := make(map[string]string)
+		timezone["manualTimezone"] = "America/Los_Angeles"
 		user := &model.User{
 			Email:    "-@-.-",
 			Nickname: "TestUser",
@@ -42,6 +44,7 @@ func TestLocation(t *testing.T) {
 			Username: "testuser",
 			Roles:    model.SYSTEM_USER_ROLE_ID,
 			Locale:   "en",
+			Timezone: timezone,
 		}
 
 		location := p.location(user)

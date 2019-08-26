@@ -70,6 +70,28 @@ func TestTriggerReminders(t *testing.T) {
 		return api
 	}
 
+	t.Run("it doesn't trigger on different hostname", func(t *testing.T) {
+		occurrences := []Occurrence{
+			{
+				Hostname:   model.NewId(),
+				Id:         model.NewId(),
+				ReminderId: reminderId,
+				Occurrence: testTime,
+			},
+		}
+
+		stringOccurrences, _ := json.Marshal(occurrences)
+		api := &plugintest.API{}
+		api.On("KVGet", string(fmt.Sprintf("%v", testTime))).Return(stringOccurrences, nil)
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.API = api
+
+		p.TriggerReminders()
+
+	})
+
 	t.Run("if triggers reminder for me", func(t *testing.T) {
 		api := setupAPI()
 		stringReminders, _ := json.Marshal(reminders)
@@ -114,13 +136,87 @@ func TestTriggerReminders(t *testing.T) {
 
 	})
 
-	t.Run("if triggers reminder recurring", func(t *testing.T) {
-		api := setupAPI()
-		reminders[0].Target = "me"
-		reminders[0].When = "every tuesday at 3pm"
+	t.Run("if triggers user reminder recurring", func(t *testing.T) {
+		occurrences := []Occurrence{
+			{
+				Hostname:   hostname,
+				Id:         model.NewId(),
+				ReminderId: reminderId,
+				Occurrence: testTime,
+				Repeat:     "every tuesday at 3pm",
+			},
+		}
+		reminders := []Reminder{
+			{
+				Id:          reminderId,
+				TeamId:      model.NewId(),
+				Username:    user.Username,
+				Message:     "Hello",
+				Target:      "me",
+				When:        "every tuesday at 3pm",
+				Occurrences: occurrences,
+			},
+		}
+
 		stringReminders, _ := json.Marshal(reminders)
-		api.On("KVGet", user.Username).Return(stringReminders, nil)
+		stringOccurrences, _ := json.Marshal(occurrences)
+		api := &plugintest.API{}
+		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogInfo", mock.Anything).Maybe()
+		api.On("GetUserByUsername", mock.AnythingOfType("string")).Return(user, nil)
+		api.On("CreatePost", mock.Anything).Return(post, nil)
 		api.On("GetDirectChannel", mock.Anything, mock.Anything).Return(channel, nil)
+
+		api.On("KVGet", string(fmt.Sprintf("%v", testTime))).Return(stringOccurrences, nil)
+		api.On("KVGet", user.Username).Return(stringReminders, nil)
+		api.On("KVGet", mock.Anything).Return(stringOccurrences, nil)
+		api.On("KVSet", mock.Anything, mock.Anything).Return(nil)
+		api.On("GetUser", mock.Anything).Return(user, nil)
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.API = api
+
+		p.TriggerReminders()
+
+	})
+
+	t.Run("if triggers channel reminder recurring", func(t *testing.T) {
+		occurrences := []Occurrence{
+			{
+				Hostname:   hostname,
+				Id:         model.NewId(),
+				ReminderId: reminderId,
+				Occurrence: testTime,
+				Repeat:     "every tuesday at 3pm",
+			},
+		}
+		reminders := []Reminder{
+			{
+				Id:          reminderId,
+				TeamId:      model.NewId(),
+				Username:    user.Username,
+				Message:     "Hello",
+				Target:      "~town-square",
+				When:        "every tuesday at 3pm",
+				Occurrences: occurrences,
+			},
+		}
+
+		stringReminders, _ := json.Marshal(reminders)
+		stringOccurrences, _ := json.Marshal(occurrences)
+		api := &plugintest.API{}
+		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogError", mock.Anything, mock.Anything, mock.Anything).Maybe()
+		api.On("LogInfo", mock.Anything).Maybe()
+		api.On("GetUserByUsername", mock.AnythingOfType("string")).Return(user, nil)
+		api.On("CreatePost", mock.Anything).Return(post, nil)
+		api.On("GetChannelByName", mock.Anything, mock.Anything, mock.Anything).Return(channel, nil)
+		api.On("KVGet", user.Username).Return(stringReminders, nil)
+		api.On("KVGet", mock.Anything).Return(stringOccurrences, nil)
+		api.On("KVSet", mock.Anything, mock.Anything).Return(nil)
+		api.On("GetUser", mock.Anything).Return(user, nil)
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
