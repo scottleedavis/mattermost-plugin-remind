@@ -501,8 +501,8 @@ func TestHandleSnooze(t *testing.T) {
 				PostId: "postID1",
 				Context: model.StringInterface{
 					"orig_user_id":    "foobar",
-					"reminder_id":     model.NewId(),
-					"occurrence_id":   model.NewId(),
+					"reminder_id":     reminders[0].Id,
+					"occurrence_id":   occurrences[0].Id,
 					"selected_option": test.SnoozeTime,
 				},
 			}
@@ -993,8 +993,8 @@ func TestHandleSnoozeList(t *testing.T) {
 				UserId: "userID1",
 				PostId: "postID1",
 				Context: model.StringInterface{
-					"reminder_id":     model.NewId(),
-					"occurrence_id":   model.NewId(),
+					"reminder_id":     reminders[0].Id,
+					"occurrence_id":   occurrences[0].Id,
 					"selected_option": test.SnoozeTime,
 					"offset":          0,
 				},
