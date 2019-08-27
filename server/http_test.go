@@ -520,7 +520,7 @@ func TestHandleSnooze(t *testing.T) {
 		},
 	}
 	stringReminders, _ := json.Marshal(reminders)
-
+	stringOccurrences, _ := json.Marshal(occurrences)
 	setupAPI := func() *plugintest.API {
 		api := &plugintest.API{}
 		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
@@ -531,6 +531,8 @@ func TestHandleSnooze(t *testing.T) {
 		api.On("GetUser", mock.Anything).Return(user, nil)
 		api.On("GetUserByUsername", mock.Anything).Return(user, nil)
 		api.On("KVGet", user.Username).Return(stringReminders, nil)
+		api.On("KVGet", mock.Anything).Return(stringOccurrences, nil)
+		api.On("KVSet", mock.Anything, mock.Anything).Return(nil)
 
 		return api
 	}
@@ -569,8 +571,8 @@ func TestHandleSnooze(t *testing.T) {
 				PostId: "postID1",
 				Context: model.StringInterface{
 					"orig_user_id":    "foobar",
-					"reminder_id":     model.NewId(),
-					"occurrence_id":   model.NewId(),
+					"reminder_id":     reminders[0].Id,
+					"occurrence_id":   occurrences[0].Id,
 					"selected_option": test.SnoozeTime,
 				},
 			}
@@ -1014,7 +1016,7 @@ func TestHandleSnoozeList(t *testing.T) {
 		},
 	}
 	stringReminders, _ := json.Marshal(reminders)
-
+	stringOccurrences, _ := json.Marshal(occurrences)
 	setupAPI := func() *plugintest.API {
 		api := &plugintest.API{}
 		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
@@ -1023,6 +1025,8 @@ func TestHandleSnoozeList(t *testing.T) {
 		api.On("GetUser", mock.Anything).Return(user, nil)
 		api.On("GetUserByUsername", mock.Anything).Return(user, nil)
 		api.On("KVGet", user.Username).Return(stringReminders, nil)
+		api.On("KVGet", mock.Anything).Return(stringOccurrences, nil)
+		api.On("KVSet", mock.Anything, mock.Anything).Return(nil)
 		api.On("UpdateEphemeralPost", mock.Anything, mock.Anything).Return(post)
 
 		return api
@@ -1061,8 +1065,8 @@ func TestHandleSnoozeList(t *testing.T) {
 				UserId: "userID1",
 				PostId: "postID1",
 				Context: model.StringInterface{
-					"reminder_id":     model.NewId(),
-					"occurrence_id":   model.NewId(),
+					"reminder_id":     reminders[0].Id,
+					"occurrence_id":   occurrences[0].Id,
 					"selected_option": test.SnoozeTime,
 					"offset":          0,
 				},
