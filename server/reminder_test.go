@@ -29,7 +29,7 @@ func TestTriggerReminders(t *testing.T) {
 	}
 
 	post := &model.Post{
-		Id: model.NewId(),
+		Id:        model.NewId(),
 		ChannelId: channel.Id,
 	}
 
@@ -121,7 +121,7 @@ func TestTriggerReminders(t *testing.T) {
 			{
 				Hostname:   model.NewId(),
 				Id:         model.NewId(),
-				ReminderId: reminderId,
+				ReminderId: reminder1,
 				Occurrence: testTime,
 			},
 		}
@@ -188,14 +188,14 @@ func TestTriggerReminders(t *testing.T) {
 			{
 				Hostname:   hostname,
 				Id:         model.NewId(),
-				ReminderId: reminderId,
+				ReminderId: reminder1,
 				Occurrence: testTime,
 				Repeat:     "every tuesday at 3pm",
 			},
 		}
 		reminders := []Reminder{
 			{
-				Id:          reminderId,
+				Id:          reminder1,
 				TeamId:      model.NewId(),
 				Username:    user.Username,
 				Message:     "Hello",
@@ -234,14 +234,14 @@ func TestTriggerReminders(t *testing.T) {
 			{
 				Hostname:   hostname,
 				Id:         model.NewId(),
-				ReminderId: reminderId,
+				ReminderId: reminder1,
 				Occurrence: testTime,
 				Repeat:     "every tuesday at 3pm",
 			},
 		}
 		reminders := []Reminder{
 			{
-				Id:          reminderId,
+				Id:          reminder1,
 				TeamId:      model.NewId(),
 				Username:    user.Username,
 				Message:     "Hello",

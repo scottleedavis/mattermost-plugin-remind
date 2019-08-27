@@ -506,7 +506,7 @@ func TestOn(t *testing.T) {
 			hour = 12
 		}
 		if min < 10 {
-			strmin = "0"+strconv.Itoa(min)
+			strmin = "0" + strconv.Itoa(min)
 		} else {
 			strmin = strconv.Itoa(min)
 		}
@@ -605,7 +605,7 @@ func TestEvery(t *testing.T) {
 			hour = 12
 		}
 		if min < 10 {
-			strmin = "0"+strconv.Itoa(min)
+			strmin = "0" + strconv.Itoa(min)
 		} else {
 			strmin = strconv.Itoa(min)
 		}
