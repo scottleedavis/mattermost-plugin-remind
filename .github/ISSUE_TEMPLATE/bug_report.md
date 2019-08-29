@@ -28,7 +28,7 @@ What did you see happen? Please include relevant error messages and/or screensho
 
 **Mattermost version:**
 
-**Matterpoll version:**
+**Remind version:**
 
 **Updated from an older Remind bot version or fresh install:**
 
