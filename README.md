@@ -28,7 +28,7 @@ See the full list of [Usage Examples](https://github.com/scottleedavis/mattermos
   * `/remind [who] [what] every (other) [monday,...,sunday|weekdays|month&day|m/d|d.m] (at) [time]`
 * `/remind [who] [when] [what]`
 
-### Building 
+### Build
 
 #### Requirements
 * [Go 1.12](https://golang.org/)
