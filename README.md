@@ -27,7 +27,7 @@ _requires Mattermost 5.14 or greater._
   * `/remind [who] [what] every (other) [monday,...,sunday|weekdays|month&day|m/d|d.m] (at) [time]`
 * `/remind [who] [when] [what]`
 
-Here is the full list of [Usage Examples](https://github.com/scottleedavis/mattermost-plugin-remind/wiki/Usage)
+Here is the full list of [Examples](https://github.com/scottleedavis/mattermost-plugin-remind/wiki/Usage)
 
 ### Build
 
