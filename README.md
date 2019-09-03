@@ -17,7 +17,6 @@ _requires Mattermost 5.14 or greater._
 
 ### Usage
 
-See the full list of [Usage Examples](https://github.com/scottleedavis/mattermost-plugin-remind/wiki/Usage) in the [wiki](https://github.com/scottleedavis/mattermost-plugin-remind/wiki) 
 * `/remind` - opens up an [interactive dialog](https://docs.mattermost.com/developer/interactive-dialogs.html) to schedule a reminder
 * `/remind help` - displays help examples
 * `/remind list` - displays a list of reminders
@@ -27,6 +26,8 @@ See the full list of [Usage Examples](https://github.com/scottleedavis/mattermos
   * `/remind [who] [what] (on) [(monday-sunday|month&day|m/d/y|d.m.y)] (at) [time]`
   * `/remind [who] [what] every (other) [monday,...,sunday|weekdays|month&day|m/d|d.m] (at) [time]`
 * `/remind [who] [when] [what]`
+
+Here is the full list of [Usage Examples](https://github.com/scottleedavis/mattermost-plugin-remind/wiki/Usage)
 
 ### Build
 
