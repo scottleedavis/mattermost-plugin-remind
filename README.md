@@ -31,10 +31,6 @@ Here is the full list of [Examples](https://github.com/scottleedavis/mattermost-
 
 ### Build
 
-#### Requirements
-* [Go 1.12](https://golang.org/)
-* [Dep](https://github.com/golang/dep)
-
 ```
 make
 ```
@@ -44,13 +40,3 @@ This will produce a single plugin file (with support for multiple architectures)
 ```
 dist/com.github.scottleedavis.mattermost-plugin-remind.tar.gz
 ```
-
-There is a build target to automate deploying and enabling the plugin to your server, but it requires configuration as below:
-```
-export MM_SERVICESETTINGS_SITEURL=http://localhost:8065
-export MM_ADMIN_USERNAME=admin
-export MM_ADMIN_PASSWORD=password
-make deploy
-```
-In production, deploy and upload your plugin via the [System Console](https://about.mattermost.com/default-plugin-uploads).
-
