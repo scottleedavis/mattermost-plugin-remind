@@ -29,35 +29,76 @@ func TestTriggerReminders(t *testing.T) {
 	}
 
 	post := &model.Post{
-		Id: model.NewId(),
+		Id:        model.NewId(),
+		ChannelId: channel.Id,
 	}
 
 	testTime := time.Now().UTC().Round(time.Second)
 	hostname, _ := os.Hostname()
-	reminderId := model.NewId()
+	reminder1 := model.NewId()
+	reminder2 := model.NewId()
+	reminder3 := model.NewId()
 
 	occurrences := []Occurrence{
 		{
 			Hostname:   hostname,
+			Username:   user.Username,
 			Id:         model.NewId(),
-			ReminderId: reminderId,
+			ReminderId: reminder1,
+			Occurrence: testTime,
+		},
+		{
+			Hostname:   hostname,
+			Username:   user.Username,
+			Id:         model.NewId(),
+			ReminderId: reminder2,
+			Occurrence: testTime,
+		},
+		{
+			Hostname:   hostname,
+			Username:   user.Username,
+			Id:         model.NewId(),
+			ReminderId: reminder3,
 			Occurrence: testTime,
 		},
 	}
 
 	reminders := []Reminder{
 		{
-			Id:          reminderId,
+			Id:          reminder1,
 			TeamId:      model.NewId(),
 			Username:    user.Username,
 			Message:     "Hello",
 			Target:      "me",
 			When:        "in one minute",
-			Occurrences: occurrences,
+			Occurrences: []Occurrence{occurrences[0]},
+		},
+		{
+			Id:          reminder2,
+			TeamId:      model.NewId(),
+			Username:    user.Username,
+			Message:     "Hello 2",
+			Target:      "me",
+			When:        "in one minute",
+			Occurrences: []Occurrence{occurrences[1]},
+		},
+		{
+			Id:          reminder3,
+			PostId:      model.NewId(),
+			TeamId:      model.NewId(),
+			Username:    user.Username,
+			Message:     "Hello 2",
+			Target:      "me",
+			When:        "in one minute",
+			Occurrences: []Occurrence{occurrences[2]},
 		},
 	}
 
 	stringOccurrences, _ := json.Marshal(occurrences)
+
+	team := &model.Team{
+		Id: model.NewId(),
+	}
 
 	setupAPI := func() *plugintest.API {
 		api := &plugintest.API{}
@@ -66,7 +107,12 @@ func TestTriggerReminders(t *testing.T) {
 		api.On("LogInfo", mock.Anything).Maybe()
 		api.On("KVGet", string(fmt.Sprintf("%v", testTime))).Return(stringOccurrences, nil)
 		api.On("GetUserByUsername", mock.AnythingOfType("string")).Return(user, nil)
+		api.On("GetDirectChannel", mock.Anything, mock.Anything).Return(channel, nil)
 		api.On("CreatePost", mock.Anything).Return(post, nil)
+		api.On("GetPost", mock.Anything).Return(post, nil)
+		api.On("GetTeam", mock.Anything).Return(team, nil)
+		api.On("GetUser", mock.Anything).Return(user, nil)
+
 		return api
 	}
 
@@ -75,7 +121,7 @@ func TestTriggerReminders(t *testing.T) {
 			{
 				Hostname:   model.NewId(),
 				Id:         model.NewId(),
-				ReminderId: reminderId,
+				ReminderId: reminder1,
 				Occurrence: testTime,
 			},
 		}
@@ -127,6 +173,7 @@ func TestTriggerReminders(t *testing.T) {
 		stringReminders, _ := json.Marshal(reminders)
 		api.On("KVGet", user.Username).Return(stringReminders, nil)
 		api.On("GetChannelByName", mock.Anything, mock.Anything, mock.Anything).Return(channel, nil)
+		api.On("CreatePost", mock.Anything).Return(nil, nil)
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
@@ -141,14 +188,14 @@ func TestTriggerReminders(t *testing.T) {
 			{
 				Hostname:   hostname,
 				Id:         model.NewId(),
-				ReminderId: reminderId,
+				ReminderId: reminder1,
 				Occurrence: testTime,
 				Repeat:     "every tuesday at 3pm",
 			},
 		}
 		reminders := []Reminder{
 			{
-				Id:          reminderId,
+				Id:          reminder1,
 				TeamId:      model.NewId(),
 				Username:    user.Username,
 				Message:     "Hello",
@@ -187,14 +234,14 @@ func TestTriggerReminders(t *testing.T) {
 			{
 				Hostname:   hostname,
 				Id:         model.NewId(),
-				ReminderId: reminderId,
+				ReminderId: reminder1,
 				Occurrence: testTime,
 				Repeat:     "every tuesday at 3pm",
 			},
 		}
 		reminders := []Reminder{
 			{
-				Id:          reminderId,
+				Id:          reminder1,
 				TeamId:      model.NewId(),
 				Username:    user.Username,
 				Message:     "Hello",

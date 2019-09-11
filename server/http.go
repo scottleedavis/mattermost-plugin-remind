@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	"net/http"
@@ -11,8 +12,20 @@ import (
 	"github.com/mattermost/mattermost-server/plugin"
 )
 
+type ReminderHTTPRequest struct {
+	PostId string
+
+	UserId string
+
+	TeamId string
+
+	TimeId string
+}
+
 func (p *Plugin) InitAPI() *mux.Router {
 	r := mux.NewRouter()
+
+	r.HandleFunc("/remind/{id:[a-z0-9]+}", p.handleReminder).Methods("POST")
 	r.HandleFunc("/dialog", p.handleDialog).Methods("POST")
 
 	r.HandleFunc("/view/ephemeral", p.handleViewEphemeral).Methods("POST")
@@ -38,6 +51,144 @@ func (p *Plugin) InitAPI() *mux.Router {
 
 func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Request) {
 	p.router.ServeHTTP(w, r)
+}
+
+func (p *Plugin) handleReminder(w http.ResponseWriter, r *http.Request) {
+
+	decoder := json.NewDecoder(r.Body)
+	var request ReminderHTTPRequest
+	err := decoder.Decode(&request)
+	if err != nil {
+		panic(err)
+	}
+
+	user, uErr := p.API.GetUser(request.UserId)
+	if uErr != nil {
+		p.API.LogError(uErr.Error())
+		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
+		return
+	}
+	post, pErr := p.API.GetPost(request.PostId)
+	if pErr != nil {
+		p.API.LogError(pErr.Error())
+		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
+		return
+	}
+	team, tErr := p.API.GetTeam(request.TeamId)
+	if tErr != nil {
+		p.API.LogError(tErr.Error())
+		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
+	}
+
+	location := p.location(user)
+	T, _ := p.translation(user)
+
+	var timeChoice string
+	switch request.TimeId {
+	case "20min":
+		timeChoice = T("action.20min")
+	case "1hr":
+		timeChoice = T("action.1hr")
+	case "3hr":
+		timeChoice = T("action.3hr")
+	case "tomorrow":
+		timeChoice = T("action.tomorrow")
+	case "nextweek":
+		timeChoice = T("action.nextweek")
+	default:
+		timeChoice = request.TimeId
+	}
+
+	rr := &ReminderRequest{
+		TeamId:   team.Id,
+		Username: user.Username,
+		Reminder: Reminder{
+			Id:        model.NewId(),
+			TeamId:    team.Id,
+			PostId:    post.Id,
+			Username:  user.Username,
+			Message:   post.Message,
+			Completed: p.emptyTime,
+			Target:    "@" + user.Username,
+			When:      timeChoice,
+		},
+	}
+
+	if cErr := p.CreateOccurrences(rr); cErr != nil {
+		p.API.LogError(cErr.Error())
+		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
+		return
+	}
+
+	if rErr := p.UpsertReminder(rr); rErr != nil {
+		p.API.LogError(rErr.Error())
+		writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
+		return
+	}
+
+	t := ""
+	if len(rr.Reminder.Occurrences) > 0 {
+		t = rr.Reminder.Occurrences[0].Occurrence.In(location).Format(time.RFC3339)
+	}
+	message := post.Message
+	if len(message) > 9 {
+		message = message[0:9] + "..."
+	}
+
+	var responseParameters = map[string]interface{}{
+		"PostLink": "/" + team.Name + "/pl/" + post.Id,
+		"Message":  message,
+		"When": p.formatWhen(
+			rr.Username,
+			rr.Reminder.When,
+			t,
+			false,
+		),
+	}
+
+	responsePost := &model.Post{
+		ChannelId: post.ChannelId,
+		UserId:    p.remindUserId,
+		Props: model.StringInterface{
+			"attachments": []*model.SlackAttachment{
+				{
+					Text: T("schedule.post.response", responseParameters),
+					Actions: []*model.PostAction{
+						{
+							Id: model.NewId(),
+							Integration: &model.PostActionIntegration{
+								Context: model.StringInterface{
+									"reminder_id":   rr.Reminder.Id,
+									"occurrence_id": rr.Reminder.Occurrences[0].Id,
+									"action":        "delete/ephemeral",
+								},
+								URL: fmt.Sprintf("/plugins/%s/delete/ephemeral", manifest.Id),
+							},
+							Type: model.POST_ACTION_TYPE_BUTTON,
+							Name: T("button.delete"),
+						},
+						{
+							Id: model.NewId(),
+							Integration: &model.PostActionIntegration{
+								Context: model.StringInterface{
+									"reminder_id":   rr.Reminder.Id,
+									"occurrence_id": rr.Reminder.Occurrences[0].Id,
+									"action":        "view/ephemeral",
+								},
+								URL: fmt.Sprintf("/plugins/%s/view/ephemeral", manifest.Id),
+							},
+							Type: model.POST_ACTION_TYPE_BUTTON,
+							Name: T("button.view.reminders"),
+						},
+					},
+				},
+			},
+		},
+	}
+	p.API.SendEphemeralPost(user.Id, responsePost)
+
+	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
+
 }
 
 func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {

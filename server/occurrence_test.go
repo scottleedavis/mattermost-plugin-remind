@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -51,7 +52,6 @@ func TestCreateOccurrences(t *testing.T) {
 		},
 	}
 
-	//stringReminders, _ := json.Marshal(reminders)
 	stringOccurrences, _ := json.Marshal(occurrences)
 	setupAPI := func() *plugintest.API {
 		api := &plugintest.API{}
@@ -499,6 +499,23 @@ func TestOn(t *testing.T) {
 		assert.True(t, times[0].In(location).Month() == 1 && times[0].In(location).Day() == 1 &&
 			times[0].In(location).Hour() == 0)
 
+		today := time.Now().In(location)
+		hour, min, _ := today.Add(2 * time.Minute).Clock()
+		strmin := ""
+		if hour == 0 {
+			hour = 12
+		}
+		if min < 10 {
+			strmin = "0" + strconv.Itoa(min)
+		} else {
+			strmin = strconv.Itoa(min)
+		}
+		todayWeekday := today.Weekday().String()
+		times, err = p.onEN("on "+todayWeekday+" at "+strconv.Itoa(hour)+":"+strmin, user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Weekday().String() == todayWeekday &&
+			times[0].In(location).Hour() == hour && times[0].In(location).Minute() == min)
+
 		times, err = p.onEN("on 2020-08-10 13:55", user)
 		assert.Nil(t, err)
 		assert.True(t, times[0].In(location).Year() == 2020 &&
@@ -575,50 +592,56 @@ func TestEvery(t *testing.T) {
 
 		times, err = p.everyEN("every monday and wednesday", user)
 		assert.Nil(t, err)
-		if err == nil {
-			assert.True(t, times[0].In(location).Weekday().String() == "Monday" && times[1].In(location).Weekday().String() == "Wednesday")
-		}
+		assert.True(t, times[0].In(location).Weekday().String() == "Monday" && times[1].In(location).Weekday().String() == "Wednesday")
 
 		times, err = p.everyEN("every wednesday, thursday", user)
 		assert.Nil(t, err)
-		if err == nil {
-			assert.True(t, times[0].In(location).Weekday().String() == "Wednesday" && times[1].In(location).Weekday().String() == "Thursday")
+		assert.True(t, times[0].In(location).Weekday().String() == "Wednesday" && times[1].In(location).Weekday().String() == "Thursday")
+
+		today := time.Now().In(location)
+		hour, min, _ := today.Add(2 * time.Minute).Clock()
+		strmin := ""
+		if hour == 0 {
+			hour = 12
 		}
+		if min < 10 {
+			strmin = "0" + strconv.Itoa(min)
+		} else {
+			strmin = strconv.Itoa(min)
+		}
+		todayWeekday := today.Weekday().String()
+		times, err = p.everyEN("every "+todayWeekday+" at "+strconv.Itoa(hour)+":"+strmin, user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Weekday().String() == todayWeekday)
 
 		times, err = p.everyEN("every other friday and saturday", user)
 		assert.Nil(t, err)
-		if err == nil {
-			assert.True(t, times[0].In(location).Weekday().String() == "Friday" && times[1].In(location).Weekday().String() == "Saturday")
-		}
+		assert.True(t, times[0].In(location).Weekday().String() == "Friday" && times[1].In(location).Weekday().String() == "Saturday")
+
+		times, err = p.everyEN("every other "+todayWeekday+" at "+strconv.Itoa(hour)+":"+strmin, user)
+		assert.Nil(t, err)
+		assert.True(t, times[0].In(location).Weekday().String() == todayWeekday)
 
 		times, err = p.everyEN("every monday and wednesday at 1:39am", user)
 		assert.Nil(t, err)
-		if err == nil {
-			assert.True(t, times[0].In(location).Weekday().String() == "Monday" &&
-				times[1].In(location).Weekday().String() == "Wednesday" && times[0].In(location).Hour() == 1 && times[0].Minute() == 39)
-		}
+		assert.True(t, times[0].In(location).Weekday().String() == "Monday" &&
+			times[1].In(location).Weekday().String() == "Wednesday" && times[0].In(location).Hour() == 1 && times[0].Minute() == 39)
 
 		times, err = p.everyEN("every monday, tuesday and sunday at 11:00am", user)
 		assert.Nil(t, err)
-		if err == nil {
-			assert.True(t, times[0].In(location).Weekday().String() == "Monday" &&
-				times[1].In(location).Weekday().String() == "Tuesday" && times[2].In(location).Weekday().String() == "Sunday" &&
-				times[0].In(location).Hour() == 11)
-		}
+		assert.True(t, times[0].In(location).Weekday().String() == "Monday" &&
+			times[1].In(location).Weekday().String() == "Tuesday" && times[2].In(location).Weekday().String() == "Sunday" &&
+			times[0].In(location).Hour() == 11)
 
 		times, err = p.everyEN("every monday, tuesday at 2pm", user)
 		assert.Nil(t, err)
-		if err == nil {
-			assert.True(t, times[0].In(location).Weekday().String() == "Monday" &&
-				times[1].In(location).Weekday().String() == "Tuesday" && times[0].In(location).Hour() == 14)
-		}
+		assert.True(t, times[0].In(location).Weekday().String() == "Monday" &&
+			times[1].In(location).Weekday().String() == "Tuesday" && times[0].In(location).Hour() == 14)
 
 		times, err = p.everyEN("every 1/30 and 9/30 at noon", user)
 		assert.Nil(t, err)
-		if err == nil {
-			assert.True(t, times[0].In(location).Month() == 1 && times[0].In(location).Day() == 30 &&
-				times[1].In(location).Month() == 9 && times[1].In(location).Day() == 30 && times[0].In(location).Hour() == 12)
-		}
+		assert.True(t, times[0].In(location).Month() == 1 && times[0].In(location).Day() == 30 &&
+			times[1].In(location).Month() == 9 && times[1].In(location).Day() == 30 && times[0].In(location).Hour() == 12)
 	})
 }
 

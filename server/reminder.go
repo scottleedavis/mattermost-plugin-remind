@@ -15,6 +15,8 @@ type Reminder struct {
 
 	Id string
 
+	PostId string
+
 	Username string
 
 	Target string
@@ -113,14 +115,115 @@ func (p *Plugin) TriggerReminders() {
 					finalTarget = "@" + user.Username
 				}
 
-				messageParameters := map[string]interface{}{
-					"FinalTarget": finalTarget,
-					"Message":     reminder.Message,
-				}
-
 				interactivePost := model.Post{}
 
-				if occurrence.Repeat == "" {
+				if reminder.PostId != "" {
+
+					team, tErr := p.API.GetTeam(reminder.TeamId)
+					if tErr != nil {
+						p.API.LogError(tErr.Error())
+						continue
+					}
+					post, pErr := p.API.GetPost(reminder.PostId)
+					if pErr != nil {
+						p.API.LogError(pErr.Error())
+						continue
+					}
+					pUser, puErr := p.API.GetUser(post.UserId)
+					if puErr != nil {
+						p.API.LogError(puErr.Error())
+						continue
+					}
+
+					messageParameters := map[string]interface{}{
+						"PostLink": "/" + team.Name + "/pl/" + reminder.PostId,
+					}
+
+					interactivePost = model.Post{
+						ChannelId:     channel.Id,
+						PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
+						UserId:        p.remindUserId,
+						Props: model.StringInterface{
+							"attachments": []*model.SlackAttachment{
+								{
+									Text: T("reminder.post.message", messageParameters),
+									Actions: []*model.PostAction{
+										{
+											Id: model.NewId(),
+											Integration: &model.PostActionIntegration{
+												Context: model.StringInterface{
+													"reminder_id":   reminder.Id,
+													"occurrence_id": occurrence.Id,
+													"action":        "complete",
+												},
+												URL: fmt.Sprintf("/plugins/%s/complete", manifest.Id),
+											},
+											Type: model.POST_ACTION_TYPE_BUTTON,
+											Name: T("button.complete"),
+										},
+										{
+											Integration: &model.PostActionIntegration{
+												Context: model.StringInterface{
+													"reminder_id":   reminder.Id,
+													"occurrence_id": occurrence.Id,
+													"action":        "delete",
+												},
+												URL: fmt.Sprintf("/plugins/%s/delete", manifest.Id),
+											},
+											Name: T("button.delete"),
+											Type: "action",
+										},
+										{
+											Integration: &model.PostActionIntegration{
+												Context: model.StringInterface{
+													"reminder_id":   reminder.Id,
+													"occurrence_id": occurrence.Id,
+													"action":        "snooze",
+												},
+												URL: fmt.Sprintf("/plugins/%s/snooze", manifest.Id),
+											},
+											Name: T("button.snooze"),
+											Type: "select",
+											Options: []*model.PostActionOptions{
+												{
+													Text:  T("button.snooze.20min"),
+													Value: "20min",
+												},
+												{
+													Text:  T("button.snooze.1hr"),
+													Value: "1hr",
+												},
+												{
+													Text:  T("button.snooze.3hr"),
+													Value: "3hrs",
+												},
+												{
+													Text:  T("button.snooze.tomorrow"),
+													Value: "tomorrow",
+												},
+												{
+													Text:  T("button.snooze.nextweek"),
+													Value: "nextweek",
+												},
+											},
+										},
+									},
+								},
+								{
+									AuthorName: pUser.Username,
+									AuthorIcon: "/api/v4/users/" + pUser.Id + "/image",
+									Text:       reminder.Message,
+								},
+							},
+						},
+					}
+
+				} else if occurrence.Repeat == "" {
+
+					messageParameters := map[string]interface{}{
+						"FinalTarget": finalTarget,
+						"Message":     reminder.Message,
+					}
 
 					interactivePost = model.Post{
 						ChannelId:     channel.Id,
@@ -200,6 +303,11 @@ func (p *Plugin) TriggerReminders() {
 					}
 
 				} else {
+
+					messageParameters := map[string]interface{}{
+						"FinalTarget": finalTarget,
+						"Message":     reminder.Message,
+					}
 
 					interactivePost = model.Post{
 						ChannelId:     channel.Id,
