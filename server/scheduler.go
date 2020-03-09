@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mattermost/mattermost-server/model"
+	"github.com/mattermost/mattermost-server/v5/model"
 )
 
 func (p *Plugin) ScheduleReminder(request *ReminderRequest, channelId string) (*model.Post, error) {
@@ -82,7 +82,7 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest, channelId string) (*
 									"occurrence_id": request.Reminder.Occurrences[0].Id,
 									"action":        "delete/ephemeral",
 								},
-								URL: fmt.Sprintf("/plugins/%s/delete/ephemeral", manifest.Id),
+								URL: fmt.Sprintf("/plugins/%s/delete/ephemeral", manifest.ID),
 							},
 							Type: model.POST_ACTION_TYPE_BUTTON,
 							Name: T("button.delete"),
@@ -95,7 +95,7 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest, channelId string) (*
 									"occurrence_id": request.Reminder.Occurrences[0].Id,
 									"action":        "view/ephemeral",
 								},
-								URL: fmt.Sprintf("/plugins/%s/view/ephemeral", manifest.Id),
+								URL: fmt.Sprintf("/plugins/%s/view/ephemeral", manifest.ID),
 							},
 							Type: model.POST_ACTION_TYPE_BUTTON,
 							Name: T("button.view.reminders"),
@@ -114,7 +114,7 @@ func (p *Plugin) InteractiveSchedule(triggerId string, user *model.User) {
 
 	dialogRequest := model.OpenDialogRequest{
 		TriggerId: triggerId,
-		URL:       fmt.Sprintf("/plugins/%s/dialog", manifest.Id),
+		URL:       fmt.Sprintf("/plugins/%s/dialog", manifest.ID),
 		Dialog: model.Dialog{
 			Title:       T("schedule.reminder"),
 			CallbackId:  model.NewId(),

@@ -3,23 +3,19 @@ package main
 import (
 	"strings"
 
-	"github.com/mattermost/mattermost-server/model"
-	"github.com/mattermost/mattermost-server/plugin"
+	"github.com/mattermost/mattermost-server/v5/model"
+	"github.com/mattermost/mattermost-server/v5/plugin"
 	"github.com/pkg/errors"
 )
 
 const CommandTrigger = "remind"
 
-func (p *Plugin) registerCommand(teamId string) error {
+func (p *Plugin) registerCommand() error {
 	if err := p.API.RegisterCommand(&model.Command{
-		TeamId:           teamId,
 		Trigger:          CommandTrigger,
-		Username:         botName,
 		AutoComplete:     true,
 		AutoCompleteHint: "[@someone or ~channel] [what] [when]",
 		AutoCompleteDesc: "Set a reminder",
-		DisplayName:      "Remind Plugin Command",
-		Description:      "A command used to set a reminder",
 	}); err != nil {
 		return errors.Wrap(err, "failed to register command")
 	}

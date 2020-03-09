@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mattermost/mattermost-server/model"
-	"github.com/mattermost/mattermost-server/plugin"
+	"github.com/mattermost/mattermost-server/v5/model"
+	"github.com/mattermost/mattermost-server/v5/plugin"
 )
 
 func (p *Plugin) InitAPI() *mux.Router {
@@ -147,7 +147,7 @@ func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {
 									"occurrence_id": r.Reminder.Occurrences[0].Id,
 									"action":        "delete/ephemeral",
 								},
-								URL: fmt.Sprintf("/plugins/%s/delete/ephemeral", manifest.Id),
+								URL: fmt.Sprintf("/plugins/%s/delete/ephemeral", manifest.ID),
 							},
 							Type: model.POST_ACTION_TYPE_BUTTON,
 							Name: T("button.delete"),
@@ -159,7 +159,7 @@ func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {
 									"occurrence_id": r.Reminder.Occurrences[0].Id,
 									"action":        "view/ephemeral",
 								},
-								URL: fmt.Sprintf("/plugins/%s/view/ephemeral", manifest.Id),
+								URL: fmt.Sprintf("/plugins/%s/view/ephemeral", manifest.ID),
 							},
 							Type: model.POST_ACTION_TYPE_BUTTON,
 							Name: T("button.view.reminders"),
