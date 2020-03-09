@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mattermost/mattermost-server/model"
+	"github.com/mattermost/mattermost-server/v5/model"
 )
 
 type Reminder struct {
@@ -140,7 +140,7 @@ func (p *Plugin) TriggerReminders() {
 													"occurrence_id": occurrence.Id,
 													"action":        "complete",
 												},
-												URL: fmt.Sprintf("/plugins/%s/complete", manifest.Id),
+												URL: fmt.Sprintf("/plugins/%s/complete", manifest.ID),
 											},
 											Type: model.POST_ACTION_TYPE_BUTTON,
 											Name: T("button.complete"),
@@ -153,7 +153,7 @@ func (p *Plugin) TriggerReminders() {
 													"occurrence_id": occurrence.Id,
 													"action":        "delete",
 												},
-												URL: fmt.Sprintf("/plugins/%s/delete", manifest.Id),
+												URL: fmt.Sprintf("/plugins/%s/delete", manifest.ID),
 											},
 											Name: T("button.delete"),
 											Type: "action",
@@ -166,7 +166,7 @@ func (p *Plugin) TriggerReminders() {
 													"occurrence_id": occurrence.Id,
 													"action":        "snooze",
 												},
-												URL: fmt.Sprintf("/plugins/%s/snooze", manifest.Id),
+												URL: fmt.Sprintf("/plugins/%s/snooze", manifest.ID),
 											},
 											Name: T("button.snooze"),
 											Type: "select",
@@ -217,7 +217,7 @@ func (p *Plugin) TriggerReminders() {
 													"occurrence_id": occurrence.Id,
 													"action":        "snooze",
 												},
-												URL: fmt.Sprintf("/plugins/%s/snooze", manifest.Id),
+												URL: fmt.Sprintf("/plugins/%s/snooze", manifest.ID),
 											},
 											Name: T("button.snooze"),
 											Type: "select",
