@@ -886,6 +886,9 @@ func (p *Plugin) onEN(when string, user *model.User) (times []time.Time, err err
 	dateSplit := p.regSplit(dateUnit, "T|Z")
 	dateSplit = p.regSplit(dateSplit[0], "-")
 	timeSplit := p.regSplit(timeUnit, ":")
+	if len(dateSplit) < 3 || len(timeSplit) < 3 {
+		return []time.Time{}, errors.New("error date/time format")
+	}
 	year, _ := strconv.Atoi(dateSplit[0])
 	month, _ := strconv.Atoi(dateSplit[1])
 	day, _ := strconv.Atoi(dateSplit[2])
@@ -1059,6 +1062,9 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 			dateSplit := p.regSplit(dateUnit, "T|Z")
 			dateSplit = p.regSplit(dateSplit[0], "-")
 			timeSplit := p.regSplit(timeUnit, ":")
+			if len(dateSplit) < 3 || len(timeSplit) < 3 {
+				return []time.Time{}, errors.New("error date/time format")
+			}
 			year, _ := strconv.Atoi(dateSplit[0])
 			month, _ := strconv.Atoi(dateSplit[1])
 			day, _ := strconv.Atoi(dateSplit[2])

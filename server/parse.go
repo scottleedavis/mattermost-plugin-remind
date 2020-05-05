@@ -603,54 +603,14 @@ func (p *Plugin) normalizeDate(text string, user *model.User) (string, error) {
 			return "", errors.New("unrecognized date format")
 		}
 
-		switch parts[0] {
-		case T("jan"),
-			T("january"):
-			parts[0] = "01"
-			break
-		case T("feb"),
-			T("february"):
-			parts[0] = "02"
-			break
-		case T("mar"),
-			T("march"):
-			parts[0] = "03"
-			break
-		case T("apr"),
-			T("april"):
-			parts[0] = "04"
-			break
-		case T("may"):
-			parts[0] = "05"
-			break
-		case T("june"):
-			parts[0] = "06"
-			break
-		case T("july"):
-			parts[0] = "07"
-			break
-		case T("aug"),
-			T("august"):
-			parts[0] = "08"
-			break
-		case T("sept"),
-			T("september"):
-			parts[0] = "09"
-			break
-		case T("oct"),
-			T("october"):
-			parts[0] = "10"
-			break
-		case T("nov"),
-			T("november"):
-			parts[0] = "11"
-			break
-		case T("dec"),
-			T("december"):
-			parts[0] = "12"
-			break
-		default:
-			return "", errors.New("month not found")
+		var err error
+		parts[0], err = p.monthNumber(parts[0], user)
+		if err != nil {
+			return "", err
+		}
+
+		if len(parts) < 3 {
+			return "", errors.New("unrecognized date format")
 		}
 
 		mon, mErr := strconv.Atoi(parts[0])
@@ -901,6 +861,49 @@ func (p *Plugin) daySuffix(user *model.User, day string) string {
 		}
 	}
 	return day
+}
+
+func (p *Plugin) monthNumber(month string, user *model.User) (string, error) {
+
+	T, _ := p.translation(user)
+
+	switch month {
+	case T("jan"),
+		T("january"):
+		return "01", nil
+	case T("feb"),
+		T("february"):
+		return "02", nil
+	case T("mar"),
+		T("march"):
+		return "03", nil
+	case T("apr"),
+		T("april"):
+		return "04", nil
+	case T("may"):
+		return "05", nil
+	case T("june"):
+		return "06", nil
+	case T("july"):
+		return "07", nil
+	case T("aug"),
+		T("august"):
+		return "08", nil
+	case T("sept"),
+		T("september"):
+		return "09", nil
+	case T("oct"),
+		T("october"):
+		return "10", nil
+	case T("nov"),
+		T("november"):
+		return "11", nil
+	case T("dec"),
+		T("december"):
+		return "12", nil
+	default:
+		return "", errors.New("month not found")
+	}
 }
 
 func (p *Plugin) weekDayNumber(day string, user *model.User) int {
