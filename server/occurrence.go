@@ -577,7 +577,6 @@ func (p *Plugin) at(when string, user *model.User) (times []time.Time, err error
 }
 
 func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err error) {
-
 	T, _ := p.translation(user)
 	location := p.location(user)
 
@@ -607,12 +606,20 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 			}
 		}
 		t, pErr := time.ParseInLocation(time.Kitchen, normalizedWhen+strings.ToUpper(whenSplit[2]), location)
+
 		if pErr != nil {
 			p.API.LogError(fmt.Sprintf("%v", pErr))
 		}
 
 		now := time.Now().In(location).Round(time.Hour * time.Duration(24))
-		occurrence := t.AddDate(now.Year(), int(now.Month())-1, now.Day()-1)
+
+		var occurrence time.Time
+		if now.Day() > time.Now().Day() {
+			occurrence = t.AddDate(now.Year(), int(now.Month())-1, now.Day()-2)
+		} else {
+			occurrence = t.AddDate(now.Year(), int(now.Month())-1, now.Day()-1)
+		}
+
 		return []time.Time{p.chooseClosest(user, &occurrence, true).UTC()}, nil
 
 	} else if strings.HasSuffix(normalizedWhen, T("pm")) ||
@@ -640,12 +647,20 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 
 		}
 		t, pErr := time.ParseInLocation(time.Kitchen, strings.ToUpper(normalizedWhen), location)
+
 		if pErr != nil {
 			p.API.LogError(fmt.Sprintf("%v", pErr))
 		}
 
 		now := time.Now().In(location).Round(time.Hour * time.Duration(24))
-		occurrence := t.AddDate(now.Year(), int(now.Month())-1, now.Day()-1)
+
+		var occurrence time.Time
+		if now.Day() > time.Now().Day() {
+			occurrence = t.AddDate(now.Year(), int(now.Month())-1, now.Day()-2)
+		} else {
+			occurrence = t.AddDate(now.Year(), int(now.Month())-1, now.Day()-1)
+		}
+
 		return []time.Time{p.chooseClosest(user, &occurrence, true).UTC()}, nil
 
 	}
@@ -759,7 +774,14 @@ func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err err
 		}
 
 		now := time.Now().In(location).Round(time.Hour * time.Duration(24))
-		occurrence := t.In(location).AddDate(now.Year(), int(now.Month())-1, now.Day()-1)
+
+		var occurrence time.Time
+		if now.Day() > time.Now().Day() {
+			occurrence = t.AddDate(now.Year(), int(now.Month())-1, now.Day()-2)
+		} else {
+			occurrence = t.AddDate(now.Year(), int(now.Month())-1, now.Day()-1)
+		}
+
 		return []time.Time{p.chooseClosest(user, &occurrence, dayInterval).UTC()}, nil
 
 	}
