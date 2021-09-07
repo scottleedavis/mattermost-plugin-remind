@@ -7,5 +7,5 @@ var manifest = struct {
 	Version string
 }{
 	ID:      "com.github.scottleedavis.mattermost-plugin-remind",
-	Version: "0.4.4",
+	Version: "0.4.5",
 }
