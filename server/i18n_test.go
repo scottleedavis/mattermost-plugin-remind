@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"strings"
 
 	"github.com/mattermost/mattermost-server/v5/plugin/plugintest"
 	"github.com/stretchr/testify/mock"
@@ -49,9 +50,7 @@ func TestTranslationsPreInit(t *testing.T) {
 		p := &Plugin{}
 		p.API = api
 		err = p.TranslationsPreInit()
-		require.True(t, err.Error() == "unable to read i18n directory: readdirent: invalid argument" ||
-			err.Error() == "unable to read i18n directory: readdirent: not a directory" ||
-			err.Error() == "unable to read i18n directory: fdopendir: not a directory")
+		require.True(t, strings.Contains(err.Error(), "unable to read i18n directory"))
 
 	})
 
