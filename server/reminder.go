@@ -281,6 +281,7 @@ func (p *Plugin) TriggerReminders() {
 						ChannelId:     channel.Id,
 						PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
 						UserId:        p.remindUserId,
+						Type:          model.POST_CUSTOM_TYPE_PREFIX + "reminder",
 						Message:       T("reminder.message", messageParameters),
 						Props:         model.StringInterface{},
 					}
