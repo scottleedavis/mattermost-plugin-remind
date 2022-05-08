@@ -39,9 +39,31 @@ type ReminderRequest struct {
 }
 
 func (p *Plugin) TriggerReminders() {
+	tickAt := time.Now().UTC().Round(time.Second)
+	//p.API.LogInfo("TickAt: " + fmt.Sprintf("%v", tickAt))
 
-	bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", time.Now().UTC().Round(time.Second))))
+	// Read the LastTickAt time
+	lastTickAt := p.getLastTickTimeWithDefault(tickAt)
+	//p.API.LogInfo("lastTickAt: " + fmt.Sprintf("%v", lastTickAt))
 
+	// Before handling more operations, save the updated LastTickAt time
+	p.setLastTickTime(tickAt)
+
+	// Detect missed ticks
+	tickDelta := tickAt.Sub(lastTickAt)
+	if tickDelta.Seconds() > 1 {
+		p.API.LogInfo(fmt.Sprintf("Missed %v reminder tick(s)", tickDelta.Seconds() - 1))
+	}
+
+	// Trigger the actual tick
+	p.TriggerRemindersForTick(tickAt)
+}
+
+func (p *Plugin) TriggerRemindersForTick(tickAt time.Time) {
+	p.API.LogDebug("Trigger reminders at " + fmt.Sprintf("%v", tickAt))
+
+	// Look up reminders to be triggered for the tick time
+	bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", tickAt)))
 	if err != nil {
 		p.API.LogError("failed KVGet %s", err)
 	}
@@ -582,4 +604,29 @@ func (p *Plugin) findReminder(reminders []Reminder, occurrence Occurrence) Remin
 		}
 	}
 	return Reminder{}
+}
+
+func (p *Plugin) getLastTickTimeWithDefault(defaultValue time.Time) time.Time {
+	bytes, err := p.API.KVGet("LastTickAt")
+	if err != nil {
+		p.API.LogInfo(fmt.Sprintf("Failed to read LastTickAt (%v); returning the default value", err))
+		return defaultValue
+	}
+	if bytes == nil {
+		p.API.LogDebug("LastTickAt is not set; returning the default value")
+		return defaultValue
+	}
+
+	lastTickAt, parseErr := time.Parse(time.RFC3339, string(bytes[:]))
+	if parseErr != nil {
+		p.API.LogInfo(fmt.Sprintf("Failed to parse LastTickAt value (%v); returning the default value", parseErr))
+		return defaultValue
+	}
+
+	return lastTickAt
+}
+
+func (p *Plugin) setLastTickTime(lastTickAt time.Time) {
+	serializedTime := lastTickAt.Format(time.RFC3339)
+	p.API.KVSet("LastTickAt", []byte(serializedTime))
 }

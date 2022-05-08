@@ -14,6 +14,48 @@ import (
 )
 
 func TestTriggerReminders(t *testing.T) {
+  testTime := time.Now().UTC().Round(time.Second)
+  serializedTestTime := []byte(testTime.Format(time.RFC3339))
+
+	t.Run("it triggers reminders scheduled for the current time", func(t *testing.T) {
+		oneSecondAgo, _ := time.ParseDuration("-1s")
+		lastTickAt := testTime.Add(oneSecondAgo)
+	  serializedLastTickAt := []byte(lastTickAt.Format(time.RFC3339))
+
+		api := &plugintest.API{}
+		api.On("KVGet", string("LastTickAt")).Return(serializedLastTickAt, nil)
+		api.On("KVSet", string("LastTickAt"), serializedTestTime).Return(nil)
+		api.On("LogDebug", "Trigger reminders at " + fmt.Sprintf("%v", testTime))
+		api.On("KVGet", string(fmt.Sprintf("%v", testTime))).Return(nil, nil)
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.API = api
+
+		p.TriggerReminders()
+	})
+
+	t.Run("when ticks have been missed, it logs a statement", func(t *testing.T) {
+		threeSecondsAgo, _ := time.ParseDuration("-3s")
+	  lastTickAt := testTime.Add(threeSecondsAgo)
+	  serializedLastTickAt := []byte(lastTickAt.Format(time.RFC3339))
+
+		api := &plugintest.API{}
+		api.On("KVGet", string("LastTickAt")).Return(serializedLastTickAt, nil)
+		api.On("KVSet", string("LastTickAt"), serializedTestTime).Return(nil)
+		api.On("LogInfo", "Missed 2 reminder tick(s)")
+		api.On("LogDebug", "Trigger reminders at " + fmt.Sprintf("%v", testTime))
+		api.On("KVGet", string(fmt.Sprintf("%v", testTime))).Return(nil, nil)
+		defer api.AssertExpectations(t)
+
+		p := &Plugin{}
+		p.API = api
+
+		p.TriggerReminders()
+	})
+}
+
+func TestTriggerRemindersForTick(t *testing.T) {
 
 	user := &model.User{
 		Email:    "-@-.-",
@@ -82,13 +124,14 @@ func TestTriggerReminders(t *testing.T) {
 
 		stringOccurrences, _ := json.Marshal(occurrences)
 		api := &plugintest.API{}
+		api.On("LogDebug", mock.Anything, mock.Anything, mock.Anything).Maybe()
 		api.On("KVGet", string(fmt.Sprintf("%v", testTime))).Return(stringOccurrences, nil)
 		defer api.AssertExpectations(t)
 
 		p := &Plugin{}
 		p.API = api
 
-		p.TriggerReminders()
+		p.TriggerRemindersForTick(testTime)
 
 	})
 
@@ -102,7 +145,7 @@ func TestTriggerReminders(t *testing.T) {
 		p := &Plugin{}
 		p.API = api
 
-		p.TriggerReminders()
+		p.TriggerRemindersForTick(testTime)
 
 	})
 
@@ -117,7 +160,7 @@ func TestTriggerReminders(t *testing.T) {
 		p := &Plugin{}
 		p.API = api
 
-		p.TriggerReminders()
+		p.TriggerRemindersForTick(testTime)
 
 	})
 
@@ -132,7 +175,7 @@ func TestTriggerReminders(t *testing.T) {
 		p := &Plugin{}
 		p.API = api
 
-		p.TriggerReminders()
+		p.TriggerRemindersForTick(testTime)
 
 	})
 
@@ -178,7 +221,7 @@ func TestTriggerReminders(t *testing.T) {
 		p := &Plugin{}
 		p.API = api
 
-		p.TriggerReminders()
+		p.TriggerRemindersForTick(testTime)
 
 	})
 
@@ -222,7 +265,7 @@ func TestTriggerReminders(t *testing.T) {
 		p := &Plugin{}
 		p.API = api
 
-		p.TriggerReminders()
+		p.TriggerRemindersForTick(testTime)
 
 	})
 
