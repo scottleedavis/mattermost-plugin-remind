@@ -25,7 +25,7 @@ func TestTriggerReminders(t *testing.T) {
 		api := &plugintest.API{}
 		api.On("KVGet", string("LastTickAt")).Return(serializedLastTickAt, nil)
 		api.On("KVSet", string("LastTickAt"), serializedTestTime).Return(nil)
-		api.On("LogDebug", "Trigger reminders at " + fmt.Sprintf("%v", testTime))
+		api.On("LogDebug", "Trigger reminders for " + fmt.Sprintf("%v", testTime))
 		api.On("KVGet", string(fmt.Sprintf("%v", testTime))).Return(nil, nil)
 		defer api.AssertExpectations(t)
 
@@ -35,7 +35,9 @@ func TestTriggerReminders(t *testing.T) {
 		p.TriggerReminders()
 	})
 
-	t.Run("when ticks have been missed, it logs a statement", func(t *testing.T) {
+	t.Run("when ticks have been missed, it triggers reminders for the missed ticks as well", func(t *testing.T) {
+		oneSecondsAgo, _ := time.ParseDuration("-1s")
+		twoSecondsAgo, _ := time.ParseDuration("-2s")
 		threeSecondsAgo, _ := time.ParseDuration("-3s")
 	  lastTickAt := testTime.Add(threeSecondsAgo)
 	  serializedLastTickAt := []byte(lastTickAt.Format(time.RFC3339))
@@ -43,8 +45,13 @@ func TestTriggerReminders(t *testing.T) {
 		api := &plugintest.API{}
 		api.On("KVGet", string("LastTickAt")).Return(serializedLastTickAt, nil)
 		api.On("KVSet", string("LastTickAt"), serializedTestTime).Return(nil)
-		api.On("LogInfo", "Missed 2 reminder tick(s)")
-		api.On("LogDebug", "Trigger reminders at " + fmt.Sprintf("%v", testTime))
+		api.On("LogDebug", "Catching up on 2 reminder tick(s)...")
+		api.On("LogDebug", "Trigger reminders for " + fmt.Sprintf("%v", testTime.Add(twoSecondsAgo)))
+		api.On("KVGet", string(fmt.Sprintf("%v", testTime.Add(twoSecondsAgo)))).Return(nil, nil)
+		api.On("LogDebug", "Trigger reminders for " + fmt.Sprintf("%v", testTime.Add(oneSecondsAgo)))
+		api.On("KVGet", string(fmt.Sprintf("%v", testTime.Add(oneSecondsAgo)))).Return(nil, nil)
+		api.On("LogDebug", "Caught up on missed reminder ticks.")
+		api.On("LogDebug", "Trigger reminders for " + fmt.Sprintf("%v", testTime))
 		api.On("KVGet", string(fmt.Sprintf("%v", testTime))).Return(nil, nil)
 		defer api.AssertExpectations(t)
 

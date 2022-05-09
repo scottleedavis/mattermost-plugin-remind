@@ -40,19 +40,30 @@ type ReminderRequest struct {
 
 func (p *Plugin) TriggerReminders() {
 	tickAt := time.Now().UTC().Round(time.Second)
-	//p.API.LogInfo("TickAt: " + fmt.Sprintf("%v", tickAt))
-
-	// Read the LastTickAt time
 	lastTickAt := p.getLastTickTimeWithDefault(tickAt)
-	//p.API.LogInfo("lastTickAt: " + fmt.Sprintf("%v", lastTickAt))
 
 	// Before handling more operations, save the updated LastTickAt time
 	p.setLastTickTime(tickAt)
 
-	// Detect missed ticks
+	// Catch up on missed ticks (if any)
 	tickDelta := tickAt.Sub(lastTickAt)
-	if tickDelta.Seconds() > 1 {
-		p.API.LogInfo(fmt.Sprintf("Missed %v reminder tick(s)", tickDelta.Seconds() - 1))
+	ticksMissed := tickDelta.Seconds() - 1
+	if ticksMissed > 0 {
+		oneSecond             := time.Second
+		maxCatchupDuration, _ := time.ParseDuration("-10m")
+		catchupStart          := lastTickAt.Add(oneSecond)
+		earliestCatchupStart  := tickAt.Add(maxCatchupDuration)
+
+		if (catchupStart.Before(earliestCatchupStart)) {
+			catchupStart = earliestCatchupStart
+			p.API.LogInfo(fmt.Sprintf("Too many reminder ticks were missed: occurrences between %v and %v will be dropped.", lastTickAt, catchupStart))
+		}
+
+		p.API.LogDebug(fmt.Sprintf("Catching up on %v reminder tick(s)...", tickAt.Sub(catchupStart).Seconds()))
+		for tick := catchupStart; tick.Before(tickAt); tick = tick.Add(oneSecond) {
+			p.TriggerRemindersForTick(tick)
+		}
+		p.API.LogDebug("Caught up on missed reminder ticks.")
 	}
 
 	// Trigger the actual tick
@@ -60,7 +71,7 @@ func (p *Plugin) TriggerReminders() {
 }
 
 func (p *Plugin) TriggerRemindersForTick(tickAt time.Time) {
-	p.API.LogDebug("Trigger reminders at " + fmt.Sprintf("%v", tickAt))
+	p.API.LogDebug("Trigger reminders for " + fmt.Sprintf("%v", tickAt))
 
 	// Look up reminders to be triggered for the tick time
 	bytes, err := p.API.KVGet(string(fmt.Sprintf("%v", tickAt)))
