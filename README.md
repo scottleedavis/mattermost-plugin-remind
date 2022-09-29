@@ -13,6 +13,7 @@ _requires Mattermost 5.14 or greater._
 1) Go to the [releases page](https://github.com/scottleedavis/mattermost-plugin-remind/releases) of this GitHub repository and download the latest release for your Mattermost server.
 2) Upload this file in the Mattermost System Console > Plugins > Management page to install the plugin. To learn more about how to upload a plugin, see the documentation.
 3) For a better cross timezone experience, enable Experimental timezone support.  `System Console -> Experimental Features -> Timezone  = true`
+4) (Opt.) If your server is not configured for cross-team DMs (i.e. `Enable users to open Direct Message channels with:` is set to `Users on same Team`) then you will need to add `remindbot` to any team which wishes to use the plugin. This is done through the "Manage members" interface.
 
 
 ### Usage
