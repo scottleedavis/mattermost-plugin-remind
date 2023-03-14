@@ -1,6 +1,6 @@
 module github.com/scottleedavis/mattermost-plugin-remind
 
-go 1.12
+go 1.16
 
 require (
 	github.com/gorilla/mux v1.7.4
