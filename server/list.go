@@ -144,23 +144,28 @@ func (p *Plugin) categorizeOccurrences(reminders []Reminder) (
 			t := occurrence.Occurrence
 			s := occurrence.Snoozed
 
-			if !strings.HasPrefix(reminder.Target, "~") &&
-				reminder.Completed == p.emptyTime &&
-				((occurrence.Repeat == "" && t.After(time.Now().UTC())) ||
+			isChannelReminder := strings.HasPrefix(reminder.Target, "~")
+			isCompleted := reminder.Completed != p.emptyTime
+			isPast := t.Before(time.Now().UTC())
+			isFuture := t.After(time.Now().UTC())
+
+			if !isChannelReminder &&
+				!isCompleted &&
+				((occurrence.Repeat == "" && isFuture) ||
 					(s != p.emptyTime && s.After(time.Now().UTC()))) {
 				upcomingOccurrences = append(upcomingOccurrences, occurrence)
-			} else if !strings.HasPrefix(reminder.Target, "~") &&
-				occurrence.Repeat != "" && t.After(time.Now().UTC()) {
+			} else if !isChannelReminder &&
+				occurrence.Repeat != "" && isFuture {
 				recurringOccurrences = append(recurringOccurrences, occurrence)
-			} else if reminder.Completed == p.emptyTime &&
-				t.Before(time.Now().UTC()) &&
+			} else if !isCompleted &&
+				isPast &&
 				(s == p.emptyTime || s.Before(time.Now().UTC())) {
 				pastOccurrences = append(pastOccurrences, occurrence)
-			} else if strings.HasPrefix(reminder.Target, "~") &&
-				reminder.Completed == p.emptyTime &&
-				t.After(time.Now().UTC()) {
+			} else if isChannelReminder &&
+				!isCompleted &&
+				isFuture {
 				channelOccurrences = append(channelOccurrences, occurrence)
-			} else if reminder.Completed != p.emptyTime {
+			} else if isCompleted {
 				//p.API.LogInfo("completed reminder: " + fmt.Sprintf("%v", reminder))
 			} else {
 				//p.API.LogInfo("unknown reminder: " + fmt.Sprintf("%v", reminder))
