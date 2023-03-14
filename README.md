@@ -1,12 +1,5 @@
 # Mattermost Plugin Remind - deprecated & unsupported
 
-
-##via [@jwilander](https://github.com/jwilander), I have heard tha:
-
-1) the Mattermost team is building reminders baked into the product, generated on their own requirements, lead by a PM with QA and paid support. ( i am not going to compete with that)
-2) the Mattermost security team is backlogged with plugin reviews so turn around time on this plugin into the Marketplace is going to be slow at best.
-
-
 [![Build Status](https://img.shields.io/circleci/project/github/scottleedavis/mattermost-plugin-remind/master.svg)](https://circleci.com/gh/scottleedavis/mattermost-plugin-remind)  [![codecov](https://codecov.io/gh/scottleedavis/mattermost-plugin-remind/branch/master/graph/badge.svg)](https://codecov.io/gh/scottleedavis/mattermost-plugin-remind)  [![Go Report Card](https://goreportcard.com/badge/github.com/scottleedavis/mattermost-plugin-remind)](https://goreportcard.com/report/github.com/scottleedavis/mattermost-plugin-remind)  [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/3119/badge)](https://bestpractices.coreinfrastructure.org/projects/3119)  [![Releases](https://img.shields.io/github/release/scottleedavis/mattermost-plugin-remind.svg)](https://github.com/scottleedavis/mattermost-plugin-remind/releases/latest)
 
 _**A bot that schedules reminders for [Mattermost](https://mattermost.com/)**_
