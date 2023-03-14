@@ -49,12 +49,12 @@ func (p *Plugin) TriggerReminders() {
 	tickDelta := tickAt.Sub(lastTickAt)
 	ticksMissed := tickDelta.Seconds() - 1
 	if ticksMissed > 0 {
-		oneSecond             := time.Second
+		oneSecond := time.Second
 		maxCatchupDuration, _ := time.ParseDuration("-10m")
-		catchupStart          := lastTickAt.Add(oneSecond)
-		earliestCatchupStart  := tickAt.Add(maxCatchupDuration)
+		catchupStart := lastTickAt.Add(oneSecond)
+		earliestCatchupStart := tickAt.Add(maxCatchupDuration)
 
-		if (catchupStart.Before(earliestCatchupStart)) {
+		if catchupStart.Before(earliestCatchupStart) {
 			catchupStart = earliestCatchupStart
 			p.API.LogInfo(fmt.Sprintf("Too many reminder ticks were missed: occurrences between %v and %v will be dropped.", lastTickAt, catchupStart))
 		}

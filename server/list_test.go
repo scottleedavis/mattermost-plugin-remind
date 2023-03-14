@@ -28,20 +28,20 @@ func TestListReminders(t *testing.T) {
 	}
 
 	publicChannel := &model.Channel{
-		Id: model.NewId(),
+		Id:   model.NewId(),
 		Name: "public-channel",
 	}
 
 	T, _ := p.translation(user)
 
-	pastOccurrenceDate := time.Now().Add(-1*time.Minute)
-	futureOccurrenceDate := time.Now().Add(1*time.Minute)
+	pastOccurrenceDate := time.Now().Add(-1 * time.Minute)
+	futureOccurrenceDate := time.Now().Add(1 * time.Minute)
 
 	pastReminder := Reminder{
-		Id:          model.NewId(),
-		Username:    user.Username,
-		Message:     "This reminder was triggered a single time",
-		When:        "in 1 minute",
+		Id:       model.NewId(),
+		Username: user.Username,
+		Message:  "This reminder was triggered a single time",
+		When:     "in 1 minute",
 		Occurrences: []Occurrence{
 			{
 				Id:         model.NewId(),
@@ -53,10 +53,10 @@ func TestListReminders(t *testing.T) {
 	}
 
 	upcomingReminder := Reminder{
-		Id:          model.NewId(),
-		Username:    user.Username,
-		Message:     "This reminder triggers a single time",
-		When:        "in 1 minute",
+		Id:       model.NewId(),
+		Username: user.Username,
+		Message:  "This reminder triggers a single time",
+		When:     "in 1 minute",
 		Occurrences: []Occurrence{
 			{
 				Id:         model.NewId(),
@@ -68,11 +68,11 @@ func TestListReminders(t *testing.T) {
 	}
 
 	channelReminder := Reminder{
-		Id:          model.NewId(),
-		Username:    user.Username,
-		Target:      "~" + publicChannel.Name,
-		Message:     "This reminder posts in a channel a single time",
-		When:        "in 1 minute",
+		Id:       model.NewId(),
+		Username: user.Username,
+		Target:   "~" + publicChannel.Name,
+		Message:  "This reminder posts in a channel a single time",
+		When:     "in 1 minute",
 		Occurrences: []Occurrence{
 			{
 				Id:         model.NewId(),
@@ -84,10 +84,10 @@ func TestListReminders(t *testing.T) {
 	}
 
 	recurringReminder := Reminder{
-		Id:          model.NewId(),
-		Username:    user.Username,
-		Message:     "This reminder triggers several times",
-		When:        "every Monday",
+		Id:       model.NewId(),
+		Username: user.Username,
+		Message:  "This reminder triggers several times",
+		When:     "every Monday",
 		Occurrences: []Occurrence{
 			{
 				Id:         model.NewId(),
@@ -111,7 +111,7 @@ func TestListReminders(t *testing.T) {
 	}
 
 	t.Run("the list categorizes reminders by type", func(t *testing.T) {
-		reminders := []Reminder { pastReminder, upcomingReminder, channelReminder, recurringReminder }
+		reminders := []Reminder{pastReminder, upcomingReminder, channelReminder, recurringReminder}
 		p.API = setupAPI(reminders)
 
 		post := p.ListReminders(user, originChannel.Id)
@@ -119,7 +119,7 @@ func TestListReminders(t *testing.T) {
 		attachments := post.Attachments()
 		assert.NotNil(t, post, "A post must be returned")
 		assert.Equal(t, post.ChannelId, originChannel.Id, "The list must be posted to the channel it was requested")
-		assert.Equal(t, len(reminders) + 1, len(attachments), "The list must have one attachment per active reminder, plus an attachment for control")
+		assert.Equal(t, len(reminders)+1, len(attachments), "The list must have one attachment per active reminder, plus an attachment for control")
 		assert.Contains(t, attachments[0].Text, T("list.upcoming"), "The first displayed reminders must be upcoming reminders")
 		assert.Contains(t, attachments[1].Text, T("list.recurring"), "The next displayed reminders must be recurring reminders")
 		assert.Contains(t, attachments[2].Text, T("list.past.and.incomplete"), "The next displayed reminders must be past and incomplete reminders")
