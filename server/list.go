@@ -269,7 +269,7 @@ func (p *Plugin) listControl(
 						},
 						URL: fmt.Sprintf("/plugins/%s/next/reminders", manifest.ID),
 					},
-					Type: model.POST_ACTION_TYPE_BUTTON,
+					Type: model.PostActionTypeButton,
 					Name: T("button.next.reminders", reminderCount),
 				})
 
@@ -284,7 +284,7 @@ func (p *Plugin) listControl(
 						},
 						URL: fmt.Sprintf("/plugins/%s/next/reminders", manifest.ID),
 					},
-					Type: model.POST_ACTION_TYPE_BUTTON,
+					Type: model.PostActionTypeButton,
 					Name: T("button.previous.reminders", reminderCount),
 				})
 
@@ -299,7 +299,7 @@ func (p *Plugin) listControl(
 						},
 						URL: fmt.Sprintf("/plugins/%s/next/reminders", manifest.ID),
 					},
-					Type: model.POST_ACTION_TYPE_BUTTON,
+					Type: model.PostActionTypeButton,
 					Name: T("button.previous.reminders", reminderCount),
 				})
 			actions = append(actions,
@@ -311,7 +311,7 @@ func (p *Plugin) listControl(
 						},
 						URL: fmt.Sprintf("/plugins/%s/next/reminders", manifest.ID),
 					},
-					Type: model.POST_ACTION_TYPE_BUTTON,
+					Type: model.PostActionTypeButton,
 					Name: T("button.next.reminders", reminderCount),
 				})
 
@@ -329,7 +329,7 @@ func (p *Plugin) listControl(
 					},
 					URL: fmt.Sprintf("/plugins/%s/view/complete/list", manifest.ID),
 				},
-				Type: model.POST_ACTION_TYPE_BUTTON,
+				Type: model.PostActionTypeButton,
 				Name: T("button.view.complete"),
 			})
 
@@ -342,7 +342,7 @@ func (p *Plugin) listControl(
 					},
 					URL: fmt.Sprintf("/plugins/%s/delete/complete/list", manifest.ID),
 				},
-				Type: model.POST_ACTION_TYPE_BUTTON,
+				Type: model.PostActionTypeButton,
 				Name: T("button.delete.complete"),
 			})
 
@@ -411,7 +411,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							},
 							URL: fmt.Sprintf("/plugins/%s/complete/list", manifest.ID),
 						},
-						Type: model.POST_ACTION_TYPE_BUTTON,
+						Type: model.PostActionTypeButton,
 						Name: T("button.complete"),
 					},
 					{
@@ -425,7 +425,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							URL: fmt.Sprintf("/plugins/%s/delete/list", manifest.ID),
 						},
 						Name: T("button.delete"),
-						Type: model.POST_ACTION_TYPE_BUTTON,
+						Type: model.PostActionTypeButton,
 					},
 				},
 			}
@@ -450,7 +450,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							URL: fmt.Sprintf("/plugins/%s/delete/list", manifest.ID),
 						},
 						Name: T("button.delete"),
-						Type: model.POST_ACTION_TYPE_BUTTON,
+						Type: model.PostActionTypeButton,
 					},
 				},
 			}
@@ -474,7 +474,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							},
 							URL: fmt.Sprintf("/plugins/%s/complete/list", manifest.ID),
 						},
-						Type: model.POST_ACTION_TYPE_BUTTON,
+						Type: model.PostActionTypeButton,
 						Name: T("button.complete"),
 					},
 					{
@@ -488,7 +488,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							URL: fmt.Sprintf("/plugins/%s/delete/list", manifest.ID),
 						},
 						Name: T("button.delete"),
-						Type: model.POST_ACTION_TYPE_BUTTON,
+						Type: model.PostActionTypeButton,
 					},
 					{
 						Integration: &model.PostActionIntegration{
@@ -547,7 +547,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							},
 							URL: fmt.Sprintf("/plugins/%s/complete/list", manifest.ID),
 						},
-						Type: model.POST_ACTION_TYPE_BUTTON,
+						Type: model.PostActionTypeButton,
 						Name: T("button.complete"),
 					},
 					{
@@ -561,7 +561,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							URL: fmt.Sprintf("/plugins/%s/delete/list", manifest.ID),
 						},
 						Name: T("button.delete"),
-						Type: model.POST_ACTION_TYPE_BUTTON,
+						Type: model.PostActionTypeButton,
 					},
 				},
 			}

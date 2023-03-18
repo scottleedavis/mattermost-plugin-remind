@@ -69,7 +69,7 @@ func TestTriggerRemindersForTick(t *testing.T) {
 		Nickname: "TestUser",
 		Password: model.NewId(),
 		Username: "testuser",
-		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Roles:    model.SystemUserRoleId,
 		Locale:   "en",
 	}
 
@@ -285,7 +285,7 @@ func TestGetReminder(t *testing.T) {
 		Nickname: "TestUser",
 		Password: model.NewId(),
 		Username: "testuser",
-		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Roles:    model.SystemUserRoleId,
 		Locale:   "en",
 	}
 	testTime := time.Now().UTC().Round(time.Second)
@@ -343,7 +343,7 @@ func TestGetReminders(t *testing.T) {
 		Nickname: "TestUser",
 		Password: model.NewId(),
 		Username: "testuser",
-		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Roles:    model.SystemUserRoleId,
 		Locale:   "en",
 	}
 	testTime := time.Now().UTC().Round(time.Second)
@@ -400,7 +400,7 @@ func TestUpdateReminder(t *testing.T) {
 		Nickname: "TestUser",
 		Password: model.NewId(),
 		Username: "testuser",
-		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Roles:    model.SystemUserRoleId,
 		Locale:   "en",
 	}
 	testTime := time.Now().UTC().Round(time.Second)
@@ -457,7 +457,7 @@ func TestUpsertReminder(t *testing.T) {
 		Nickname: "TestUser",
 		Password: model.NewId(),
 		Username: "testuser",
-		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Roles:    model.SystemUserRoleId,
 		Locale:   "en",
 	}
 	testTime := time.Now().UTC().Round(time.Second)
@@ -529,7 +529,7 @@ func TestDeleteReminder(t *testing.T) {
 		Nickname: "TestUser",
 		Password: model.NewId(),
 		Username: "testuser",
-		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Roles:    model.SystemUserRoleId,
 		Locale:   "en",
 	}
 	testTime := time.Now().UTC().Round(time.Second)
@@ -585,7 +585,7 @@ func TestDeleteReminders(t *testing.T) {
 		Nickname: "TestUser",
 		Password: model.NewId(),
 		Username: "testuser",
-		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Roles:    model.SystemUserRoleId,
 		Locale:   "en",
 	}
 	testTime := time.Now().UTC().Round(time.Second)

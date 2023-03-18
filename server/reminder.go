@@ -175,7 +175,7 @@ func (p *Plugin) TriggerRemindersForTick(tickAt time.Time) {
 												},
 												URL: fmt.Sprintf("/plugins/%s/complete", manifest.ID),
 											},
-											Type: model.POST_ACTION_TYPE_BUTTON,
+											Type: model.PostActionTypeButton,
 											Name: T("button.complete"),
 										},
 										{

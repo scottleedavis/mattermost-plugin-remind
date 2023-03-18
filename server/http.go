@@ -150,7 +150,7 @@ func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {
 								},
 								URL: fmt.Sprintf("/plugins/%s/delete/ephemeral", manifest.ID),
 							},
-							Type: model.POST_ACTION_TYPE_BUTTON,
+							Type: model.PostActionTypeButton,
 							Name: T("button.delete"),
 						},
 						{
@@ -162,7 +162,7 @@ func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {
 								},
 								URL: fmt.Sprintf("/plugins/%s/view/ephemeral", manifest.ID),
 							},
-							Type: model.POST_ACTION_TYPE_BUTTON,
+							Type: model.PostActionTypeButton,
 							Name: T("button.view.reminders"),
 						},
 					},

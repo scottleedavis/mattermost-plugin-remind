@@ -23,7 +23,7 @@ func TestCreateOccurrences(t *testing.T) {
 		Nickname: "TestUser",
 		Password: model.NewId(),
 		Username: "testuser",
-		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Roles:    model.SystemUserRoleId,
 		Locale:   "en",
 	}
 	testTime := time.Now().UTC().Round(time.Second)
@@ -114,7 +114,7 @@ func TestIn(t *testing.T) {
 			Nickname: "TestUser",
 			Password: model.NewId(),
 			Username: "testuser",
-			Roles:    model.SYSTEM_USER_ROLE_ID,
+			Roles:    model.SystemUserRoleId,
 			Locale:   "en",
 		}
 
@@ -207,7 +207,7 @@ func TestAt(t *testing.T) {
 			Nickname: "TestUser",
 			Password: model.NewId(),
 			Username: "testuser",
-			Roles:    model.SYSTEM_USER_ROLE_ID,
+			Roles:    model.SystemUserRoleId,
 			Locale:   "en",
 		}
 		location := p.location(user)
@@ -312,7 +312,7 @@ func TestOn(t *testing.T) {
 			Nickname: "TestUser",
 			Password: model.NewId(),
 			Username: "testuser",
-			Roles:    model.SYSTEM_USER_ROLE_ID,
+			Roles:    model.SystemUserRoleId,
 			Locale:   "en",
 		}
 		location := p.location(user)
@@ -529,7 +529,7 @@ func TestEvery(t *testing.T) {
 			Nickname: "TestUser",
 			Password: model.NewId(),
 			Username: "testuser",
-			Roles:    model.SYSTEM_USER_ROLE_ID,
+			Roles:    model.SystemUserRoleId,
 			Locale:   "en",
 		}
 		location := p.location(user)
@@ -643,7 +643,7 @@ func TestFreeForm(t *testing.T) {
 			Nickname: "TestUser",
 			Password: model.NewId(),
 			Username: "testuser",
-			Roles:    model.SYSTEM_USER_ROLE_ID,
+			Roles:    model.SystemUserRoleId,
 			Locale:   "en",
 		}
 		location := p.location(user)
@@ -772,7 +772,7 @@ func TestFormatWhen(t *testing.T) {
 		Nickname: "TestUser",
 		Password: model.NewId(),
 		Username: "testuser",
-		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Roles:    model.SystemUserRoleId,
 		Locale:   "en",
 	}
 
