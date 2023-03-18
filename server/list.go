@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mattermost/mattermost-server/v5/model"
+	"github.com/mattermost/mattermost-server/v6/model"
 )
 
 const RemindersPerPage = 4
@@ -19,7 +19,7 @@ func (p *Plugin) ListReminders(user *model.User, channelId string) *model.Post {
 		return &model.Post{
 			ChannelId:     channelId,
 			PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
-			UserId:        p.remindUserId,
+			UserId:        p.botUserId,
 			Message:       T("no.reminders"),
 		}
 	}
@@ -61,7 +61,7 @@ func (p *Plugin) ListReminders(user *model.User, channelId string) *model.Post {
 	return &model.Post{
 		ChannelId:     channelId,
 		PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
-		UserId:        p.remindUserId,
+		UserId:        p.botUserId,
 		Props: model.StringInterface{
 			"attachments": attachments,
 		},
@@ -120,7 +120,7 @@ func (p *Plugin) UpdateListReminders(userId string, postId string, channelId str
 	post := &model.Post{
 		Id:        postId,
 		ChannelId: channelId,
-		UserId:    p.remindUserId,
+		UserId:    p.botUserId,
 		Props: model.StringInterface{
 			"attachments": attachments,
 		},

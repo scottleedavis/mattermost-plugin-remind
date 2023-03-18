@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mattermost/mattermost-server/v5/model"
+	"github.com/mattermost/mattermost-server/v6/model"
 )
 
 func (p *Plugin) ScheduleReminder(request *ReminderRequest, channelId string) (*model.Post, error) {
@@ -68,7 +68,7 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest, channelId string) (*
 
 	return &model.Post{
 		ChannelId: channelId,
-		UserId:    p.remindUserId,
+		UserId:    p.botUserId,
 		Props: model.StringInterface{
 			"attachments": []*model.SlackAttachment{
 				{

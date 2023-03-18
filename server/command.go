@@ -3,8 +3,8 @@ package main
 import (
 	"strings"
 
-	"github.com/mattermost/mattermost-server/v5/model"
-	"github.com/mattermost/mattermost-server/v5/plugin"
+	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost-server/v6/plugin"
 	"github.com/pkg/errors"
 )
 
@@ -42,7 +42,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	if strings.HasSuffix(command, T("help")) {
 		post := model.Post{
 			ChannelId: args.ChannelId,
-			UserId:    p.remindUserId,
+			UserId:    p.botUserId,
 			Message:   T("help.response"),
 		}
 		p.API.SendEphemeralPost(user.Id, &post)
@@ -58,7 +58,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	if strings.HasSuffix(command, "__clear") {
 		post := model.Post{
 			ChannelId: args.ChannelId,
-			UserId:    p.remindUserId,
+			UserId:    p.botUserId,
 			Message:   p.DeleteReminders(user),
 		}
 		p.API.SendEphemeralPost(user.Id, &post)
@@ -69,7 +69,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	if strings.HasSuffix(command, "__version") {
 		post := model.Post{
 			ChannelId: args.ChannelId,
-			UserId:    p.remindUserId,
+			UserId:    p.botUserId,
 			Message:   manifest.Version,
 		}
 		p.API.SendEphemeralPost(user.Id, &post)
@@ -80,7 +80,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	if strings.HasSuffix(command, "__user") {
 		post := model.Post{
 			ChannelId: args.ChannelId,
-			UserId:    p.remindUserId,
+			UserId:    p.botUserId,
 			Message:   "locale: " + locale + "\nlocation: " + location.String(),
 		}
 		p.API.SendEphemeralPost(user.Id, &post)
@@ -99,7 +99,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	if err != nil {
 		post := model.Post{
 			ChannelId: args.ChannelId,
-			UserId:    p.remindUserId,
+			UserId:    p.botUserId,
 			Message:   T("exception.response"),
 		}
 		p.API.SendEphemeralPost(user.Id, &post)

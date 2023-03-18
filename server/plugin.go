@@ -5,29 +5,22 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-
-	"github.com/mattermost/mattermost-server/v5/model"
-	"github.com/mattermost/mattermost-server/v5/plugin"
+	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost-server/v6/plugin"
 )
 
 type Plugin struct {
 	plugin.MattermostPlugin
-
-	router *mux.Router
+	router      *mux.Router
+	botUserId   string
+	running     bool
+	emptyTime   time.Time
+	defaultTime time.Time
 
 	ServerConfig *model.Config
 
-	remindUserId string
-
-	running bool
-
-	emptyTime time.Time
-
-	defaultTime time.Time
-
 	readFile func(path string) ([]byte, error)
-
-	locales map[string]string
+	locales  map[string]string
 }
 
 func NewPlugin() *Plugin {

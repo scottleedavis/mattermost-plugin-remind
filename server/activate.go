@@ -3,8 +3,8 @@ package main
 import (
 	"time"
 
-	"github.com/mattermost/mattermost-server/v5/model"
-	"github.com/mattermost/mattermost-server/v5/plugin"
+	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost-server/v6/plugin"
 	"github.com/pkg/errors"
 )
 
@@ -22,7 +22,7 @@ func (p *Plugin) OnActivate() error {
 	if err != nil {
 		return errors.Wrap(err, "failed to ensure bot user")
 	}
-	p.remindUserId = botUserID
+	p.botUserId = botUserID
 
 	err = p.registerCommand()
 	if err != nil {

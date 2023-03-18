@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mattermost/mattermost-server/v5/model"
+	"github.com/mattermost/mattermost-server/v6/model"
 )
 
 type Reminder struct {
@@ -133,7 +133,7 @@ func (p *Plugin) TriggerRemindersForTick(tickAt time.Time) {
 					targetId = user.Id
 				}
 
-				channel, cErr := p.API.GetDirectChannel(p.remindUserId, targetId)
+				channel, cErr := p.API.GetDirectChannel(p.botUserId, targetId)
 				if cErr != nil {
 					p.API.LogError("failed to create channel " + cErr.Error())
 					continue
@@ -158,7 +158,7 @@ func (p *Plugin) TriggerRemindersForTick(tickAt time.Time) {
 					interactivePost = model.Post{
 						ChannelId:     channel.Id,
 						PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
-						UserId:        p.remindUserId,
+						UserId:        p.botUserId,
 						Props: model.StringInterface{
 							"attachments": []*model.SlackAttachment{
 								{
@@ -237,7 +237,7 @@ func (p *Plugin) TriggerRemindersForTick(tickAt time.Time) {
 					interactivePost = model.Post{
 						ChannelId:     channel.Id,
 						PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
-						UserId:        p.remindUserId,
+						UserId:        p.botUserId,
 						Props: model.StringInterface{
 							"attachments": []*model.SlackAttachment{
 								{
@@ -313,7 +313,7 @@ func (p *Plugin) TriggerRemindersForTick(tickAt time.Time) {
 					interactivePost := model.Post{
 						ChannelId:     channel.Id,
 						PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
-						UserId:        p.remindUserId,
+						UserId:        p.botUserId,
 						Type:          model.POST_CUSTOM_TYPE_PREFIX + "reminder",
 						Message:       T("reminder.message", messageParameters),
 						Props:         model.StringInterface{},

@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
 	"net/http"
 	"strings"
 	"time"
 
-	"github.com/mattermost/mattermost-server/v5/model"
-	"github.com/mattermost/mattermost-server/v5/plugin"
+	"github.com/gorilla/mux"
+
+	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost-server/v6/plugin"
 )
 
 func (p *Plugin) InitAPI() *mux.Router {
@@ -134,7 +135,7 @@ func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {
 
 	reminder := &model.Post{
 		ChannelId: request.ChannelId,
-		UserId:    p.remindUserId,
+		UserId:    p.botUserId,
 		Props: model.StringInterface{
 			"attachments": []*model.SlackAttachment{
 				{
@@ -245,7 +246,7 @@ func (p *Plugin) handleComplete(w http.ResponseWriter, r *http.Request) {
 				writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
 				return
 			} else {
-				if channel, cErr := p.API.GetDirectChannel(p.remindUserId, originalUser.Id); cErr != nil {
+				if channel, cErr := p.API.GetDirectChannel(p.botUserId, originalUser.Id); cErr != nil {
 					p.API.LogError("failed to create channel " + cErr.Error())
 					writePostActionIntegrationResponseError(w, &model.PostActionIntegrationResponse{})
 				} else {
@@ -255,7 +256,7 @@ func (p *Plugin) handleComplete(w http.ResponseWriter, r *http.Request) {
 					}
 					if _, pErr := p.API.CreatePost(&model.Post{
 						ChannelId: channel.Id,
-						UserId:    p.remindUserId,
+						UserId:    p.botUserId,
 						Message:   T("action.complete.callback", postbackUpdateParameters),
 					}); pErr != nil {
 						p.API.LogError(pErr.Error())
@@ -330,7 +331,7 @@ func (p *Plugin) handleDeleteEphemeral(w http.ResponseWriter, r *http.Request) {
 	}
 	post := &model.Post{
 		Id:        request.PostId,
-		UserId:    p.remindUserId,
+		UserId:    p.botUserId,
 		ChannelId: request.ChannelId,
 		Message:   T("action.delete", deleteParameters),
 	}
