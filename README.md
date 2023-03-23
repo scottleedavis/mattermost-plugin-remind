@@ -1,6 +1,7 @@
-# Mattermost Plugin Remind
+c# Mattermost Plugin Remind
 
  **add back circle ci**
+ [![Build Status](https://img.shields.io/circleci/project/github/scottleedavis/mattermost-plugin-remind/master.svg)](https://circleci.com/gh/scottleedavis/mattermost-plugin-remind)
  [![codecov](https://codecov.io/gh/scottleedavis/mattermost-plugin-remind/branch/master/graph/badge.svg)](https://codecov.io/gh/scottleedavis/mattermost-plugin-remind)  
  [![Go Report Card](https://goreportcard.com/badge/github.com/scottleedavis/mattermost-plugin-remind)](https://goreportcard.com/report/github.com/scottleedavis/mattermost-plugin-remind)  
  [![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/3119/badge)](https://bestpractices.coreinfrastructure.org/projects/3119)  
