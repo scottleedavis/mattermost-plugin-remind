@@ -83,7 +83,8 @@ func TestHandleDialog(t *testing.T) {
 		}
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/dialog", bytes.NewReader(request.ToJson()))
+		requestJSON, _ := json.Marshal(request)
+		r := httptest.NewRequest("POST", "/dialog", bytes.NewReader(requestJSON))
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
@@ -159,7 +160,8 @@ func TestHandleViewEphmeral(t *testing.T) {
 		}
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/view/ephemeral", bytes.NewReader(request.ToJson()))
+		requestJSON, _ := json.Marshal(request)
+		r := httptest.NewRequest("POST", "/view/ephemeral", bytes.NewReader(requestJSON))
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
@@ -245,7 +247,8 @@ func TestHandleComplete(t *testing.T) {
 		}
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/complete", bytes.NewReader(request.ToJson()))
+		requestJSON, _ := json.Marshal(request)
+		r := httptest.NewRequest("POST", "/complete", bytes.NewReader(requestJSON))
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
@@ -327,7 +330,8 @@ func TestHandleDelete(t *testing.T) {
 		}
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/delete", bytes.NewReader(request.ToJson()))
+		requestJSON, _ := json.Marshal(request)
+		r := httptest.NewRequest("POST", "/delete", bytes.NewReader(requestJSON))
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
@@ -406,7 +410,8 @@ func TestHandleDeleteEphemeral(t *testing.T) {
 		}
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/delete/ephemeral", bytes.NewReader(request.ToJson()))
+		requestJSON, _ := json.Marshal(request)
+		r := httptest.NewRequest("POST", "/delete/ephemeral", bytes.NewReader(requestJSON))
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
@@ -510,7 +515,8 @@ func TestHandleSnooze(t *testing.T) {
 			}
 
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest("POST", "/snooze", bytes.NewReader(request.ToJson()))
+			requestJSON, _ := json.Marshal(request)
+			r := httptest.NewRequest("POST", "/snooze", bytes.NewReader(requestJSON))
 			p.ServeHTTP(nil, w, r)
 
 			result := w.Result()
@@ -590,7 +596,8 @@ func TestHandleNextReminders(t *testing.T) {
 		}
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/next/reminders", bytes.NewReader(request.ToJson()))
+		requestJSON, _ := json.Marshal(request)
+		r := httptest.NewRequest("POST", "/next/reminders", bytes.NewReader(requestJSON))
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
@@ -672,7 +679,8 @@ func TestHandleCompleteList(t *testing.T) {
 		}
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/complete/list", bytes.NewReader(request.ToJson()))
+		requestJSON, _ := json.Marshal(request)
+		r := httptest.NewRequest("POST", "/complete/list", bytes.NewReader(requestJSON))
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
@@ -743,7 +751,8 @@ func TestHandleViewCompleteList(t *testing.T) {
 		request := &model.PostActionIntegrationRequest{UserId: user.Id, PostId: post.Id}
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/view/complete/list", bytes.NewReader(request.ToJson()))
+		requestJSON, _ := json.Marshal(request)
+		r := httptest.NewRequest("POST", "/view/complete/list", bytes.NewReader(requestJSON))
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
@@ -823,7 +832,8 @@ func TestHandleDeleteList(t *testing.T) {
 		}
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/delete/list", bytes.NewReader(request.ToJson()))
+		requestJSON, _ := json.Marshal(request)
+		r := httptest.NewRequest("POST", "/delete/list", bytes.NewReader(requestJSON))
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
@@ -903,7 +913,8 @@ func TestHandleDeleteCompleteList(t *testing.T) {
 		}
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/delete/complete/list", bytes.NewReader(request.ToJson()))
+		requestJSON, _ := json.Marshal(request)
+		r := httptest.NewRequest("POST", "/delete/complete/list", bytes.NewReader(requestJSON))
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
@@ -1005,7 +1016,8 @@ func TestHandleSnoozeList(t *testing.T) {
 			}
 
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest("POST", "/snooze/list", bytes.NewReader(request.ToJson()))
+			requestJSON, _ := json.Marshal(request)
+			r := httptest.NewRequest("POST", "/snooze/list", bytes.NewReader(requestJSON))
 			p.ServeHTTP(nil, w, r)
 
 			result := w.Result()
@@ -1043,7 +1055,8 @@ func TestHandleCloseList(t *testing.T) {
 		request := &model.PostActionIntegrationRequest{UserId: "userID1", PostId: "postID1"}
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/close/list", bytes.NewReader(request.ToJson()))
+		requestJSON, _ := json.Marshal(request)
+		r := httptest.NewRequest("POST", "/close/list", bytes.NewReader(requestJSON))
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
