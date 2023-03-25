@@ -43,7 +43,7 @@ func (p *Plugin) TranslationsPreInit() error {
 
 func (p *Plugin) GetUserTranslations(locale string) i18n.TranslateFunc {
 	if _, ok := p.locales[locale]; !ok {
-		locale = model.DEFAULT_LOCALE
+		locale = model.DefaultLocale
 	}
 
 	translations := TfuncWithFallback(locale)
@@ -57,7 +57,7 @@ func TfuncWithFallback(pref string) i18n.TranslateFunc {
 			return translated
 		}
 
-		t, _ := i18n.Tfunc(model.DEFAULT_LOCALE)
+		t, _ := i18n.Tfunc(model.DefaultLocale)
 		return t(translationID, args...)
 	}
 }

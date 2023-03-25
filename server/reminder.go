@@ -314,7 +314,7 @@ func (p *Plugin) TriggerRemindersForTick(tickAt time.Time) {
 						ChannelId:     channel.Id,
 						PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
 						UserId:        p.botUserId,
-						Type:          model.POST_CUSTOM_TYPE_PREFIX + "reminder",
+						Type:          model.PostCustomTypePrefix + "reminder",
 						Message:       T("reminder.message", messageParameters),
 						Props:         model.StringInterface{},
 					}

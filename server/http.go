@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"strings"
 	"time"
@@ -43,7 +45,11 @@ func (p *Plugin) ServeHTTP(c *plugin.Context, w http.ResponseWriter, r *http.Req
 
 func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {
 
-	request := model.SubmitDialogRequestFromJson(req.Body)
+	body, _ := ioutil.ReadAll(req.Body)
+	defer req.Body.Close()
+
+	var request *model.SubmitDialogRequest
+	_ = json.Unmarshal(body, &request)
 
 	user, uErr := p.API.GetUser(request.UserId)
 	if uErr != nil {
@@ -176,7 +182,11 @@ func (p *Plugin) handleDialog(w http.ResponseWriter, req *http.Request) {
 
 func (p *Plugin) handleViewEphemeral(w http.ResponseWriter, r *http.Request) {
 
-	request := model.PostActionIntegrationRequestFromJson(r.Body)
+	body, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	var request *model.PostActionIntegrationRequest
+	_ = json.Unmarshal(body, &request)
 
 	user, uErr := p.API.GetUser(request.UserId)
 	if uErr != nil {
@@ -192,7 +202,11 @@ func (p *Plugin) handleViewEphemeral(w http.ResponseWriter, r *http.Request) {
 
 func (p *Plugin) handleComplete(w http.ResponseWriter, r *http.Request) {
 
-	request := model.PostActionIntegrationRequestFromJson(r.Body)
+	body, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	var request *model.PostActionIntegrationRequest
+	_ = json.Unmarshal(body, &request)
 
 	reminder := p.GetReminder(request.Context["orig_user_id"].(string), request.Context["reminder_id"].(string))
 	user, uErr := p.API.GetUser(request.UserId)
@@ -273,7 +287,11 @@ func (p *Plugin) handleComplete(w http.ResponseWriter, r *http.Request) {
 
 func (p *Plugin) handleDelete(w http.ResponseWriter, r *http.Request) {
 
-	request := model.PostActionIntegrationRequestFromJson(r.Body)
+	body, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	var request *model.PostActionIntegrationRequest
+	_ = json.Unmarshal(body, &request)
 
 	reminder := p.GetReminder(request.Context["orig_user_id"].(string), request.Context["reminder_id"].(string))
 	user, uErr := p.API.GetUser(request.UserId)
@@ -308,7 +326,11 @@ func (p *Plugin) handleDelete(w http.ResponseWriter, r *http.Request) {
 
 func (p *Plugin) handleDeleteEphemeral(w http.ResponseWriter, r *http.Request) {
 
-	request := model.PostActionIntegrationRequestFromJson(r.Body)
+	body, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	var request *model.PostActionIntegrationRequest
+	_ = json.Unmarshal(body, &request)
 
 	reminder := p.GetReminder(request.UserId, request.Context["reminder_id"].(string))
 	user, uErr := p.API.GetUser(request.UserId)
@@ -342,7 +364,11 @@ func (p *Plugin) handleDeleteEphemeral(w http.ResponseWriter, r *http.Request) {
 
 func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request) {
 
-	request := model.PostActionIntegrationRequestFromJson(r.Body)
+	body, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	var request *model.PostActionIntegrationRequest
+	_ = json.Unmarshal(body, &request)
 
 	reminder := p.GetReminder(request.Context["orig_user_id"].(string), request.Context["reminder_id"].(string))
 	user, uErr := p.API.GetUser(request.UserId)
@@ -459,13 +485,21 @@ func (p *Plugin) handleSnooze(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *Plugin) handleNextReminders(w http.ResponseWriter, r *http.Request) {
-	request := model.PostActionIntegrationRequestFromJson(r.Body)
+	body, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	var request *model.PostActionIntegrationRequest
+	_ = json.Unmarshal(body, &request)
 	p.UpdateListReminders(request.UserId, request.PostId, request.ChannelId, int(request.Context["offset"].(float64)))
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
 func (p *Plugin) handleCompleteList(w http.ResponseWriter, r *http.Request) {
-	request := model.PostActionIntegrationRequestFromJson(r.Body)
+	body, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	var request *model.PostActionIntegrationRequest
+	_ = json.Unmarshal(body, &request)
 	reminder := p.GetReminder(request.UserId, request.Context["reminder_id"].(string))
 
 	for _, occurrence := range reminder.Occurrences {
@@ -479,13 +513,21 @@ func (p *Plugin) handleCompleteList(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *Plugin) handleViewCompleteList(w http.ResponseWriter, r *http.Request) {
-	request := model.PostActionIntegrationRequestFromJson(r.Body)
+	body, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	var request *model.PostActionIntegrationRequest
+	_ = json.Unmarshal(body, &request)
 	p.ListCompletedReminders(request.UserId, request.PostId, request.ChannelId)
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
 func (p *Plugin) handleDeleteList(w http.ResponseWriter, r *http.Request) {
-	request := model.PostActionIntegrationRequestFromJson(r.Body)
+	body, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	var request *model.PostActionIntegrationRequest
+	_ = json.Unmarshal(body, &request)
 	reminder := p.GetReminder(request.UserId, request.Context["reminder_id"].(string))
 
 	for _, occurrence := range reminder.Occurrences {
@@ -498,14 +540,22 @@ func (p *Plugin) handleDeleteList(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *Plugin) handleDeleteCompleteList(w http.ResponseWriter, r *http.Request) {
-	request := model.PostActionIntegrationRequestFromJson(r.Body)
+	body, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	var request *model.PostActionIntegrationRequest
+	_ = json.Unmarshal(body, &request)
 	p.DeleteCompletedReminders(request.UserId)
 	p.UpdateListReminders(request.UserId, request.PostId, request.ChannelId, int(request.Context["offset"].(float64)))
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
 
 func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request) {
-	request := model.PostActionIntegrationRequestFromJson(r.Body)
+	body, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	var request *model.PostActionIntegrationRequest
+	_ = json.Unmarshal(body, &request)
 	reminder := p.GetReminder(request.UserId, request.Context["reminder_id"].(string))
 
 	for _, occurrence := range reminder.Occurrences {
@@ -599,7 +649,11 @@ func (p *Plugin) handleSnoozeList(w http.ResponseWriter, r *http.Request) {
 }
 
 func (p *Plugin) handleCloseList(w http.ResponseWriter, r *http.Request) {
-	request := model.PostActionIntegrationRequestFromJson(r.Body)
+	body, _ := ioutil.ReadAll(r.Body)
+	defer r.Body.Close()
+
+	var request *model.PostActionIntegrationRequest
+	_ = json.Unmarshal(body, &request)
 	p.API.DeleteEphemeralPost(request.UserId, request.PostId)
 	writePostActionIntegrationResponseOk(w, &model.PostActionIntegrationResponse{})
 }
