@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mattermost/mattermost-server/v5/model"
+	"github.com/mattermost/mattermost-server/v6/model"
 )
 
 type Reminder struct {
@@ -49,12 +49,12 @@ func (p *Plugin) TriggerReminders() {
 	tickDelta := tickAt.Sub(lastTickAt)
 	ticksMissed := tickDelta.Seconds() - 1
 	if ticksMissed > 0 {
-		oneSecond             := time.Second
+		oneSecond := time.Second
 		maxCatchupDuration, _ := time.ParseDuration("-10m")
-		catchupStart          := lastTickAt.Add(oneSecond)
-		earliestCatchupStart  := tickAt.Add(maxCatchupDuration)
+		catchupStart := lastTickAt.Add(oneSecond)
+		earliestCatchupStart := tickAt.Add(maxCatchupDuration)
 
-		if (catchupStart.Before(earliestCatchupStart)) {
+		if catchupStart.Before(earliestCatchupStart) {
 			catchupStart = earliestCatchupStart
 			p.API.LogInfo(fmt.Sprintf("Too many reminder ticks were missed: occurrences between %v and %v will be dropped.", lastTickAt, catchupStart))
 		}
@@ -133,7 +133,7 @@ func (p *Plugin) TriggerRemindersForTick(tickAt time.Time) {
 					targetId = user.Id
 				}
 
-				channel, cErr := p.API.GetDirectChannel(p.remindUserId, targetId)
+				channel, cErr := p.API.GetDirectChannel(p.botUserId, targetId)
 				if cErr != nil {
 					p.API.LogError("failed to create channel " + cErr.Error())
 					continue
@@ -158,7 +158,7 @@ func (p *Plugin) TriggerRemindersForTick(tickAt time.Time) {
 					interactivePost = model.Post{
 						ChannelId:     channel.Id,
 						PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
-						UserId:        p.remindUserId,
+						UserId:        p.botUserId,
 						Props: model.StringInterface{
 							"attachments": []*model.SlackAttachment{
 								{
@@ -175,7 +175,7 @@ func (p *Plugin) TriggerRemindersForTick(tickAt time.Time) {
 												},
 												URL: fmt.Sprintf("/plugins/%s/complete", manifest.ID),
 											},
-											Type: model.POST_ACTION_TYPE_BUTTON,
+											Type: model.PostActionTypeButton,
 											Name: T("button.complete"),
 										},
 										{
@@ -237,7 +237,7 @@ func (p *Plugin) TriggerRemindersForTick(tickAt time.Time) {
 					interactivePost = model.Post{
 						ChannelId:     channel.Id,
 						PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
-						UserId:        p.remindUserId,
+						UserId:        p.botUserId,
 						Props: model.StringInterface{
 							"attachments": []*model.SlackAttachment{
 								{
@@ -313,8 +313,8 @@ func (p *Plugin) TriggerRemindersForTick(tickAt time.Time) {
 					interactivePost := model.Post{
 						ChannelId:     channel.Id,
 						PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
-						UserId:        p.remindUserId,
-						Type:          model.POST_CUSTOM_TYPE_PREFIX + "reminder",
+						UserId:        p.botUserId,
+						Type:          model.PostCustomTypePrefix + "reminder",
 						Message:       T("reminder.message", messageParameters),
 						Props:         model.StringInterface{},
 					}
@@ -413,8 +413,10 @@ func (p *Plugin) UpdateReminder(userId string, reminder Reminder) error {
 		return rErr
 	}
 
-	p.API.KVSet(user.Username, ro)
-
+	kvErr := p.API.KVSet(user.Username, ro)
+	if kvErr != nil {
+		p.API.LogDebug("failed store username %s", kvErr)
+	}
 	return nil
 }
 
@@ -460,8 +462,10 @@ func (p *Plugin) UpsertReminder(request *ReminderRequest) error {
 		return rErr
 	}
 
-	p.API.KVSet(user.Username, ro)
-
+	kvErr := p.API.KVSet(user.Username, ro)
+	if kvErr != nil {
+		p.API.LogDebug("failed stored username%s", kvErr)
+	}
 	return nil
 }
 
@@ -499,8 +503,10 @@ func (p *Plugin) DeleteReminder(userId string, reminder Reminder) error {
 		return rErr
 	}
 
-	p.API.KVSet(user.Username, ro)
-
+	kvErr := p.API.KVSet(user.Username, ro)
+	if kvErr != nil {
+		p.API.LogDebug("failed stored username %s", kvErr)
+	}
 	return nil
 }
 
@@ -587,7 +593,10 @@ func (p *Plugin) rescheduleOccurrence(occurrence *Occurrence) {
 		}
 	}
 	reminder.Occurrences = updatedOccurrences
-	p.UpdateReminder(user.Id, reminder)
+	uErr := p.UpdateReminder(user.Id, reminder)
+	if uErr != nil {
+		p.API.LogError("failed to update reminder %s", uErr)
+	}
 
 }
 
@@ -640,5 +649,8 @@ func (p *Plugin) getLastTickTimeWithDefault(defaultValue time.Time) time.Time {
 
 func (p *Plugin) setLastTickTime(lastTickAt time.Time) {
 	serializedTime := lastTickAt.Format(time.RFC3339)
-	p.API.KVSet("LastTickAt", []byte(serializedTime))
+	kvErr := p.API.KVSet("LastTickAt", []byte(serializedTime))
+	if kvErr != nil {
+		p.API.LogDebug("failed stored lastTickAt %s", kvErr)
+	}
 }

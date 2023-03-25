@@ -4,12 +4,12 @@
 package main
 
 import (
-	"io/ioutil"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
 
-	"github.com/mattermost/mattermost-server/v5/model"
+	"github.com/mattermost/mattermost-server/v6/model"
 	"github.com/nicksnyder/go-i18n/i18n"
 	"github.com/pkg/errors"
 )
@@ -21,7 +21,7 @@ func (p *Plugin) TranslationsPreInit() error {
 	}
 
 	i18nDirectory := path.Join(bundlePath, "assets", "i18n")
-	files, err := ioutil.ReadDir(i18nDirectory)
+	files, err := os.ReadDir(i18nDirectory)
 	if err != nil {
 		return errors.Wrap(err, "unable to read i18n directory")
 	}
@@ -43,7 +43,7 @@ func (p *Plugin) TranslationsPreInit() error {
 
 func (p *Plugin) GetUserTranslations(locale string) i18n.TranslateFunc {
 	if _, ok := p.locales[locale]; !ok {
-		locale = model.DEFAULT_LOCALE
+		locale = model.DefaultLocale
 	}
 
 	translations := TfuncWithFallback(locale)
@@ -57,7 +57,7 @@ func TfuncWithFallback(pref string) i18n.TranslateFunc {
 			return translated
 		}
 
-		t, _ := i18n.Tfunc(model.DEFAULT_LOCALE)
+		t, _ := i18n.Tfunc(model.DefaultLocale)
 		return t(translationID, args...)
 	}
 }

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mattermost/mattermost-server/v5/model"
+	"github.com/mattermost/mattermost-server/v6/model"
 )
 
 func (p *Plugin) ParseRequest(request *ReminderRequest) error {
@@ -580,7 +580,6 @@ func (p *Plugin) normalizeDate(text string, user *model.User) (string, error) {
 
 			parts = append(parts, fmt.Sprintf("%v", time.Now().In(location).Year()))
 
-			break
 		case 3:
 			if len(parts[1]) > 2 {
 				parts[1] = p.daySuffix(user, parts[1])
@@ -598,7 +597,6 @@ func (p *Plugin) normalizeDate(text string, user *model.User) (string, error) {
 				}
 			}
 
-			break
 		default:
 			return "", errors.New("unrecognized date format")
 		}
@@ -753,7 +751,6 @@ func (p *Plugin) normalizeDate(text string, user *model.User) (string, error) {
 			if wordNum, wErr := p.wordToNumber(date, user); wErr != nil {
 				return "", wErr
 			} else {
-				day = strconv.Itoa(wordNum)
 				dayInt = wordNum
 			}
 		} else {
@@ -1036,7 +1033,6 @@ func (p *Plugin) wordToNumber(word string, user *model.User) (int, error) {
 				sum = sum - previous
 			}
 			sum = sum + previous*onumbers[split]
-			temp = 0
 			previous = 0
 		} else if tnumbers[split] != 0 {
 			temp = tnumbers[split]

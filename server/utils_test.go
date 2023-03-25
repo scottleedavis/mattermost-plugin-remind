@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"github.com/mattermost/mattermost-server/v5/model"
+	"github.com/mattermost/mattermost-server/v6/model"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -18,7 +18,7 @@ func TestTranslation(t *testing.T) {
 			Nickname: "TestUser",
 			Password: model.NewId(),
 			Username: "testuser",
-			Roles:    model.SYSTEM_USER_ROLE_ID,
+			Roles:    model.SystemUserRoleId,
 			Locale:   "en",
 		}
 
@@ -42,7 +42,7 @@ func TestLocation(t *testing.T) {
 			Nickname: "TestUser",
 			Password: model.NewId(),
 			Username: "testuser",
-			Roles:    model.SYSTEM_USER_ROLE_ID,
+			Roles:    model.SystemUserRoleId,
 			Locale:   "en",
 			Timezone: timezone,
 		}

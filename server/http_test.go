@@ -4,14 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http/httptest"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/mattermost/mattermost-server/v5/model"
-	"github.com/mattermost/mattermost-server/v5/plugin/plugintest"
+	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost-server/v6/plugin/plugintest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -83,13 +83,14 @@ func TestHandleDialog(t *testing.T) {
 		}
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/dialog", bytes.NewReader(request.ToJson()))
+		requestJSON, _ := json.Marshal(request)
+		r := httptest.NewRequest("POST", "/dialog", bytes.NewReader(requestJSON))
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
 		assert.NotNil(t, result)
 
-		bodyBytes, err := ioutil.ReadAll(result.Body)
+		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
 		assert.Equal(t, bodyString, "")
@@ -159,16 +160,17 @@ func TestHandleViewEphmeral(t *testing.T) {
 		}
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/view/ephemeral", bytes.NewReader(request.ToJson()))
+		requestJSON, _ := json.Marshal(request)
+		r := httptest.NewRequest("POST", "/view/ephemeral", bytes.NewReader(requestJSON))
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
 		assert.NotNil(t, result)
 
-		bodyBytes, err := ioutil.ReadAll(result.Body)
+		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
-		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 	})
 
@@ -245,16 +247,17 @@ func TestHandleComplete(t *testing.T) {
 		}
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/complete", bytes.NewReader(request.ToJson()))
+		requestJSON, _ := json.Marshal(request)
+		r := httptest.NewRequest("POST", "/complete", bytes.NewReader(requestJSON))
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
 		assert.NotNil(t, result)
 
-		bodyBytes, err := ioutil.ReadAll(result.Body)
+		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
-		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 	})
 
@@ -327,16 +330,17 @@ func TestHandleDelete(t *testing.T) {
 		}
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/delete", bytes.NewReader(request.ToJson()))
+		requestJSON, _ := json.Marshal(request)
+		r := httptest.NewRequest("POST", "/delete", bytes.NewReader(requestJSON))
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
 		assert.NotNil(t, result)
 
-		bodyBytes, err := ioutil.ReadAll(result.Body)
+		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
-		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 	})
 
@@ -406,16 +410,17 @@ func TestHandleDeleteEphemeral(t *testing.T) {
 		}
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/delete/ephemeral", bytes.NewReader(request.ToJson()))
+		requestJSON, _ := json.Marshal(request)
+		r := httptest.NewRequest("POST", "/delete/ephemeral", bytes.NewReader(requestJSON))
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
 		assert.NotNil(t, result)
 
-		bodyBytes, err := ioutil.ReadAll(result.Body)
+		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
-		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 	})
 
@@ -510,16 +515,17 @@ func TestHandleSnooze(t *testing.T) {
 			}
 
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest("POST", "/snooze", bytes.NewReader(request.ToJson()))
+			requestJSON, _ := json.Marshal(request)
+			r := httptest.NewRequest("POST", "/snooze", bytes.NewReader(requestJSON))
 			p.ServeHTTP(nil, w, r)
 
 			result := w.Result()
 			assert.NotNil(t, result)
 
-			bodyBytes, err := ioutil.ReadAll(result.Body)
+			bodyBytes, err := io.ReadAll(result.Body)
 			assert.Nil(t, err)
 			bodyString := string(bodyBytes)
-			assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+			assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 		})
 	}
@@ -590,16 +596,17 @@ func TestHandleNextReminders(t *testing.T) {
 		}
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/next/reminders", bytes.NewReader(request.ToJson()))
+		requestJSON, _ := json.Marshal(request)
+		r := httptest.NewRequest("POST", "/next/reminders", bytes.NewReader(requestJSON))
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
 		assert.NotNil(t, result)
 
-		bodyBytes, err := ioutil.ReadAll(result.Body)
+		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
-		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 	})
 }
@@ -672,16 +679,17 @@ func TestHandleCompleteList(t *testing.T) {
 		}
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/complete/list", bytes.NewReader(request.ToJson()))
+		requestJSON, _ := json.Marshal(request)
+		r := httptest.NewRequest("POST", "/complete/list", bytes.NewReader(requestJSON))
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
 		assert.NotNil(t, result)
 
-		bodyBytes, err := ioutil.ReadAll(result.Body)
+		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
-		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 	})
 }
@@ -743,16 +751,17 @@ func TestHandleViewCompleteList(t *testing.T) {
 		request := &model.PostActionIntegrationRequest{UserId: user.Id, PostId: post.Id}
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/view/complete/list", bytes.NewReader(request.ToJson()))
+		requestJSON, _ := json.Marshal(request)
+		r := httptest.NewRequest("POST", "/view/complete/list", bytes.NewReader(requestJSON))
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
 		assert.NotNil(t, result)
 
-		bodyBytes, err := ioutil.ReadAll(result.Body)
+		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
-		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 	})
 
@@ -823,16 +832,17 @@ func TestHandleDeleteList(t *testing.T) {
 		}
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/delete/list", bytes.NewReader(request.ToJson()))
+		requestJSON, _ := json.Marshal(request)
+		r := httptest.NewRequest("POST", "/delete/list", bytes.NewReader(requestJSON))
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
 		assert.NotNil(t, result)
 
-		bodyBytes, err := ioutil.ReadAll(result.Body)
+		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
-		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 	})
 
@@ -903,16 +913,17 @@ func TestHandleDeleteCompleteList(t *testing.T) {
 		}
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/delete/complete/list", bytes.NewReader(request.ToJson()))
+		requestJSON, _ := json.Marshal(request)
+		r := httptest.NewRequest("POST", "/delete/complete/list", bytes.NewReader(requestJSON))
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
 		assert.NotNil(t, result)
 
-		bodyBytes, err := ioutil.ReadAll(result.Body)
+		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
-		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 	})
 }
@@ -1005,16 +1016,17 @@ func TestHandleSnoozeList(t *testing.T) {
 			}
 
 			w := httptest.NewRecorder()
-			r := httptest.NewRequest("POST", "/snooze/list", bytes.NewReader(request.ToJson()))
+			requestJSON, _ := json.Marshal(request)
+			r := httptest.NewRequest("POST", "/snooze/list", bytes.NewReader(requestJSON))
 			p.ServeHTTP(nil, w, r)
 
 			result := w.Result()
 			assert.NotNil(t, result)
 
-			bodyBytes, err := ioutil.ReadAll(result.Body)
+			bodyBytes, err := io.ReadAll(result.Body)
 			assert.Nil(t, err)
 			bodyString := string(bodyBytes)
-			assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+			assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 		})
 	}
@@ -1043,16 +1055,17 @@ func TestHandleCloseList(t *testing.T) {
 		request := &model.PostActionIntegrationRequest{UserId: "userID1", PostId: "postID1"}
 
 		w := httptest.NewRecorder()
-		r := httptest.NewRequest("POST", "/close/list", bytes.NewReader(request.ToJson()))
+		requestJSON, _ := json.Marshal(request)
+		r := httptest.NewRequest("POST", "/close/list", bytes.NewReader(requestJSON))
 		p.ServeHTTP(nil, w, r)
 
 		result := w.Result()
 		assert.NotNil(t, result)
 
-		bodyBytes, err := ioutil.ReadAll(result.Body)
+		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
-		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 	})
 }

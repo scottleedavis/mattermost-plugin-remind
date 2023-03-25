@@ -3,8 +3,8 @@ package main
 import (
 	"testing"
 
-	"github.com/mattermost/mattermost-server/v5/model"
-	"github.com/mattermost/mattermost-server/v5/plugin/plugintest"
+	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost-server/v6/plugin/plugintest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -16,7 +16,7 @@ func TestParseRequest(t *testing.T) {
 		Nickname: "TestUser",
 		Password: model.NewId(),
 		Username: "testuser",
-		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Roles:    model.SystemUserRoleId,
 		Locale:   "en",
 	}
 
@@ -137,7 +137,7 @@ func TestFindWhen(t *testing.T) {
 		Nickname: "TestUser",
 		Password: model.NewId(),
 		Username: "testuser",
-		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Roles:    model.SystemUserRoleId,
 		Locale:   "en",
 	}
 

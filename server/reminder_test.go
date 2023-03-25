@@ -7,25 +7,25 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mattermost/mattermost-server/v5/model"
-	"github.com/mattermost/mattermost-server/v5/plugin/plugintest"
+	"github.com/mattermost/mattermost-server/v6/model"
+	"github.com/mattermost/mattermost-server/v6/plugin/plugintest"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
 func TestTriggerReminders(t *testing.T) {
-  testTime := time.Now().UTC().Round(time.Second)
-  serializedTestTime := []byte(testTime.Format(time.RFC3339))
+	testTime := time.Now().UTC().Round(time.Second)
+	serializedTestTime := []byte(testTime.Format(time.RFC3339))
 
 	t.Run("it triggers reminders scheduled for the current time", func(t *testing.T) {
 		oneSecondAgo, _ := time.ParseDuration("-1s")
 		lastTickAt := testTime.Add(oneSecondAgo)
-	  serializedLastTickAt := []byte(lastTickAt.Format(time.RFC3339))
+		serializedLastTickAt := []byte(lastTickAt.Format(time.RFC3339))
 
 		api := &plugintest.API{}
 		api.On("KVGet", string("LastTickAt")).Return(serializedLastTickAt, nil)
 		api.On("KVSet", string("LastTickAt"), serializedTestTime).Return(nil)
-		api.On("LogDebug", "Trigger reminders for " + fmt.Sprintf("%v", testTime))
+		api.On("LogDebug", "Trigger reminders for "+fmt.Sprintf("%v", testTime))
 		api.On("KVGet", string(fmt.Sprintf("%v", testTime))).Return(nil, nil)
 		defer api.AssertExpectations(t)
 
@@ -39,19 +39,19 @@ func TestTriggerReminders(t *testing.T) {
 		oneSecondsAgo, _ := time.ParseDuration("-1s")
 		twoSecondsAgo, _ := time.ParseDuration("-2s")
 		threeSecondsAgo, _ := time.ParseDuration("-3s")
-	  lastTickAt := testTime.Add(threeSecondsAgo)
-	  serializedLastTickAt := []byte(lastTickAt.Format(time.RFC3339))
+		lastTickAt := testTime.Add(threeSecondsAgo)
+		serializedLastTickAt := []byte(lastTickAt.Format(time.RFC3339))
 
 		api := &plugintest.API{}
 		api.On("KVGet", string("LastTickAt")).Return(serializedLastTickAt, nil)
 		api.On("KVSet", string("LastTickAt"), serializedTestTime).Return(nil)
 		api.On("LogDebug", "Catching up on 2 reminder tick(s)...")
-		api.On("LogDebug", "Trigger reminders for " + fmt.Sprintf("%v", testTime.Add(twoSecondsAgo)))
+		api.On("LogDebug", "Trigger reminders for "+fmt.Sprintf("%v", testTime.Add(twoSecondsAgo)))
 		api.On("KVGet", string(fmt.Sprintf("%v", testTime.Add(twoSecondsAgo)))).Return(nil, nil)
-		api.On("LogDebug", "Trigger reminders for " + fmt.Sprintf("%v", testTime.Add(oneSecondsAgo)))
+		api.On("LogDebug", "Trigger reminders for "+fmt.Sprintf("%v", testTime.Add(oneSecondsAgo)))
 		api.On("KVGet", string(fmt.Sprintf("%v", testTime.Add(oneSecondsAgo)))).Return(nil, nil)
 		api.On("LogDebug", "Caught up on missed reminder ticks.")
-		api.On("LogDebug", "Trigger reminders for " + fmt.Sprintf("%v", testTime))
+		api.On("LogDebug", "Trigger reminders for "+fmt.Sprintf("%v", testTime))
 		api.On("KVGet", string(fmt.Sprintf("%v", testTime))).Return(nil, nil)
 		defer api.AssertExpectations(t)
 
@@ -69,7 +69,7 @@ func TestTriggerRemindersForTick(t *testing.T) {
 		Nickname: "TestUser",
 		Password: model.NewId(),
 		Username: "testuser",
-		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Roles:    model.SystemUserRoleId,
 		Locale:   "en",
 	}
 
@@ -285,7 +285,7 @@ func TestGetReminder(t *testing.T) {
 		Nickname: "TestUser",
 		Password: model.NewId(),
 		Username: "testuser",
-		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Roles:    model.SystemUserRoleId,
 		Locale:   "en",
 	}
 	testTime := time.Now().UTC().Round(time.Second)
@@ -343,7 +343,7 @@ func TestGetReminders(t *testing.T) {
 		Nickname: "TestUser",
 		Password: model.NewId(),
 		Username: "testuser",
-		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Roles:    model.SystemUserRoleId,
 		Locale:   "en",
 	}
 	testTime := time.Now().UTC().Round(time.Second)
@@ -400,7 +400,7 @@ func TestUpdateReminder(t *testing.T) {
 		Nickname: "TestUser",
 		Password: model.NewId(),
 		Username: "testuser",
-		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Roles:    model.SystemUserRoleId,
 		Locale:   "en",
 	}
 	testTime := time.Now().UTC().Round(time.Second)
@@ -457,7 +457,7 @@ func TestUpsertReminder(t *testing.T) {
 		Nickname: "TestUser",
 		Password: model.NewId(),
 		Username: "testuser",
-		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Roles:    model.SystemUserRoleId,
 		Locale:   "en",
 	}
 	testTime := time.Now().UTC().Round(time.Second)
@@ -529,7 +529,7 @@ func TestDeleteReminder(t *testing.T) {
 		Nickname: "TestUser",
 		Password: model.NewId(),
 		Username: "testuser",
-		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Roles:    model.SystemUserRoleId,
 		Locale:   "en",
 	}
 	testTime := time.Now().UTC().Round(time.Second)
@@ -585,7 +585,7 @@ func TestDeleteReminders(t *testing.T) {
 		Nickname: "TestUser",
 		Password: model.NewId(),
 		Username: "testuser",
-		Roles:    model.SYSTEM_USER_ROLE_ID,
+		Roles:    model.SystemUserRoleId,
 		Locale:   "en",
 	}
 	testTime := time.Now().UTC().Round(time.Second)

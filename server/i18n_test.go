@@ -2,24 +2,21 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
-	"testing"
 	"strings"
+	"testing"
 
-	"github.com/mattermost/mattermost-server/v5/plugin/plugintest"
+	"github.com/mattermost/mattermost-server/v6/plugin/plugintest"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
 func TestTranslationsPreInit(t *testing.T) {
-	tmpDir, err := ioutil.TempDir("", "TestTranslationsPreInit")
-	require.NoError(t, err)
-	defer os.RemoveAll(tmpDir)
-
+	tmpDir := os.TempDir()
 	assetsPath := filepath.Join(tmpDir, "assets")
-	err = os.Mkdir(assetsPath, 0777)
+	defer os.RemoveAll(assetsPath)
+	err := os.Mkdir(assetsPath, 0777)
 	require.NoError(t, err)
 
 	i18nPath := filepath.Join(tmpDir, "assets", "i18n")
@@ -87,16 +84,16 @@ func TestTranslationsPreInit(t *testing.T) {
 		err := os.Mkdir(i18nPath, 0777)
 		require.NoError(t, err)
 
-		err = ioutil.WriteFile(filepath.Join(i18nPath, "not-i18n.txt"), []byte{}, 0777)
+		err = os.WriteFile(filepath.Join(i18nPath, "not-i18n.txt"), []byte{}, 0777)
 		require.NoError(t, err)
 
-		err = ioutil.WriteFile(filepath.Join(i18nPath, "invalid.json"), []byte{}, 0777)
+		err = os.WriteFile(filepath.Join(i18nPath, "invalid.json"), []byte{}, 0777)
 		require.NoError(t, err)
 
-		err = ioutil.WriteFile(filepath.Join(i18nPath, "en.json"), []byte(`[{"id":"id","translation":"translation"}]`), 0777)
+		err = os.WriteFile(filepath.Join(i18nPath, "en.json"), []byte(`[{"id":"id","translation":"translation"}]`), 0777)
 		require.NoError(t, err)
 
-		err = ioutil.WriteFile(filepath.Join(i18nPath, "es.json"), []byte(`[{"id":"id","translation":"translation2"}]`), 0777)
+		err = os.WriteFile(filepath.Join(i18nPath, "es.json"), []byte(`[{"id":"id","translation":"translation2"}]`), 0777)
 		require.NoError(t, err)
 
 		p := NewPlugin()

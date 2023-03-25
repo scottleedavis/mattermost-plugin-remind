@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mattermost/mattermost-server/v5/model"
+	"github.com/mattermost/mattermost-server/v6/model"
 )
 
 func (p *Plugin) ScheduleReminder(request *ReminderRequest, channelId string) (*model.Post, error) {
@@ -68,7 +68,7 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest, channelId string) (*
 
 	return &model.Post{
 		ChannelId: channelId,
-		UserId:    p.remindUserId,
+		UserId:    p.botUserId,
 		Props: model.StringInterface{
 			"attachments": []*model.SlackAttachment{
 				{
@@ -84,7 +84,7 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest, channelId string) (*
 								},
 								URL: fmt.Sprintf("/plugins/%s/delete/ephemeral", manifest.ID),
 							},
-							Type: model.POST_ACTION_TYPE_BUTTON,
+							Type: model.PostActionTypeButton,
 							Name: T("button.delete"),
 						},
 						{
@@ -97,7 +97,7 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest, channelId string) (*
 								},
 								URL: fmt.Sprintf("/plugins/%s/view/ephemeral", manifest.ID),
 							},
-							Type: model.POST_ACTION_TYPE_BUTTON,
+							Type: model.PostActionTypeButton,
 							Name: T("button.view.reminders"),
 						},
 					},

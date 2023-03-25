@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mattermost/mattermost-server/v5/model"
+	"github.com/mattermost/mattermost-server/v6/model"
 )
 
 const RemindersPerPage = 4
@@ -19,7 +19,7 @@ func (p *Plugin) ListReminders(user *model.User, channelId string) *model.Post {
 		return &model.Post{
 			ChannelId:     channelId,
 			PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
-			UserId:        p.remindUserId,
+			UserId:        p.botUserId,
 			Message:       T("no.reminders"),
 		}
 	}
@@ -61,7 +61,7 @@ func (p *Plugin) ListReminders(user *model.User, channelId string) *model.Post {
 	return &model.Post{
 		ChannelId:     channelId,
 		PendingPostId: model.NewId() + ":" + fmt.Sprint(model.GetMillis()),
-		UserId:        p.remindUserId,
+		UserId:        p.botUserId,
 		Props: model.StringInterface{
 			"attachments": attachments,
 		},
@@ -120,7 +120,7 @@ func (p *Plugin) UpdateListReminders(userId string, postId string, channelId str
 	post := &model.Post{
 		Id:        postId,
 		ChannelId: channelId,
-		UserId:    p.remindUserId,
+		UserId:    p.botUserId,
 		Props: model.StringInterface{
 			"attachments": attachments,
 		},
@@ -165,11 +165,11 @@ func (p *Plugin) categorizeOccurrences(reminders []Reminder) (
 				!isCompleted &&
 				isFuture {
 				channelOccurrences = append(channelOccurrences, occurrence)
-			} else if isCompleted {
-				//p.API.LogInfo("completed reminder: " + fmt.Sprintf("%v", reminder))
+			} /* else if isCompleted {
+				p.API.LogInfo("completed reminder: " + fmt.Sprintf("%v", reminder))
 			} else {
-				//p.API.LogInfo("unknown reminder: " + fmt.Sprintf("%v", reminder))
-			}
+				p.API.LogInfo("unknown reminder: " + fmt.Sprintf("%v", reminder))
+			} */
 		}
 	}
 
@@ -269,7 +269,7 @@ func (p *Plugin) listControl(
 						},
 						URL: fmt.Sprintf("/plugins/%s/next/reminders", manifest.ID),
 					},
-					Type: model.POST_ACTION_TYPE_BUTTON,
+					Type: model.PostActionTypeButton,
 					Name: T("button.next.reminders", reminderCount),
 				})
 
@@ -284,7 +284,7 @@ func (p *Plugin) listControl(
 						},
 						URL: fmt.Sprintf("/plugins/%s/next/reminders", manifest.ID),
 					},
-					Type: model.POST_ACTION_TYPE_BUTTON,
+					Type: model.PostActionTypeButton,
 					Name: T("button.previous.reminders", reminderCount),
 				})
 
@@ -299,7 +299,7 @@ func (p *Plugin) listControl(
 						},
 						URL: fmt.Sprintf("/plugins/%s/next/reminders", manifest.ID),
 					},
-					Type: model.POST_ACTION_TYPE_BUTTON,
+					Type: model.PostActionTypeButton,
 					Name: T("button.previous.reminders", reminderCount),
 				})
 			actions = append(actions,
@@ -311,7 +311,7 @@ func (p *Plugin) listControl(
 						},
 						URL: fmt.Sprintf("/plugins/%s/next/reminders", manifest.ID),
 					},
-					Type: model.POST_ACTION_TYPE_BUTTON,
+					Type: model.PostActionTypeButton,
 					Name: T("button.next.reminders", reminderCount),
 				})
 
@@ -329,7 +329,7 @@ func (p *Plugin) listControl(
 					},
 					URL: fmt.Sprintf("/plugins/%s/view/complete/list", manifest.ID),
 				},
-				Type: model.POST_ACTION_TYPE_BUTTON,
+				Type: model.PostActionTypeButton,
 				Name: T("button.view.complete"),
 			})
 
@@ -342,7 +342,7 @@ func (p *Plugin) listControl(
 					},
 					URL: fmt.Sprintf("/plugins/%s/delete/complete/list", manifest.ID),
 				},
-				Type: model.POST_ACTION_TYPE_BUTTON,
+				Type: model.PostActionTypeButton,
 				Name: T("button.delete.complete"),
 			})
 
@@ -411,7 +411,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							},
 							URL: fmt.Sprintf("/plugins/%s/complete/list", manifest.ID),
 						},
-						Type: model.POST_ACTION_TYPE_BUTTON,
+						Type: model.PostActionTypeButton,
 						Name: T("button.complete"),
 					},
 					{
@@ -425,7 +425,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							URL: fmt.Sprintf("/plugins/%s/delete/list", manifest.ID),
 						},
 						Name: T("button.delete"),
-						Type: model.POST_ACTION_TYPE_BUTTON,
+						Type: model.PostActionTypeButton,
 					},
 				},
 			}
@@ -450,7 +450,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							URL: fmt.Sprintf("/plugins/%s/delete/list", manifest.ID),
 						},
 						Name: T("button.delete"),
-						Type: model.POST_ACTION_TYPE_BUTTON,
+						Type: model.PostActionTypeButton,
 					},
 				},
 			}
@@ -474,7 +474,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							},
 							URL: fmt.Sprintf("/plugins/%s/complete/list", manifest.ID),
 						},
-						Type: model.POST_ACTION_TYPE_BUTTON,
+						Type: model.PostActionTypeButton,
 						Name: T("button.complete"),
 					},
 					{
@@ -488,7 +488,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							URL: fmt.Sprintf("/plugins/%s/delete/list", manifest.ID),
 						},
 						Name: T("button.delete"),
-						Type: model.POST_ACTION_TYPE_BUTTON,
+						Type: model.PostActionTypeButton,
 					},
 					{
 						Integration: &model.PostActionIntegration{
@@ -547,7 +547,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							},
 							URL: fmt.Sprintf("/plugins/%s/complete/list", manifest.ID),
 						},
-						Type: model.POST_ACTION_TYPE_BUTTON,
+						Type: model.PostActionTypeButton,
 						Name: T("button.complete"),
 					},
 					{
@@ -561,7 +561,7 @@ func (p *Plugin) addAttachment(user *model.User, occurrence Occurrence, reminder
 							URL: fmt.Sprintf("/plugins/%s/delete/list", manifest.ID),
 						},
 						Name: T("button.delete"),
-						Type: model.POST_ACTION_TYPE_BUTTON,
+						Type: model.PostActionTypeButton,
 					},
 				},
 			}
@@ -606,7 +606,10 @@ func (p *Plugin) DeleteCompletedReminders(userId string) {
 	reminders := p.GetReminders(user.Username)
 	for _, reminder := range reminders {
 		if reminder.Completed != p.emptyTime {
-			p.DeleteReminder(userId, reminder)
+			dErr := p.DeleteReminder(userId, reminder)
+			if dErr != nil {
+				p.API.LogError("failed to update post %s", dErr)
+			}
 		}
 	}
 
