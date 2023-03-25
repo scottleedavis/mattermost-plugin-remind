@@ -165,11 +165,11 @@ func (p *Plugin) categorizeOccurrences(reminders []Reminder) (
 				!isCompleted &&
 				isFuture {
 				channelOccurrences = append(channelOccurrences, occurrence)
-			} else if isCompleted {
-				//p.API.LogInfo("completed reminder: " + fmt.Sprintf("%v", reminder))
+			} /* else if isCompleted {
+				p.API.LogInfo("completed reminder: " + fmt.Sprintf("%v", reminder))
 			} else {
-				//p.API.LogInfo("unknown reminder: " + fmt.Sprintf("%v", reminder))
-			}
+				p.API.LogInfo("unknown reminder: " + fmt.Sprintf("%v", reminder))
+			} */
 		}
 	}
 
@@ -606,7 +606,10 @@ func (p *Plugin) DeleteCompletedReminders(userId string) {
 	reminders := p.GetReminders(user.Username)
 	for _, reminder := range reminders {
 		if reminder.Completed != p.emptyTime {
-			p.DeleteReminder(userId, reminder)
+			dErr := p.DeleteReminder(userId, reminder)
+			if dErr != nil {
+				p.API.LogError("failed to update post %s", dErr)
+			}
 		}
 	}
 

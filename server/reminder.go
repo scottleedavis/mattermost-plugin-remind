@@ -413,8 +413,10 @@ func (p *Plugin) UpdateReminder(userId string, reminder Reminder) error {
 		return rErr
 	}
 
-	p.API.KVSet(user.Username, ro)
-
+	kvErr := p.API.KVSet(user.Username, ro)
+	if kvErr != nil {
+		p.API.LogDebug("failed store username %s", kvErr)
+	}
 	return nil
 }
 
@@ -460,8 +462,10 @@ func (p *Plugin) UpsertReminder(request *ReminderRequest) error {
 		return rErr
 	}
 
-	p.API.KVSet(user.Username, ro)
-
+	kvErr := p.API.KVSet(user.Username, ro)
+	if kvErr != nil {
+		p.API.LogDebug("failed stored username%s", kvErr)
+	}
 	return nil
 }
 
@@ -499,8 +503,10 @@ func (p *Plugin) DeleteReminder(userId string, reminder Reminder) error {
 		return rErr
 	}
 
-	p.API.KVSet(user.Username, ro)
-
+	kvErr := p.API.KVSet(user.Username, ro)
+	if kvErr != nil {
+		p.API.LogDebug("failed stored username %s", kvErr)
+	}
 	return nil
 }
 
@@ -587,7 +593,10 @@ func (p *Plugin) rescheduleOccurrence(occurrence *Occurrence) {
 		}
 	}
 	reminder.Occurrences = updatedOccurrences
-	p.UpdateReminder(user.Id, reminder)
+	uErr := p.UpdateReminder(user.Id, reminder)
+	if uErr != nil {
+		p.API.LogError("failed to update reminder %s", uErr)
+	}
 
 }
 
@@ -640,5 +649,8 @@ func (p *Plugin) getLastTickTimeWithDefault(defaultValue time.Time) time.Time {
 
 func (p *Plugin) setLastTickTime(lastTickAt time.Time) {
 	serializedTime := lastTickAt.Format(time.RFC3339)
-	p.API.KVSet("LastTickAt", []byte(serializedTime))
+	kvErr := p.API.KVSet("LastTickAt", []byte(serializedTime))
+	if kvErr != nil {
+		p.API.LogDebug("failed stored lastTickAt %s", kvErr)
+	}
 }

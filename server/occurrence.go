@@ -10,6 +10,8 @@ import (
 	"time"
 
 	"github.com/mattermost/mattermost-server/v6/model"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 type Occurrence struct {
@@ -54,7 +56,10 @@ func (p *Plugin) ClearScheduledOccurrence(reminder Reminder, occurrence Occurren
 		return
 	}
 
-	p.API.KVSet(string(fmt.Sprintf("%v", occurrence.Occurrence)), ro)
+	kvErr := p.API.KVSet(string(fmt.Sprintf("%v", occurrence.Occurrence)), ro)
+	if kvErr != nil {
+		p.API.LogError("failed to store occurence %s", kvErr)
+	}
 
 }
 
@@ -84,8 +89,10 @@ func (p *Plugin) deleteSnoozedOccurrence(occurrence Occurrence) {
 		return
 	}
 
-	p.API.KVSet(string(fmt.Sprintf("%v", occurrence.Occurrence)), ro)
-
+	kvErr := p.API.KVSet(string(fmt.Sprintf("%v", occurrence.Occurrence)), ro)
+	if kvErr != nil {
+		p.API.LogError("failed to store ocurrence %s", kvErr)
+	}
 }
 
 func (p *Plugin) deleteOccurrence(occurrence Occurrence) {
@@ -113,8 +120,10 @@ func (p *Plugin) deleteOccurrence(occurrence Occurrence) {
 		return
 	}
 
-	p.API.KVSet(string(fmt.Sprintf("%v", occurrence.Occurrence)), ro)
-
+	kvErr := p.API.KVSet(string(fmt.Sprintf("%v", occurrence.Occurrence)), ro)
+	if kvErr != nil {
+		p.API.LogError("failed to store occurrence %s", kvErr)
+	}
 }
 
 func (p *Plugin) CreateOccurrences(request *ReminderRequest) error {
@@ -279,7 +288,10 @@ func (p *Plugin) upsertOccurrence(occurrence *Occurrence) []Occurrence {
 		return occurrences
 	}
 
-	p.API.KVSet(string(fmt.Sprintf("%v", occurrence.Occurrence)), ro)
+	kvErr := p.API.KVSet(string(fmt.Sprintf("%v", occurrence.Occurrence)), ro)
+	if kvErr != nil {
+		p.API.LogDebug("failed to store occurence %s", kvErr)
+	}
 
 	return occurrences
 
@@ -306,8 +318,10 @@ func (p *Plugin) upsertSnoozedOccurrence(occurrence *Occurrence) []Occurrence {
 		return occurrences
 	}
 
-	p.API.KVSet(string(fmt.Sprintf("%v", occurrence.Snoozed)), ro)
-
+	kvErr := p.API.KVSet(string(fmt.Sprintf("%v", occurrence.Snoozed)), ro)
+	if kvErr != nil {
+		p.API.LogDebug("failed snoozed occurrence %s", kvErr)
+	}
 	return occurrences
 
 }
@@ -1031,7 +1045,6 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 			occurrence := wallClock.In(location).AddDate(nextDay.Year(), int(nextDay.Month())-1, nextDay.Day()-1)
 			times = append(times, p.chooseClosest(user, &occurrence, false).UTC())
 
-			break
 		case T("sunday"),
 			T("monday"),
 			T("tuesday"),
@@ -1078,7 +1091,7 @@ func (p *Plugin) everyEN(when string, user *model.User) (times []time.Time, err 
 			nextDay := time.Now().In(location).AddDate(0, 0, day)
 			occurrence := wallClock.In(location).AddDate(nextDay.Year(), int(nextDay.Month())-1, nextDay.Day()-1)
 			times = append(times, p.chooseClosest(user, &occurrence, false).UTC())
-			break
+
 		default:
 
 			dateSplit := p.regSplit(dateUnit, "T|Z")
@@ -1157,11 +1170,11 @@ func (p *Plugin) freeFormEN(when string, user *model.User) (times []time.Time, e
 	if ndErr != nil {
 		return []time.Time{}, ndErr
 	}
-	timeUnit, ntErr := p.normalizeTime(chronoTime, user)
+	_, ntErr := p.normalizeTime(chronoTime, user)
 	if ntErr != nil {
 		return []time.Time{}, ntErr
 	}
-	timeUnit = chronoTime
+	timeUnit := chronoTime
 
 	switch dateUnit {
 	case T("today"):
@@ -1302,7 +1315,8 @@ func (p *Plugin) formatWhenEN(username string, when string, occurrence string, s
 
 		repeatDate := strings.Trim(strings.Split(when, T("at"))[0], " ")
 		repeatDate = strings.Replace(repeatDate, T("every"), "", -1)
-		repeatDate = strings.Title(strings.ToLower(repeatDate))
+		caser := cases.Title(language.English)
+		repeatDate = caser.String(strings.ToLower(repeatDate))
 		repeatDate = T("every") + repeatDate
 		prefix := ""
 		if !snoozed {

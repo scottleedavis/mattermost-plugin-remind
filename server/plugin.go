@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"os"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -20,11 +20,10 @@ type Plugin struct {
 	plugin.MattermostPlugin
 	client *pluginapi.Client
 
-	router      *mux.Router
-	botUserId   string
-	running     bool
-	emptyTime   time.Time
-	defaultTime time.Time
+	router    *mux.Router
+	botUserId string
+	running   bool
+	emptyTime time.Time
 
 	ServerConfig *model.Config
 
@@ -34,7 +33,7 @@ type Plugin struct {
 
 func NewPlugin() *Plugin {
 	return &Plugin{
-		readFile: ioutil.ReadFile,
+		readFile: os.ReadFile,
 		locales:  make(map[string]string),
 	}
 }

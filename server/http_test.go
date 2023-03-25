@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http/httptest"
 	"os"
 	"testing"
@@ -90,7 +90,7 @@ func TestHandleDialog(t *testing.T) {
 		result := w.Result()
 		assert.NotNil(t, result)
 
-		bodyBytes, err := ioutil.ReadAll(result.Body)
+		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
 		assert.Equal(t, bodyString, "")
@@ -167,7 +167,7 @@ func TestHandleViewEphmeral(t *testing.T) {
 		result := w.Result()
 		assert.NotNil(t, result)
 
-		bodyBytes, err := ioutil.ReadAll(result.Body)
+		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
 		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
@@ -254,7 +254,7 @@ func TestHandleComplete(t *testing.T) {
 		result := w.Result()
 		assert.NotNil(t, result)
 
-		bodyBytes, err := ioutil.ReadAll(result.Body)
+		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
 		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
@@ -337,7 +337,7 @@ func TestHandleDelete(t *testing.T) {
 		result := w.Result()
 		assert.NotNil(t, result)
 
-		bodyBytes, err := ioutil.ReadAll(result.Body)
+		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
 		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
@@ -417,7 +417,7 @@ func TestHandleDeleteEphemeral(t *testing.T) {
 		result := w.Result()
 		assert.NotNil(t, result)
 
-		bodyBytes, err := ioutil.ReadAll(result.Body)
+		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
 		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
@@ -522,7 +522,7 @@ func TestHandleSnooze(t *testing.T) {
 			result := w.Result()
 			assert.NotNil(t, result)
 
-			bodyBytes, err := ioutil.ReadAll(result.Body)
+			bodyBytes, err := io.ReadAll(result.Body)
 			assert.Nil(t, err)
 			bodyString := string(bodyBytes)
 			assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
@@ -603,7 +603,7 @@ func TestHandleNextReminders(t *testing.T) {
 		result := w.Result()
 		assert.NotNil(t, result)
 
-		bodyBytes, err := ioutil.ReadAll(result.Body)
+		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
 		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
@@ -686,7 +686,7 @@ func TestHandleCompleteList(t *testing.T) {
 		result := w.Result()
 		assert.NotNil(t, result)
 
-		bodyBytes, err := ioutil.ReadAll(result.Body)
+		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
 		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
@@ -758,7 +758,7 @@ func TestHandleViewCompleteList(t *testing.T) {
 		result := w.Result()
 		assert.NotNil(t, result)
 
-		bodyBytes, err := ioutil.ReadAll(result.Body)
+		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
 		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
@@ -839,7 +839,7 @@ func TestHandleDeleteList(t *testing.T) {
 		result := w.Result()
 		assert.NotNil(t, result)
 
-		bodyBytes, err := ioutil.ReadAll(result.Body)
+		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
 		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
@@ -920,7 +920,7 @@ func TestHandleDeleteCompleteList(t *testing.T) {
 		result := w.Result()
 		assert.NotNil(t, result)
 
-		bodyBytes, err := ioutil.ReadAll(result.Body)
+		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
 		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
@@ -1023,7 +1023,7 @@ func TestHandleSnoozeList(t *testing.T) {
 			result := w.Result()
 			assert.NotNil(t, result)
 
-			bodyBytes, err := ioutil.ReadAll(result.Body)
+			bodyBytes, err := io.ReadAll(result.Body)
 			assert.Nil(t, err)
 			bodyString := string(bodyBytes)
 			assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
@@ -1062,7 +1062,7 @@ func TestHandleCloseList(t *testing.T) {
 		result := w.Result()
 		assert.NotNil(t, result)
 
-		bodyBytes, err := ioutil.ReadAll(result.Body)
+		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
 		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")

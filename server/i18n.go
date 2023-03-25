@@ -4,7 +4,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -21,7 +21,7 @@ func (p *Plugin) TranslationsPreInit() error {
 	}
 
 	i18nDirectory := path.Join(bundlePath, "assets", "i18n")
-	files, err := ioutil.ReadDir(i18nDirectory)
+	files, err := os.ReadDir(i18nDirectory)
 	if err != nil {
 		return errors.Wrap(err, "unable to read i18n directory")
 	}
