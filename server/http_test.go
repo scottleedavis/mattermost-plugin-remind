@@ -170,7 +170,7 @@ func TestHandleViewEphmeral(t *testing.T) {
 		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
-		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 	})
 
@@ -257,7 +257,7 @@ func TestHandleComplete(t *testing.T) {
 		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
-		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 	})
 
@@ -340,7 +340,7 @@ func TestHandleDelete(t *testing.T) {
 		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
-		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 	})
 
@@ -420,7 +420,7 @@ func TestHandleDeleteEphemeral(t *testing.T) {
 		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
-		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 	})
 
@@ -525,7 +525,7 @@ func TestHandleSnooze(t *testing.T) {
 			bodyBytes, err := io.ReadAll(result.Body)
 			assert.Nil(t, err)
 			bodyString := string(bodyBytes)
-			assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+			assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 		})
 	}
@@ -606,7 +606,7 @@ func TestHandleNextReminders(t *testing.T) {
 		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
-		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 	})
 }
@@ -689,7 +689,7 @@ func TestHandleCompleteList(t *testing.T) {
 		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
-		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 	})
 }
@@ -761,7 +761,7 @@ func TestHandleViewCompleteList(t *testing.T) {
 		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
-		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 	})
 
@@ -842,7 +842,7 @@ func TestHandleDeleteList(t *testing.T) {
 		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
-		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 	})
 
@@ -923,7 +923,7 @@ func TestHandleDeleteCompleteList(t *testing.T) {
 		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
-		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 	})
 }
@@ -1026,7 +1026,7 @@ func TestHandleSnoozeList(t *testing.T) {
 			bodyBytes, err := io.ReadAll(result.Body)
 			assert.Nil(t, err)
 			bodyString := string(bodyBytes)
-			assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+			assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 		})
 	}
@@ -1065,7 +1065,7 @@ func TestHandleCloseList(t *testing.T) {
 		bodyBytes, err := io.ReadAll(result.Body)
 		assert.Nil(t, err)
 		bodyString := string(bodyBytes)
-		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\"}")
+		assert.Equal(t, bodyString, "{\"update\":null,\"ephemeral_text\":\"\",\"skip_slack_parsing\":false}")
 
 	})
 }
