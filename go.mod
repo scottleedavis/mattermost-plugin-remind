@@ -9,7 +9,7 @@ require (
 	github.com/nicksnyder/go-i18n v1.10.1
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.1
-	golang.org/x/text v0.3.7
+	golang.org/x/text v0.3.8
 )
 
 require (
@@ -63,7 +63,7 @@ require (
 	github.com/yuin/goldmark v1.4.5 // indirect
 	golang.org/x/crypto v0.0.0-20220208233918-bba287dce954 // indirect
 	golang.org/x/net v0.0.0-20220127200216-cd36cc0744dd // indirect
-	golang.org/x/sys v0.0.0-20220207234003-57398862261d // indirect
+	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
 	google.golang.org/genproto v0.0.0-20220208230804-65c12eb4c068 // indirect
 	google.golang.org/grpc v1.44.0 // indirect
 	google.golang.org/protobuf v1.27.1 // indirect
