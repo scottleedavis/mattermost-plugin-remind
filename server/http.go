@@ -661,11 +661,13 @@ func (p *Plugin) handleCloseList(w http.ResponseWriter, r *http.Request) {
 func writePostActionIntegrationResponseOk(w http.ResponseWriter, response *model.PostActionIntegrationResponse) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	_, _ = w.Write(response.ToJson())
+	responseJSON, _ := json.Marshal(response)
+	_, _ = w.Write(responseJSON)
 }
 
 func writePostActionIntegrationResponseError(w http.ResponseWriter, response *model.PostActionIntegrationResponse) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusBadRequest)
-	_, _ = w.Write(response.ToJson())
+	responseJSON, _ := json.Marshal(response)
+	_, _ = w.Write(responseJSON)
 }
