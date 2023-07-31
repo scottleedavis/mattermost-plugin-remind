@@ -592,7 +592,7 @@ func (p *Plugin) at(when string, user *model.User) (times []time.Time, err error
 
 func (p *Plugin) atEN(when string, user *model.User) (times []time.Time, err error) {
 	T, _ := p.translation(user)
-	location := p.location(user)
+	location, _ := time.LoadLocation(p.location(user).String())
 
 	whenTrim := strings.Trim(when, " ")
 	whenSplit := strings.Split(whenTrim, " ")
@@ -1254,7 +1254,7 @@ func (p *Plugin) formatWhenEN(username string, when string, occurrence string, s
 		return ""
 	}
 	T, _ := p.translation(user)
-	location := p.location(user)
+	location, _ := time.LoadLocation(p.location(user).String())
 	now := time.Now().In(location)
 	t, _ := time.Parse(time.RFC3339, occurrence)
 

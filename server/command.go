@@ -2,6 +2,7 @@ package main
 
 import (
 	"strings"
+	"time"
 
 	"github.com/mattermost/mattermost-server/v6/model"
 	"github.com/mattermost/mattermost-server/v6/plugin"
@@ -31,7 +32,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 	}
 
 	T, locale := p.translation(user)
-	location := p.location(user)
+	location, _ := time.LoadLocation(p.location(user).String())
 	command := strings.Trim(args.Command, " ")
 
 	if strings.Trim(command, " ") == "/"+CommandTrigger {

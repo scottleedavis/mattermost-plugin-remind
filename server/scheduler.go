@@ -16,7 +16,7 @@ func (p *Plugin) ScheduleReminder(request *ReminderRequest, channelId string) (*
 		return nil, uErr
 	}
 	T, _ := p.translation(user)
-	location := p.location(user)
+	location, _ := time.LoadLocation(p.location(user).String())
 
 	if pErr := p.ParseRequest(request); pErr != nil {
 		p.API.LogError(pErr.Error())
