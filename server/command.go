@@ -39,7 +39,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		return &model.CommandResponse{}, nil
 	}
 
-	if strings.HasSuffix(command, T("help")) {
+	if strings.HasSuffix(command, "help") {
 		post := model.Post{
 			ChannelId: args.ChannelId,
 			UserId:    p.botUserId,
@@ -49,7 +49,7 @@ func (p *Plugin) ExecuteCommand(c *plugin.Context, args *model.CommandArgs) (*mo
 		return &model.CommandResponse{}, nil
 	}
 
-	if strings.HasSuffix(command, T("list")) {
+	if strings.HasSuffix(command, "list") {
 		p.API.SendEphemeralPost(user.Id, p.ListReminders(user, args.ChannelId))
 		return &model.CommandResponse{}, nil
 	}
