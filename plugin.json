@@ -11,7 +11,10 @@
         "executables": {
             "linux-amd64": "server/dist/plugin-linux-amd64",
             "darwin-amd64": "server/dist/plugin-darwin-amd64",
-            "windows-amd64": "server/dist/plugin-windows-amd64.exe"
+            "windows-amd64": "server/dist/plugin-windows-amd64.exe",
+            "linux-arm64": "server/dist/plugin-linux-arm64",
+            "darwin-arm64": "server/dist/plugin-darwin-arm64",
+            "windows-arm64": "server/dist/plugin-windows-arm64.exe"
         },
         "executable": ""
     },
